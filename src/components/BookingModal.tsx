@@ -12,7 +12,6 @@ import {
   ChevronLeft,
   ChevronUp,
   ChevronDown,
-  Sparkles,
   Phone,
   Mail,
   FileText,
@@ -52,7 +51,7 @@ export const BookingModal: React.FC = () => {
 
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
-  const [selectedBarberId, setSelectedBarberId] = useState<string>('any');
+  const [selectedBarberId, setSelectedBarberId] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('');
 
@@ -61,6 +60,11 @@ export const BookingModal: React.FC = () => {
   const [customerPhone, setCustomerPhone] = useState('+254 ');
   const [customerEmail, setCustomerEmail] = useState('');
   const [specialRequests, setSpecialRequests] = useState('');
+
+  // Per-step inline validation errors (shown on the relevant tab only)
+  const [serviceError, setServiceError] = useState<string | null>(null);
+  const [barberError, setBarberError] = useState<string | null>(null);
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
 
   // Availability + Payment state
   const [bookedSlots, setBookedSlots] = useState<BookedSlotInfo[]>([]);
@@ -104,39 +108,31 @@ export const BookingModal: React.FC = () => {
     [],
   );
 
-  const resolvedProvider = useMemo(() => {
-    if (selectedBarberId !== 'any')
-      return barbers.find((b) => b.id === selectedBarberId) || null;
-    return (
-      barbers.find(
-        (b) =>
-          b.status !== 'inactive' && canProviderHandle(b, selectedServiceIds),
-      ) ||
-      barbers.find((b) => b.status !== 'inactive') ||
-      null
-    );
-  }, [barbers, selectedBarberId, selectedServiceIds, canProviderHandle]);
+  const resolvedProvider = useMemo(
+    () => barbers.find((b) => b.id === selectedBarberId) || null,
+    [barbers, selectedBarberId],
+  );
 
-  const barberDisplayName =
-    selectedBarberId === 'any'
-      ? resolvedProvider?.name || 'First Available Master Barber'
-      : barbers.find((b) => b.id === selectedBarberId)?.name ||
-        'Assigned Master';
+  const barberDisplayName = resolvedProvider?.name || 'Master Barber';
 
   // Initialize selections when modal opens
   useEffect(() => {
     if (isBookingModalOpen) {
       if (selectedPreServiceId) {
         setSelectedServiceIds([selectedPreServiceId]);
-      } else if (selectedServiceIds.length === 0 && services.length > 0) {
-        setSelectedServiceIds([services[0].id]);
+      } else {
+        setSelectedServiceIds([]);
       }
 
       if (selectedPreBarberId) {
         setSelectedBarberId(selectedPreBarberId);
       } else {
-        setSelectedBarberId('any');
+        setSelectedBarberId('');
       }
+
+      setServiceError(null);
+      setBarberError(null);
+      setScheduleError(null);
 
       setSelectedDate(startOfDay(addDays(new Date(), 1)));
       setSelectedTimeSlot('');
@@ -188,6 +184,7 @@ export const BookingModal: React.FC = () => {
   ]);
 
   const toggleService = (id: string) => {
+    setServiceError(null);
     if (selectedServiceIds.includes(id)) {
       if (selectedServiceIds.length > 1) {
         setSelectedServiceIds(selectedServiceIds.filter((sId) => sId !== id));
@@ -302,7 +299,9 @@ export const BookingModal: React.FC = () => {
   /** First minute >= fromMin where a full-duration window fits with no overlap. */
   const suggestNextFreeStart = (fromMin: number): number => {
     const start = Math.ceil(fromMin / 5) * 5;
-    for (let m = start; m + totalDuration <= closeMin; m += 5) {
+    // Only the start must fall within business hours — the service may run
+    // past closing time as long as it begins before close.
+    for (let m = start; m <= closeMin; m += 5) {
       const e = m + totalDuration;
       if (!busyRanges.some((r) => m < r.end && e > r.start)) return m;
     }
@@ -332,13 +331,8 @@ export const BookingModal: React.FC = () => {
         message: `That time is outside opening hours (${openDisplay} – ${closeDisplay}).`,
       };
     }
-    if (selectedEndMin > closeMin) {
-      const latest = Math.max(openMin, closeMin - totalDuration);
-      return {
-        status: 'error' as const,
-        message: `This ${totalDuration}-minute experience can't finish before closing at ${closeDisplay} — try ${formatTimeDisplay(minutesToHHMM(latest))} or earlier.`,
-      };
-    }
+    // The service is allowed to run past closing time — only the start time
+    // must fall within business hours.
     if (selectedConflict) {
       const nextFree = suggestNextFreeStart(selectedConflict.end + 5);
       const suggestion =
@@ -350,9 +344,12 @@ export const BookingModal: React.FC = () => {
         message: `Conflicts with a booking until ${formatTimeDisplay(minutesToHHMM(selectedConflict.end))} — ${suggestion}`,
       };
     }
+    const runsPastClose = selectedEndMin > closeMin;
     return {
       status: 'success' as const,
-      message: `Available — ends at ${formatTimeDisplay(minutesToHHMM(selectedEndMin))}.`,
+      message: runsPastClose
+        ? `Available — starts before closing at ${closeDisplay} and ends at ${formatTimeDisplay(minutesToHHMM(selectedEndMin))} (running past closing is allowed).`
+        : `Available — ends at ${formatTimeDisplay(minutesToHHMM(selectedEndMin))}.`,
     };
   }, [
     selectedTimeSlot,
@@ -368,7 +365,7 @@ export const BookingModal: React.FC = () => {
 
   const timelineSpan = Math.max(1, closeMin - openMin);
   const selectedInRange =
-    selectedStartMin >= openMin && selectedEndMin <= closeMin;
+    selectedStartMin >= openMin && selectedStartMin <= closeMin;
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCustomerPhone(e.target.value);
@@ -386,12 +383,122 @@ export const BookingModal: React.FC = () => {
     return null;
   };
 
+  /** Validate a single step — gates forward navigation and tab jumps. */
+  const validateStep = (
+    s: number,
+  ): { ok: boolean; message: string } => {
+    if (s === 1) {
+      if (selectedServiceIds.length === 0)
+        return {
+          ok: false,
+          message: 'Please select at least one service to continue.',
+        };
+      return { ok: true, message: '' };
+    }
+    if (s === 2) {
+      if (!selectedBarberId)
+        return {
+          ok: false,
+          message: 'Please select a master barber to continue.',
+        };
+      return { ok: true, message: '' };
+    }
+    if (s === 3) {
+      if (slotsLoading)
+        return {
+          ok: false,
+          message: 'Availability is still loading — please wait a moment.',
+        };
+      if (!resolvedProvider)
+        return {
+          ok: false,
+          message: 'Please go back and select a master barber.',
+        };
+      if (!selectedDate)
+        return {
+          ok: false,
+          message: 'Please select a date on the schedule tab.',
+        };
+      if (!selectedTimeSlot || selectedStartMin < 0)
+        return {
+          ok: false,
+          message: 'Please enter a valid start time on the schedule tab.',
+        };
+      if (isSameDay && selectedStartMin < earliestBookableMin)
+        return { ok: false, message: timeValidation.message };
+      if (selectedStartMin < openMin || selectedStartMin > closeMin)
+        return { ok: false, message: timeValidation.message };
+      if (selectedConflict)
+        return { ok: false, message: timeValidation.message };
+      return { ok: true, message: '' };
+    }
+    return { ok: true, message: '' };
+  };
+
+  const showStepError = (s: number, message: string) => {
+    if (s === 1) setServiceError(message);
+    if (s === 2) setBarberError(message);
+    if (s === 3) setScheduleError(message);
+  };
+
+  const clearStepErrors = () => {
+    setServiceError(null);
+    setBarberError(null);
+    setScheduleError(null);
+  };
+
+  const handleNext = () => {
+    const check = validateStep(step);
+    if (!check.ok) {
+      showStepError(step, check.message);
+      return;
+    }
+    clearStepErrors();
+    setStep((step + 1) as 1 | 2 | 3 | 4 | 5);
+  };
+
+  const handlePrevious = () => {
+    if (step === 5) {
+      setPaymentStatus('idle');
+      setPaymentError(null);
+      setCheckoutRequestId(null);
+    }
+    clearStepErrors();
+    if (step > 1) setStep((step - 1) as 1 | 2 | 3 | 4 | 5);
+  };
+
+  const handleStepClick = (target: number) => {
+    if (target === step) return;
+    if (target < step) {
+      clearStepErrors();
+      setStep(target as 1 | 2 | 3 | 4 | 5);
+      return;
+    }
+    for (let i = 1; i < target; i++) {
+      const check = validateStep(i);
+      if (!check.ok) {
+        setStep(i as 1 | 2 | 3 | 4 | 5);
+        showStepError(i, check.message);
+        return;
+      }
+    }
+    clearStepErrors();
+    setStep(target as 1 | 2 | 3 | 4 | 5);
+  };
+
   /** Submit details → create pending booking → initiate STK push for 50% deposit. */
   const handleSubmitBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     setPaymentError(null);
 
-    if (!customerName || !customerPhone) return;
+    if (!customerName) {
+      setPaymentError('Please enter your full name.');
+      return;
+    }
+    if (!customerPhone) {
+      setPaymentError('Please enter your M-Pesa phone number.');
+      return;
+    }
     const phoneErr = validateSafaricom();
     if (phoneErr) {
       setPaymentError(phoneErr);
@@ -403,7 +510,12 @@ export const BookingModal: React.FC = () => {
       );
       return;
     }
-    if (!customerPhone || !selectedDate || !selectedTimeSlot) return;
+    if (!selectedDate || !selectedTimeSlot) {
+      setPaymentError(
+        'Please go back and make sure a date and time are selected.',
+      );
+      return;
+    }
 
     try {
       // 1. Create the booking atomically via check_and_reserve (race-condition-safe).
@@ -616,20 +728,39 @@ export const BookingModal: React.FC = () => {
               { num: 2, label: '2. Barber' },
               { num: 3, label: '3. Schedule' },
               { num: 4, label: '4. Details' },
-            ].map((s) => (
-              <div
-                key={s.num}
-                className={`py-2.5 px-1 border-r border-border-subtle last:border-r-0 transition-colors ${
-                  step === s.num
-                    ? 'bg-secondary text-primary font-bold border-b-2 border-b-primary'
-                    : step > s.num
-                      ? 'text-muted-foreground bg-card'
-                      : 'text-muted-foreground/40'
-                }`}
-              >
-                {s.label}
-              </div>
-            ))}
+            ].map((s) => {
+              const isCurrent = step === s.num;
+              const isDone = step > s.num;
+              const canJump =
+                s.num <= step ||
+                [1, 2, 3]
+                  .slice(0, s.num - 1)
+                  .every((i) => validateStep(i).ok);
+              return (
+                <button
+                  key={s.num}
+                  type="button"
+                  onClick={() => handleStepClick(s.num)}
+                  disabled={isCurrent}
+                  title={
+                    canJump
+                      ? `Go to step ${s.num}`
+                      : 'Complete the previous steps first'
+                  }
+                  className={`py-2.5 px-1 border-r border-border-subtle last:border-r-0 transition-colors ${
+                    isCurrent
+                      ? 'bg-secondary text-primary font-bold border-b-2 border-b-primary'
+                      : isDone
+                        ? 'text-muted-foreground bg-card hover:bg-secondary/60 cursor-pointer'
+                        : canJump
+                          ? 'text-muted-foreground/70 bg-card hover:bg-secondary/40 cursor-pointer'
+                          : 'text-muted-foreground/40'
+                  }`}
+                >
+                  {s.label}
+                </button>
+              );
+            })}
           </div>
         )}
 
@@ -693,6 +824,13 @@ export const BookingModal: React.FC = () => {
                   );
                 })}
               </div>
+
+              {serviceError && (
+                <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-xs text-destructive">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{serviceError}</span>
+                </div>
+              )}
             </div>
           )}
 
@@ -702,42 +840,12 @@ export const BookingModal: React.FC = () => {
               <h3 className="text-sm font-bold text-white uppercase tracking-wider">
                 Select Your Master Barber
               </h3>
+              <p className="text-[11px] text-muted-foreground">
+                Please choose a specific master barber. If your preferred master
+                is fully booked, go back here and pick another.
+              </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1">
-                {/* Option: Any Available */}
-                <div
-                  onClick={() => setSelectedBarberId('any')}
-                  className={`p-4 rounded-sm border cursor-pointer transition-all flex items-center gap-3.5 ${
-                    selectedBarberId === 'any'
-                      ? 'bg-secondary border-primary'
-                      : 'bg-background border-border hover:border-border-strong'
-                  }`}
-                >
-                  <div className="w-12 h-12 rounded-sm bg-secondary border border-border-strong flex items-center justify-center text-primary flex-shrink-0">
-                    <Sparkles className="w-6 h-6" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-xs sm:text-sm font-bold text-white">
-                      First Available Master
-                    </h4>
-                    <p className="text-[11px] text-muted-foreground">
-                      Any certified master available for optimal speed
-                    </p>
-                  </div>
-                  <div
-                    className={`w-5 h-5 rounded-sm border flex items-center justify-center flex-shrink-0 ${
-                      selectedBarberId === 'any'
-                        ? 'bg-primary border-primary text-primary-foreground'
-                        : 'border-border-strong'
-                    }`}
-                  >
-                    {selectedBarberId === 'any' && (
-                      <Check className="w-3.5 h-3.5" />
-                    )}
-                  </div>
-                </div>
-
-                {/* Individual Barbers */}
                 {barbers.map((barber) => {
                   const isSelected = selectedBarberId === barber.id;
                   const cannotHandle =
@@ -747,7 +855,10 @@ export const BookingModal: React.FC = () => {
                     <div
                       key={barber.id}
                       onClick={() => {
-                        if (!cannotHandle) setSelectedBarberId(barber.id);
+                        if (!cannotHandle) {
+                          setSelectedBarberId(barber.id);
+                          setBarberError(null);
+                        }
                       }}
                       className={`p-3.5 rounded-sm border transition-all flex items-center gap-3.5 ${
                         cannotHandle
@@ -795,6 +906,13 @@ export const BookingModal: React.FC = () => {
                   );
                 })}
               </div>
+
+              {barberError && (
+                <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-xs text-destructive">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{barberError}</span>
+                </div>
+              )}
             </div>
           )}
 
@@ -811,6 +929,7 @@ export const BookingModal: React.FC = () => {
                     mode="single"
                     selected={selectedDate}
                     onSelect={(date) => {
+                      setScheduleError(null);
                       setSelectedDate(date);
                       setSelectedTimeSlot('');
                     }}
@@ -903,7 +1022,7 @@ export const BookingModal: React.FC = () => {
                           className="absolute top-0 bottom-0 bg-primary/30 border-y-2 border-primary flex items-center justify-center"
                           style={{
                             left: `${((selectedStartMin - openMin) / timelineSpan) * 100}%`,
-                            width: `${((selectedEndMin - selectedStartMin) / timelineSpan) * 100}%`,
+                            width: `${((Math.min(selectedEndMin, closeMin) - selectedStartMin) / timelineSpan) * 100}%`,
                           }}
                         >
                           <span className="text-[8px] font-bold text-white px-1 truncate">
@@ -958,6 +1077,7 @@ export const BookingModal: React.FC = () => {
                         placeholder="HH:MM"
                         value={selectedTimeSlot}
                         onChange={(e) => {
+                          setScheduleError(null);
                           const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
                           let formatted = digits;
                           if (digits.length >= 3) {
@@ -988,8 +1108,9 @@ export const BookingModal: React.FC = () => {
                         type="button"
                         aria-label="Increase time by 15 minutes"
                         onClick={() => {
+                          setScheduleError(null);
                           const base = selectedStartMin >= 0 ? selectedStartMin : earliestBookableMin;
-                          const next = Math.min(closeMin - totalDuration, base + 15);
+                          const next = Math.min(closeMin, base + 15);
                           setSelectedTimeSlot(minutesToHHMM(next));
                         }}
                         className="flex-1 px-3 py-1 bg-secondary hover:bg-secondary-hover text-muted-foreground-light hover:text-white transition-colors cursor-pointer"
@@ -1000,6 +1121,7 @@ export const BookingModal: React.FC = () => {
                         type="button"
                         aria-label="Decrease time by 15 minutes"
                         onClick={() => {
+                          setScheduleError(null);
                           const base = selectedStartMin >= 0 ? selectedStartMin : earliestBookableMin;
                           const prev = Math.max(earliestBookableMin, base - 15);
                           setSelectedTimeSlot(minutesToHHMM(prev));
@@ -1019,10 +1141,18 @@ export const BookingModal: React.FC = () => {
                       </span>{' '}
                       –{' '}
                       <span className="font-mono text-primary">
-                        {minutesToHHMM(Math.max(openMin, closeMin - totalDuration))}
+                        {minutesToHHMM(closeMin)}
                       </span>
-                      ) or use the arrows.
+                      ) or use the arrows. Only the start time must be within
+                      business hours — the service may run past closing.
                     </p>
+                  )}
+
+                  {scheduleError && (
+                    <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/30 rounded-sm text-xs text-destructive">
+                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                      <span>{scheduleError}</span>
+                    </div>
                   )}
 
                   {!slotsLoading && (
@@ -1459,15 +1589,15 @@ export const BookingModal: React.FC = () => {
           )}
         </div>
 
-        {/* Modal Footer Controls (Steps 1-3) */}
-        {step < 4 && (
+        {/* Modal Footer Controls (Steps 1-4) — back navigation is always available */}
+        {(step < 5 || (step === 5 && paymentStatus === 'failed')) && (
           <div className="p-4 sm:p-5 bg-card-elevated border-t border-border-subtle flex items-center justify-between">
             {step > 1 ? (
               <Button
                 type="button"
                 variant="secondary"
                 size="sm"
-                onClick={() => setStep((step - 1) as any)}
+                onClick={handlePrevious}
                 className="text-xs gap-1"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -1482,16 +1612,25 @@ export const BookingModal: React.FC = () => {
               </div>
             )}
 
-            <Button
-              type="button"
-              variant="primary"
-              size="md"
-              onClick={() => setStep((step + 1) as any)}
-              className="text-xs uppercase font-bold tracking-wider gap-1.5"
-            >
-              <span>Continue</span>
-              <ChevronRight className="w-4 h-4" />
-            </Button>
+            {step === 4 ? (
+              <div className="text-[10px] text-muted-foreground text-right leading-tight">
+                Review the summary below, then confirm payment to secure your
+                slot.
+              </div>
+            ) : step === 5 ? (
+              <div className="w-8" />
+            ) : (
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                onClick={handleNext}
+                className="text-xs uppercase font-bold tracking-wider gap-1.5"
+              >
+                <span>Continue</span>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         )}
       </div>
