@@ -1,0 +1,35 @@
+
+> react-example@0.0.0 lint
+> tsc --noEmit
+
+src/components/BarbersSection.tsx(354,25): error TS2322: Type '"secondary"' is not assignable to type '"primary" | "destructive" | "gold" | "success" | "warning" | "info" | "neutral"'.
+src/components/portal/bookings/BookingDetailsDrawer.tsx(55,23): error TS2322: Type '"outline"' is not assignable to type '"primary" | "destructive" | "gold" | "success" | "warning" | "info" | "neutral"'.
+src/components/portal/bookings/BookingDrawer.tsx(58,23): error TS2322: Type '"outline"' is not assignable to type '"primary" | "destructive" | "gold" | "success" | "warning" | "info" | "neutral"'.
+src/components/portal/bookings/BookingDrawer.tsx(298,49): error TS2339: Property 'remainingBalanceKsh' does not exist on type 'DepositBreakdown'.
+src/components/portal/bookings/BookingDrawer.tsx(337,61): error TS2339: Property 'remainingBalanceKsh' does not exist on type 'DepositBreakdown'.
+src/components/portal/bookings/BookingList.tsx(106,23): error TS2322: Type '"outline"' is not assignable to type '"primary" | "destructive" | "gold" | "success" | "warning" | "info" | "neutral"'.
+src/components/portal/bookings/BookingList.tsx(409,29): error TS2322: Type '"neutral"' is not assignable to type '"link" | "primary" | "gold-primary" | "secondary" | "outline" | "gold-outline" | "ghost" | "destructive"'.
+src/components/portal/bookings/ProviderSelector.tsx(67,12): error TS2678: Type '"scrapper-scalp-care"' is not comparable to type 'ServiceProviderType'.
+src/components/portal/layout/PortalShell.tsx(104,22): error TS2322: Type '"primary" | "outline"' is not assignable to type '"primary" | "destructive" | "gold" | "success" | "warning" | "info" | "neutral"'.
+  Type '"outline"' is not assignable to type '"primary" | "destructive" | "gold" | "success" | "warning" | "info" | "neutral"'.
+src/components/portal/overview/PortalOverview.tsx(185,32): error TS2304: Cannot find name 'setSelectedBooking'.
+src/components/portal/overview/PortalOverview.tsx(222,30): error TS2304: Cannot find name 'setIsNewBookingOpen'.
+src/components/portal/overview/PortalOverview.tsx(234,32): error TS2304: Cannot find name 'setSelectedBooking'.
+src/components/portal/overview/PortalOverview.tsx(286,38): error TS2304: Cannot find name 'setSelectedBooking'.
+src/components/portal/overview/PortalOverview.tsx(300,8): error TS2304: Cannot find name 'BookingDetailsDrawer'.
+src/components/portal/overview/PortalOverview.tsx(301,25): error TS2304: Cannot find name 'selectedBooking'.
+src/components/portal/overview/PortalOverview.tsx(302,18): error TS2304: Cannot find name 'selectedBooking'.
+src/components/portal/overview/PortalOverview.tsx(303,24): error TS2304: Cannot find name 'setSelectedBooking'.
+src/components/portal/overview/PortalOverview.tsx(307,8): error TS2304: Cannot find name 'NewBookingModal'.
+src/components/portal/overview/PortalOverview.tsx(308,17): error TS2304: Cannot find name 'isNewBookingOpen'.
+src/components/portal/overview/PortalOverview.tsx(309,24): error TS2304: Cannot find name 'setIsNewBookingOpen'.
+src/components/portal/providers/ProvidersPage.tsx(160,28): error TS2322: Type '"outline" | "success"' is not assignable to type '"primary" | "destructive" | "gold" | "success" | "warning" | "info" | "neutral"'.
+  Type '"outline"' is not assignable to type '"primary" | "destructive" | "gold" | "success" | "warning" | "info" | "neutral"'.
+src/components/portal/services/ServicesManagementPage.tsx(267,24): error TS2322: Type '"outline" | "success"' is not assignable to type '"primary" | "destructive" | "gold" | "success" | "warning" | "info" | "neutral"'.
+  Type '"outline"' is not assignable to type '"primary" | "destructive" | "gold" | "success" | "warning" | "info" | "neutral"'.
+src/pages/AdminDashboard.tsx(210,25): error TS2322: Type '"success" | "neutral" | "danger"' is not assignable to type '"primary" | "destructive" | "gold" | "success" | "warning" | "info" | "neutral"'.
+  Type '"danger"' is not assignable to type '"primary" | "destructive" | "gold" | "success" | "warning" | "info" | "neutral"'.
+src/pages/BarberDetailPage.tsx(96,36): error TS2322: Type '"secondary"' is not assignable to type '"primary" | "destructive" | "gold" | "success" | "warning" | "info" | "neutral"'.
+src/pages/BarberPortal.tsx(116,25): error TS2322: Type '"success" | "neutral" | "danger"' is not assignable to type '"primary" | "destructive" | "gold" | "success" | "warning" | "info" | "neutral"'.
+  Type '"danger"' is not assignable to type '"primary" | "destructive" | "gold" | "success" | "warning" | "info" | "neutral"'.
+src/pages/ProductsCatalogPage.tsx(214,30): error TS2322: Type '"secondary"' is not assignable to type '"primary" | "destructive" | "gold" | "success" | "warning" | "info" | "neutral"'.

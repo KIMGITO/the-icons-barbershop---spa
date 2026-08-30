@@ -1,0 +1,866 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-foreground-bright: var(--foreground-bright);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-card-elevated: var(--card-elevated);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-hover: var(--muted-hover);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted-foreground-light: var(--muted-foreground-light);
+
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+
+  --color-product-surface: var(--product-surface);
+
+  --font-heading: 'Cinzel', serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-serif-sub: 'Cormorant Garamond', serif;
+  --font-script: 'Alex Brush', cursive;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+@layer base {
+  :root {
+    /* Fonts */
+    --font-heading: 'Cinzel', serif;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-serif-sub: 'Cormorant Garamond', serif;
+    --font-script: 'Alex Brush', cursive;
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+
+    /* Core Canvas & Text */
+    --background: #050505;
+    --foreground: #E0E0E0;
+    --foreground-bright: #FFFFFF;
+
+    /* Primary Brand Identity (The Icons Gold) */
+    --primary: #EFBF04;
+    --primary-hover: #FFD633;
+    --primary-dark: #B89200;
+    --primary-foreground: #050505;
+
+    /* Secondary Surfaces & Panels */
+    --secondary: #141414;
+    --secondary-hover: #1F1F1F;
+    --secondary-foreground: #E0E0E0;
+
+    /* Elevated Surfaces & Cards */
+    --card: #0D0D0D;
+    --card-foreground: #E0E0E0;
+    --card-elevated: #141414;
+
+    /* Muted Elements & Restrained Grays */
+    --muted: #1A1A1A;
+    --muted-hover: #262626;
+    --muted-foreground: #888888;
+    --muted-foreground-light: #A8A8A8;
+
+    /* Accents */
+    --accent: #1F1F1F;
+    --accent-hover: #2B2B2B;
+    --accent-foreground: #EFBF04;
+
+    /* Borders & Dividers */
+    --border: #222222;
+    --border-subtle: #1C1C1C;
+    --border-strong: #2E2E2E;
+
+    /* Form Controls & Focus */
+    --input: #171717;
+    --ring: #EFBF04;
+
+    /* Feedback & Status */
+    --success: #22C55E;
+    --success-foreground: #050505;
+    --warning: #F59E0B;
+    --warning-foreground: #050505;
+    --destructive: #EF4444;
+    --destructive-foreground: #FFFFFF;
+    --info: #3B82F6;
+    --info-foreground: #FFFFFF;
+
+    /* Product Display Surface */
+    --product-surface: #ECEBE7;
+
+    /* Legacy Brand Token References (for backward compatibility) */
+    --brand-gold: var(--primary);
+    --brand-gold-hover: var(--primary-hover);
+    --brand-gold-text: var(--primary-foreground);
+    --brand-gold-muted: color-mix(in srgb, var(--primary) 25%, transparent);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--background);
+    color: var(--foreground);
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .font-heading {
+    font-family: var(--font-heading);
+    letter-spacing: 0.03em;
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .font-serif-sub {
+    font-family: var(--font-serif-sub);
+  }
+
+  .font-script {
+    font-family: var(--font-script);
+  }
+}
+
+/* -------------------------
+   Button Semantic Variants & System
+------------------------- */
+.btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-family: inherit;
+  line-height: 1.2;
+  border-radius: 0.5rem;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.1s ease-in-out, opacity 0.2s ease-in-out;
+}
+
+.btn-base:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring);
+}
+
+.btn-base:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-base:disabled,
+.btn-disabled,
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Sizes */
+.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  border-radius: 0.375rem;
+}
+
+.btn-md {
+  padding: 0.625rem 1.25rem;
+  font-size: 0.8125rem;
+  border-radius: 0.5rem;
+}
+
+.btn-lg {
+  padding: 0.875rem 1.75rem;
+  font-size: 0.875rem;
+  border-radius: 0.75rem;
+}
+
+.btn-icon {
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+}
+
+.btn-pill {
+  border-radius: 9999px;
+}
+
+/* Button Variants */
+.btn-primary,
+.btn-gold-primary {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border: 1px solid var(--primary);
+  font-weight: 700;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-primary:hover,
+.btn-gold-primary:hover {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+  color: var(--primary-foreground);
+}
+
+.btn-secondary {
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
+  border: 1px solid var(--border);
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-secondary:hover {
+  background-color: var(--secondary-hover);
+  border-color: var(--border-strong);
+  color: var(--foreground-bright);
+}
+
+.btn-outline,
+.btn-gold-outline {
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  background-color: transparent;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-outline:hover,
+.btn-gold-outline:hover {
+  background-color: color-mix(in srgb, var(--primary) 12%, transparent);
+  border-color: var(--primary-hover);
+  color: var(--primary-hover);
+}
+
+.btn-ghost {
+  color: var(--foreground);
+  background-color: transparent;
+  border: 1px solid transparent;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-ghost:hover {
+  background-color: var(--secondary);
+  color: var(--primary);
+}
+
+.btn-destructive {
+  background-color: var(--destructive);
+  color: var(--destructive-foreground);
+  border: 1px solid var(--destructive);
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-destructive:hover {
+  opacity: 0.9;
+  filter: brightness(1.08);
+}
+
+.btn-link {
+  background-color: transparent;
+  color: var(--primary);
+  border: none;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.btn-link:hover {
+  color: var(--primary-hover);
+}
+
+/* Loading State for Buttons */
+.btn-loading {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+}
+
+.btn-loading::after {
+  content: "";
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  top: calc(50% - 0.5rem);
+  left: calc(50% - 0.5rem);
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: btn-spin 0.6s linear infinite;
+  color: var(--primary-foreground);
+}
+
+.btn-secondary.btn-loading::after,
+.btn-outline.btn-loading::after,
+.btn-gold-outline.btn-loading::after,
+.btn-ghost.btn-loading::after {
+  color: var(--primary);
+}
+
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* -------------------------
+   Cards
+------------------------- */
+.card-default {
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+.card-elevated {
+  background-color: var(--card-elevated);
+  color: var(--card-foreground);
+  border: 1px solid var(--border-strong);
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+}
+
+.card-bordered {
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border-strong);
+  border-radius: 0.75rem;
+}
+
+.card-interactive {
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  transition: border-color 0.25s ease, background-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+}
+
+.card-interactive:hover {
+  border-color: var(--primary);
+  background-color: var(--secondary-hover);
+  box-shadow: 0 10px 25px -5px color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+/* -------------------------
+   Badges
+------------------------- */
+.badge-base {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.55rem;
+  border-radius: 0.25rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.badge-pill {
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+}
+
+.badge-primary,
+.badge-gold {
+  background-color: color-mix(in srgb, var(--primary) 15%, transparent);
+  color: var(--primary);
+  border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+.badge-success {
+  background-color: color-mix(in srgb, var(--success) 15%, transparent);
+  color: var(--success);
+  border: 1px solid color-mix(in srgb, var(--success) 35%, transparent);
+}
+
+.badge-warning {
+  background-color: color-mix(in srgb, var(--warning) 15%, transparent);
+  color: var(--warning);
+  border: 1px solid color-mix(in srgb, var(--warning) 35%, transparent);
+}
+
+.badge-destructive {
+  background-color: color-mix(in srgb, var(--destructive) 15%, transparent);
+  color: var(--destructive);
+  border: 1px solid color-mix(in srgb, var(--destructive) 35%, transparent);
+}
+
+.badge-info {
+  background-color: color-mix(in srgb, var(--info) 15%, transparent);
+  color: var(--info);
+  border: 1px solid color-mix(in srgb, var(--info) 35%, transparent);
+}
+
+.badge-neutral {
+  background-color: var(--secondary);
+  color: var(--muted-foreground-light);
+  border: 1px solid var(--border);
+}
+
+/* -------------------------
+   Forms / Inputs
+------------------------- */
+.input-base,
+.input-default {
+  width: 100%;
+  background-color: var(--input);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  outline: none;
+}
+
+.input-default::placeholder,
+.input-base::placeholder {
+  color: var(--muted-foreground);
+}
+
+.input-default:focus,
+.input-base:focus {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 1px var(--ring);
+}
+
+.input-error {
+  border-color: var(--destructive) !important;
+}
+.input-error:focus {
+  border-color: var(--destructive) !important;
+  box-shadow: 0 0 0 1px var(--destructive) !important;
+}
+
+.input-success {
+  border-color: var(--success) !important;
+}
+.input-success:focus {
+  border-color: var(--success) !important;
+  box-shadow: 0 0 0 1px var(--success) !important;
+}
+
+.input-disabled,
+.input-base:disabled,
+.input-default:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background-color: var(--muted);
+}
+
+/* -------------------------
+   Navigation
+------------------------- */
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--foreground);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.nav-link:hover {
+  color: var(--primary);
+}
+
+.nav-link-active {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.nav-link-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.nav-item-drawer {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  color: var(--foreground);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.nav-item-drawer:hover {
+  background-color: var(--secondary);
+  color: var(--foreground-bright);
+}
+
+.nav-item-drawer-active {
+  background-color: var(--secondary);
+  color: var(--primary);
+  border-left: 3px solid var(--primary);
+  font-weight: 700;
+}
+
+/* -------------------------
+   Tabs
+------------------------- */
+.tabs-default {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.tab,
+.tab-base {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+  border-top: 2px solid transparent;
+  border-radius: 0.25rem 0.25rem 0 0;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  background: transparent;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+}
+
+.tab:hover,
+.tab-base:hover,
+.tab-inactive:hover {
+  color: var(--foreground-bright);
+}
+
+.tab-inactive {
+  color: var(--muted-foreground);
+}
+
+.tab-active {
+  background-color: var(--secondary);
+  color: var(--primary);
+  border-top-color: var(--primary);
+}
+
+.tab-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.tabs-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tab-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.875rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  background-color: var(--secondary);
+  color: var(--muted-foreground);
+  border: 1px solid var(--border);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.tab-pill:hover {
+  color: var(--foreground-bright);
+  background-color: var(--secondary-hover);
+  border-color: var(--border-strong);
+}
+
+.tab-pill-active {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+  font-weight: 700;
+  box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--primary) 30%, transparent);
+}
+
+/* -------------------------
+   Feedback / Alerts & Toast
+------------------------- */
+.alert-default {
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  color: var(--foreground);
+}
+
+.alert-success {
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--success) 40%, transparent);
+  background-color: color-mix(in srgb, var(--success) 12%, transparent);
+  color: var(--success);
+}
+
+.alert-warning {
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--warning) 40%, transparent);
+  background-color: color-mix(in srgb, var(--warning) 12%, transparent);
+  color: var(--warning);
+}
+
+.alert-destructive {
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--destructive) 40%, transparent);
+  background-color: color-mix(in srgb, var(--destructive) 12%, transparent);
+  color: var(--destructive);
+}
+
+.alert-info {
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--info) 40%, transparent);
+  background-color: color-mix(in srgb, var(--info) 12%, transparent);
+  color: var(--info);
+}
+
+.toast-success {
+  background-color: var(--card-elevated);
+  border: 1px solid var(--success);
+  color: var(--success);
+}
+
+.toast-warning {
+  background-color: var(--card-elevated);
+  border: 1px solid var(--warning);
+  color: var(--warning);
+}
+
+.toast-error {
+  background-color: var(--card-elevated);
+  border: 1px solid var(--destructive);
+  color: var(--destructive);
+}
+
+.toast-info {
+  background-color: var(--card-elevated);
+  border: 1px solid var(--info);
+  color: var(--info);
+}
+
+/* -------------------------
+   Tables
+------------------------- */
+.table-default {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.8125rem;
+}
+
+.table-header {
+  border-bottom: 1px solid var(--border);
+  background-color: var(--secondary);
+  color: var(--muted-foreground);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.table-header th {
+  padding: 0.75rem 1rem;
+}
+
+.table-row {
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background-color 0.15s ease-in-out;
+}
+
+.table-row td {
+  padding: 0.75rem 1rem;
+}
+
+.table-row-hover:hover {
+  background-color: var(--secondary-hover);
+}
+
+.table-row-selected {
+  background-color: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+.table-row-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Custom Gold Gradient & Hairline Borders using CSS Tokens */
+.gold-gradient-text {
+  background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary) 50%, var(--primary-dark) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-border-subtle {
+  border-color: var(--border-subtle);
+}
+
+.gold-glow-subtle {
+  box-shadow: 0 0 25px -5px color-mix(in srgb, var(--primary) 15%, transparent);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* -------------------------
+   Global Scrollbar Hiding (keep scroll, hide bars)
+------------------------- */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE & Edge */
+}
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge WebKit */
+}
+
+/* -------------------------
+   Remove Number Input Spinners (arrows up/down)
+------------------------- */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* -------------------------
+   Calendar / ThemeSelect Dropdown Overflow Handling
+------------------------- */
+.theme-select-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) transparent;
+}
+.theme-select-scroll::-webkit-scrollbar {
+  display: block;
+  width: 4px;
+}
+.theme-select-scroll::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 4px;
+}
+
+/* -------------------------
+   Guest Booking Calendar (react-day-picker) — The Icons brand theme
+------------------------- */
+.booking-calendar .rdp-root {
+  --rdp-accent-color: var(--primary);
+  --rdp-accent-background-color: var(--primary);
+  --rdp-accent-color-dark: var(--primary-dark);
+  --rdp-background-color: var(--secondary);
+  --rdp-outline: 2px solid var(--primary);
+  --rdp-outline-selected: 2px solid var(--primary);
+  font-family: var(--font-sans);
+}
+
+.booking-calendar .rdp-month_calendar {
+  background: var(--card);
+  border: 1px solid var(--border-strong);
+  border-radius: 0.5rem;
+  color: var(--foreground);
+}
+
+.booking-calendar .rdp-month_caption {
+  color: var(--foreground-bright);
+  font-family: var(--font-heading);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.booking-calendar .rdp-chevron {
+  fill: var(--primary);
+  color: var(--primary);
+}
+
+.booking-calendar .rdp-weekday {
+  color: var(--primary);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+}
+
+.booking-calendar .rdp-day_button {
+  color: var(--foreground);
+  border-radius: 0.25rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.booking-calendar .rdp-day_button:hover {
+  background-color: var(--secondary);
+  border-color: var(--primary);
+}
+
+.booking-calendar .rdp-selected .rdp-day_button {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 700;
+  border: 1px solid var(--primary);
+}
+
+.booking-calendar .rdp-day_disabled {
+  opacity: 0.3;
+}

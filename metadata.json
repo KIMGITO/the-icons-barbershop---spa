@@ -1,0 +1,8 @@
+{
+  "name": "The Icons Barber \u0026 Spa",
+  "description": "Premium booking platform and internal staff management portal for The Icons Barber \u0026 Spa with role-based access for managers and service providers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

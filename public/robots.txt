@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /barber/
+Disallow: /api/
+
+Sitemap: https://theiconsbarber.co.ke/sitemap.xml
