@@ -27,8 +27,9 @@ import {
   Plus as PlusIcon,
   Sparkles
 } from 'lucide-react';
-import { ProductItem, ProductReview } from '../../../types';
+import { ProductItem, ProductReview, ServiceReview } from '../../../types';
 import { useProductAdminStore } from '../../../stores/productAdminStore';
+import { useApp } from '../../../context/AppContext';
 import { ImageUploader } from '../ui/ImageUploader';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
@@ -182,9 +183,11 @@ const formToProductData = (form: ProductFormState): Omit<ProductItem, 'id'> => (
 });
 
 export const ProductsManagementPage: React.FC = () => {
+  const { services } = useApp();
   const {
     products,
     reviews,
+    serviceReviews,
     loading,
     error,
     loadProducts,
@@ -195,7 +198,9 @@ export const ProductsManagementPage: React.FC = () => {
     setProductStatus,
     adjustStock,
     setReviewStatus,
-    deleteReview
+    deleteReview,
+    setServiceReviewStatus,
+    deleteServiceReview
   } = useProductAdminStore();
 
   const [activeTab, setActiveTab] = useState<'products' | 'reviews'>('products');
@@ -209,6 +214,7 @@ export const ProductsManagementPage: React.FC = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [expandedProductId, setExpandedProductId] = useState<string | null>(null);
   const [reviewFilter, setReviewFilter] = useState('all');
+  const [reviewType, setReviewType] = useState<'product' | 'service'>('product');
 
   useEffect(() => {
     loadProducts();
@@ -239,7 +245,7 @@ export const ProductsManagementPage: React.FC = () => {
     });
   }, [reviews, reviewFilter]);
 
-  const pendingReviewCount = reviews.filter(r => r.reviewStatus === 'pending').length;
+  const pendingReviewCount = reviews.filter(r => r.reviewStatus === 'pending').length + serviceReviews.filter(r => r.reviewStatus === 'pending').length;
   const lowStockCount = products.filter(p => p.availability === 'low-stock' || p.availability === 'out-of-stock').length;
   const activeCount = products.filter(p => p.status === 'active').length;
 
@@ -336,9 +342,33 @@ export const ProductsManagementPage: React.FC = () => {
     }
   };
 
+  const handleServiceReviewAction = async (review: ServiceReview, status: 'approved' | 'rejected' | 'archived') => {
+    try {
+      await setServiceReviewStatus(review.id, status);
+      await loadReviews();
+    } catch (err: any) {
+      alert(err.message || 'Failed to update service review.');
+    }
+  };
+
+  const handleDeleteServiceReview = async (review: ServiceReview) => {
+    if (!window.confirm('Delete this service review permanently?')) return;
+    try {
+      await deleteServiceReview(review.id);
+      await loadReviews();
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete service review.');
+    }
+  };
+
   const getProductName = (productId?: string) => {
     if (!productId) return 'Unknown Product';
     return products.find(p => p.id === productId)?.name || 'Unknown Product';
+  };
+
+  const getServiceName = (serviceId?: string) => {
+    if (!serviceId) return 'Unknown Service';
+    return services.find(s => s.id === serviceId)?.name || 'Unknown Service';
   };
 
   const renderStars = (rating: number) => (
@@ -698,119 +728,239 @@ export const ProductsManagementPage: React.FC = () => {
       {/* ============ REVIEWS TAB ============ */}
       {activeTab === 'reviews' && (
         <div className="space-y-4">
-          {/* Review Filter */}
-          <div className="bg-card p-3.5 rounded-xl border border-border flex items-center gap-2.5">
-            <MessageSquare className="w-4 h-4 text-primary shrink-0" />
+          {/* Review Type + Filter */}
+          <div className="bg-card p-3.5 rounded-xl border border-border flex flex-col sm:flex-row items-start sm:items-center gap-2.5">
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setReviewType('product')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  reviewType === 'product'
+                    ? 'bg-primary text-black'
+                    : 'bg-muted/50 text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Product Reviews ({reviews.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setReviewType('service')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  reviewType === 'service'
+                    ? 'bg-primary text-black'
+                    : 'bg-muted/50 text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Service Reviews ({serviceReviews.length})
+              </button>
+            </div>
+            <MessageSquare className="w-4 h-4 text-primary shrink-0 hidden sm:block" />
             <ThemeSelect
               value={reviewFilter}
               onChange={(e) => setReviewFilter(e.target.value)}
               className="w-full sm:w-64 bg-input border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary"
             >
-              <option value="all">All Reviews ({reviews.length})</option>
-              <option value="pending">Pending Approval ({reviews.filter(r => r.reviewStatus === 'pending').length})</option>
-              <option value="approved">Approved ({reviews.filter(r => r.reviewStatus === 'approved').length})</option>
-              <option value="rejected">Rejected ({reviews.filter(r => r.reviewStatus === 'rejected').length})</option>
-              <option value="archived">Archived ({reviews.filter(r => r.reviewStatus === 'archived').length})</option>
+              <option value="all">All Statuses</option>
+              <option value="pending">Pending Approval</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+              <option value="archived">Archived</option>
             </ThemeSelect>
           </div>
 
-          {loading && reviews.length === 0 ? (
+          {loading && reviews.length === 0 && serviceReviews.length === 0 ? (
             <div className="p-10 text-center bg-card rounded-xl border border-border flex flex-col items-center gap-2">
               <Loader2 className="w-6 h-6 animate-spin text-primary" />
               <p className="text-xs text-muted-foreground">Loading reviews...</p>
             </div>
-          ) : filteredReviews.length === 0 ? (
-            <div className="p-10 text-center bg-card rounded-xl border border-border">
-              <p className="text-xs text-muted-foreground">No reviews found in this category.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {filteredReviews.map(review => (
-                <div
-                  key={review.id}
-                  className="bg-card border border-border rounded-2xl p-4 space-y-3"
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                    <div className="space-y-1.5 flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-bold text-foreground">{review.authorName}</span>
-                        <Badge
-                          variant={review.reviewStatus === 'approved' ? 'success' : review.reviewStatus === 'pending' ? 'warning' : 'neutral'}
-                          className="text-[9px] uppercase font-bold"
-                        >
-                          {REVIEW_STATUS_LABELS[review.reviewStatus || 'pending']}
-                        </Badge>
-                        {review.verifiedPurchase && (
-                          <span className="inline-flex items-center gap-1 text-[10px] text-success">
-                            <ShieldCheck className="w-3 h-3" />
-                            Verified Purchase
-                          </span>
+          ) : reviewType === 'product' ? (
+            filteredReviews.length === 0 ? (
+              <div className="p-10 text-center bg-card rounded-xl border border-border">
+                <p className="text-xs text-muted-foreground">No product reviews found in this category.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filteredReviews.map(review => (
+                  <div
+                    key={review.id}
+                    className="bg-card border border-border rounded-2xl p-4 space-y-3"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                      <div className="space-y-1.5 flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-bold text-foreground">{review.authorName}</span>
+                          <Badge
+                            variant={review.reviewStatus === 'approved' ? 'success' : review.reviewStatus === 'pending' ? 'warning' : 'neutral'}
+                            className="text-[9px] uppercase font-bold"
+                          >
+                            {REVIEW_STATUS_LABELS[review.reviewStatus || 'pending']}
+                          </Badge>
+                          {review.verifiedPurchase && (
+                            <span className="inline-flex items-center gap-1 text-[10px] text-success">
+                              <ShieldCheck className="w-3 h-3" />
+                              Verified Purchase
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          {renderStars(review.rating)}
+                          <span className="text-[10px] text-muted-foreground">{review.date}</span>
+                        </div>
+
+                        <p className="text-xs text-foreground leading-relaxed">
+                          "{review.comment}"
+                        </p>
+
+                        <div className="text-[10px] text-muted-foreground">
+                          Product: <span className="text-primary font-semibold">{getProductName(review.productId)}</span>
+                        </div>
+                      </div>
+
+                      {/* Review Actions */}
+                      <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+                        {review.reviewStatus !== 'approved' && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleReviewAction(review, 'approved')}
+                            className="text-xs py-1 h-auto text-success border-success/40 hover:bg-success/10"
+                          >
+                            <CheckCircle2 className="w-3 h-3 mr-1" />
+                            <span>Approve</span>
+                          </Button>
                         )}
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        {renderStars(review.rating)}
-                        <span className="text-[10px] text-muted-foreground">{review.date}</span>
-                      </div>
-
-                      <p className="text-xs text-foreground leading-relaxed">
-                        "{review.comment}"
-                      </p>
-
-                      <div className="text-[10px] text-muted-foreground">
-                        Product: <span className="text-primary font-semibold">{getProductName(review.productId)}</span>
-                      </div>
-                    </div>
-
-                    {/* Review Actions */}
-                    <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
-                      {review.reviewStatus !== 'approved' && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleReviewAction(review, 'approved')}
-                          className="text-xs py-1 h-auto text-success border-success/40 hover:bg-success/10"
-                        >
-                          <CheckCircle2 className="w-3 h-3 mr-1" />
-                          <span>Approve</span>
-                        </Button>
-                      )}
-                      {review.reviewStatus !== 'rejected' && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleReviewAction(review, 'rejected')}
-                          className="text-xs py-1 h-auto text-destructive border-destructive/40 hover:bg-destructive/10"
-                        >
-                          <XCircle className="w-3 h-3 mr-1" />
-                          <span>Reject</span>
-                        </Button>
-                      )}
-                      {review.reviewStatus !== 'archived' && (
+                        {review.reviewStatus !== 'rejected' && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleReviewAction(review, 'rejected')}
+                            className="text-xs py-1 h-auto text-destructive border-destructive/40 hover:bg-destructive/10"
+                          >
+                            <XCircle className="w-3 h-3 mr-1" />
+                            <span>Reject</span>
+                          </Button>
+                        )}
+                        {review.reviewStatus !== 'archived' && (
+                          <button
+                            type="button"
+                            onClick={() => handleReviewAction(review, 'archived')}
+                            className="p-1.5 rounded-lg text-muted-foreground hover:text-warning transition-colors"
+                            title="Archive review"
+                          >
+                            <Archive className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                         <button
                           type="button"
-                          onClick={() => handleReviewAction(review, 'archived')}
-                          className="p-1.5 rounded-lg text-muted-foreground hover:text-warning transition-colors"
-                          title="Archive review"
+                          onClick={() => handleDeleteReview(review)}
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive transition-colors"
+                          title="Delete review permanently"
                         >
-                          <Archive className="w-3.5 h-3.5" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteReview(review)}
-                        className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive transition-colors"
-                        title="Delete review permanently"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )
+          ) : (
+            serviceReviews.filter(r => reviewFilter === 'all' || r.reviewStatus === reviewFilter).length === 0 ? (
+              <div className="p-10 text-center bg-card rounded-xl border border-border">
+                <p className="text-xs text-muted-foreground">No service reviews found in this category.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {serviceReviews.filter(r => reviewFilter === 'all' || r.reviewStatus === reviewFilter).map(review => (
+                  <div
+                    key={review.id}
+                    className="bg-card border border-border rounded-2xl p-4 space-y-3"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                      <div className="space-y-1.5 flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-bold text-foreground">{review.authorName}</span>
+                          <Badge
+                            variant={review.reviewStatus === 'approved' ? 'success' : review.reviewStatus === 'pending' ? 'warning' : 'neutral'}
+                            className="text-[9px] uppercase font-bold"
+                          >
+                            {REVIEW_STATUS_LABELS[review.reviewStatus || 'pending']}
+                          </Badge>
+                          {review.verifiedPurchase && (
+                            <span className="inline-flex items-center gap-1 text-[10px] text-success">
+                              <ShieldCheck className="w-3 h-3" />
+                              Verified Client
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          {renderStars(review.rating)}
+                          <span className="text-[10px] text-muted-foreground">{review.date}</span>
+                        </div>
+
+                        <p className="text-xs text-foreground leading-relaxed">
+                          "{review.comment}"
+                        </p>
+
+                        <div className="text-[10px] text-muted-foreground">
+                          Service: <span className="text-primary font-semibold">{getServiceName(review.serviceId)}</span>
+                        </div>
+                      </div>
+
+                      {/* Review Actions */}
+                      <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+                        {review.reviewStatus !== 'approved' && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleServiceReviewAction(review, 'approved')}
+                            className="text-xs py-1 h-auto text-success border-success/40 hover:bg-success/10"
+                          >
+                            <CheckCircle2 className="w-3 h-3 mr-1" />
+                            <span>Approve</span>
+                          </Button>
+                        )}
+                        {review.reviewStatus !== 'rejected' && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleServiceReviewAction(review, 'rejected')}
+                            className="text-xs py-1 h-auto text-destructive border-destructive/40 hover:bg-destructive/10"
+                          >
+                            <XCircle className="w-3 h-3 mr-1" />
+                            <span>Reject</span>
+                          </Button>
+                        )}
+                        {review.reviewStatus !== 'archived' && (
+                          <button
+                            type="button"
+                            onClick={() => handleServiceReviewAction(review, 'archived')}
+                            className="p-1.5 rounded-lg text-muted-foreground hover:text-warning transition-colors"
+                            title="Archive review"
+                          >
+                            <Archive className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteServiceReview(review)}
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive transition-colors"
+                          title="Delete review permanently"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
           )}
         </div>
       )}

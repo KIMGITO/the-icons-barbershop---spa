@@ -1,4 +1,4 @@
-import { BUSINESS_INFO, INITIAL_SERVICES, INITIAL_FAQS } from '../data/initialData';
+import { FAQItem, ServiceItem } from '../types';
 
 export interface SEOProps {
   title?: string;
@@ -8,6 +8,16 @@ export interface SEOProps {
   type?: 'website' | 'article' | 'service' | 'product';
   schemaType?: 'LocalBusiness' | 'Service' | 'FAQPage' | 'Breadcrumbs' | 'Product';
   customSchema?: object;
+  /** Dynamic DB data for structured schemas (no hardcoded fallbacks). */
+  faqs?: FAQItem[];
+  services?: ServiceItem[];
+  businessPhone?: string;
+  businessAddress?: {
+    suite: string;
+    street: string;
+    neighborhood: string;
+    city: string;
+  };
 }
 
 export function updatePageSEO({
@@ -17,7 +27,11 @@ export function updatePageSEO({
   ogImage = 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=1200&auto=format&fit=crop',
   type = 'website',
   schemaType,
-  customSchema
+  customSchema,
+  faqs,
+  services,
+  businessPhone,
+  businessAddress
 }: SEOProps) {
   // Update Title
   const baseTitle = 'The Icons Barber & Spa';
@@ -70,10 +84,11 @@ export function updatePageSEO({
   if (customSchema) {
     structuredData = customSchema;
   } else if (schemaType === 'FAQPage') {
+    // FAQ schema built from live DB data when provided
     structuredData = {
       "@context": "https://schema.org",
       "@type": "FAQPage",
-      "mainEntity": INITIAL_FAQS.map(faq => ({
+      "mainEntity": (faqs || []).map(faq => ({
         "@type": "Question",
         "name": faq.question,
         "acceptedAnswer": {
@@ -83,64 +98,47 @@ export function updatePageSEO({
       }))
     };
   } else {
-    // Default: LocalBusiness / BarberShop Schema
+    // Default: LocalBusiness / BarberShop Schema (dynamic data when available)
     structuredData = {
       "@context": "https://schema.org",
       "@type": ["BarberShop", "HealthAndBeautyBusiness", "LocalBusiness"],
-      "name": BUSINESS_INFO.name,
+      "name": "The Icons Barber & Spa",
       "image": ogImage,
       "description": description || defaultDesc,
       "url": "https://theiconsbarber.co.ke",
-      "telephone": BUSINESS_INFO.phone,
-      "priceRange": "KSh 1,200 - KSh 6,500",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": `${BUSINESS_INFO.address.suite}, ${BUSINESS_INFO.address.street}`,
-        "addressLocality": BUSINESS_INFO.address.neighborhood,
-        "addressRegion": BUSINESS_INFO.address.city,
-        "postalCode": "00100",
-        "addressCountry": "KE"
-      },
+      ...(businessPhone ? { "telephone": businessPhone } : {}),
+      ...(businessAddress ? {
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": `${businessAddress.suite}, ${businessAddress.street}`,
+          "addressLocality": businessAddress.neighborhood,
+          "addressRegion": businessAddress.city,
+          "postalCode": "00100",
+          "addressCountry": "KE"
+        }
+      } : {}),
       "geo": {
         "@type": "GeoCoordinates",
         "latitude": -1.291771,
         "longitude": 36.787682
       },
-      "openingHoursSpecification": [
-        {
-          "@type": "OpeningHoursSpecification",
-          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-          "opens": "07:30",
-          "closes": "20:30"
-        },
-        {
-          "@type": "OpeningHoursSpecification",
-          "dayOfWeek": ["Saturday"],
-          "opens": "07:30",
-          "closes": "21:00"
-        },
-        {
-          "@type": "OpeningHoursSpecification",
-          "dayOfWeek": ["Sunday"],
-          "opens": "09:00",
-          "closes": "19:00"
+      ...(services && services.length > 0 ? {
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "Barber & Spa Grooming Services",
+          "itemListElement": services.map((s, index) => ({
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": s.name,
+              "description": s.shortDescription
+            },
+            "price": s.priceKsh,
+            "priceCurrency": "KES",
+            "position": index + 1
+          }))
         }
-      ],
-      "hasOfferCatalog": {
-        "@type": "OfferCatalog",
-        "name": "Barber & Spa Grooming Services",
-        "itemListElement": INITIAL_SERVICES.map((s, index) => ({
-          "@type": "Offer",
-          "itemOffered": {
-            "@type": "Service",
-            "name": s.name,
-            "description": s.shortDescription
-          },
-          "price": s.priceKsh,
-          "priceCurrency": "KES",
-          "position": index + 1
-        }))
-      }
+      } : {})
     };
   }
 

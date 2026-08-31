@@ -1,47 +1,76 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { 
-  Star, 
-  Heart, 
-  ShoppingBag, 
-  ShieldCheck, 
-  Truck, 
-  Clock, 
-  CheckCircle2, 
-  ArrowRight, 
-  Sparkles, 
-  ChevronRight, 
-  MapPin, 
+import {
+  Star,
+  Heart,
+  ShoppingBag,
+  ShieldCheck,
+  Truck,
+  Clock,
+  CheckCircle2,
+  ArrowRight,
+  Sparkles,
+  ChevronRight,
+  MapPin,
   MessageSquare,
   PackageCheck,
   Award,
   Layers,
-  Sparkle
+  Sparkle,
 } from 'lucide-react';
 import { updatePageSEO } from '../utils/seo';
-import { ProductItem, ServiceItem } from '../types';
+import { ProductItem, ServiceItem, ProductReview } from '../types';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
+import { SafeImage } from '../components/ui/SafeImage';
+import { ReviewForm } from '../components/reviews/ReviewForm';
+import { ReviewList } from '../components/reviews/ReviewList';
+import { reviewService } from '../services/reviewService';
 
 interface ProductDetailPageProps {
   slug: string;
 }
 
-export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) => {
-  const { 
-    products, 
-    services, 
-    navigateTo, 
-    wishlistSlugs, 
-    toggleWishlist, 
-    openPurchaseModal, 
+export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
+  slug,
+}) => {
+  const {
+    products,
+    services,
+    navigateTo,
+    wishlistSlugs,
+    toggleWishlist,
+    openPurchaseModal,
     openBookingModal,
-    businessInfo 
+    businessInfo,
   } = useApp();
 
-  const product = products.find(p => p.slug === slug) || products[0];
-  const [selectedImage, setSelectedImage] = useState<string>(product?.imageUrl || '');
+  const product = products.find((p) => p.slug === slug) || products[0];
+  const [selectedImage, setSelectedImage] = useState<string>(
+    product?.imageUrl || '',
+  );
   const [quantity, setQuantity] = useState<number>(1);
+  const [reviews, setReviews] = useState<ProductReview[]>(
+    product?.reviews || [],
+  );
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsError, setReviewsError] = useState<string | null>(null);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+
+  // Load approved reviews from database
+  useEffect(() => {
+    if (product) {
+      setReviewsLoading(true);
+      setReviewsError(null);
+      reviewService
+        .getProductReviews(product.id)
+        .then((list) => setReviews(list))
+        .catch((err) =>
+          setReviewsError(err.message || 'Failed to load reviews.'),
+        )
+        .finally(() => setReviewsLoading(false));
+    }
+  }, [product?.id]);
 
   // Sync selected image when slug changes
   useEffect(() => {
@@ -51,33 +80,34 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
 
       // JSON-LD Product Schema
       const productSchema = {
-        "@context": "https://schema.org/",
-        "@type": "Product",
-        "name": product.name,
-        "image": [product.imageUrl, ...(product.secondaryImages || [])],
-        "description": product.detailedDescription,
-        "sku": product.id,
-        "brand": {
-          "@type": "Brand",
-          "name": "The Icons Barber & Spa"
+        '@context': 'https://schema.org/',
+        '@type': 'Product',
+        name: product.name,
+        image: [product.imageUrl, ...(product.secondaryImages || [])],
+        description: product.detailedDescription,
+        sku: product.id,
+        brand: {
+          '@type': 'Brand',
+          name: 'The Icons Barber & Spa',
         },
-        "offers": {
-          "@type": "Offer",
-          "url": `https://theiconsbarber.co.ke/products/${product.slug}`,
-          "priceCurrency": "KES",
-          "price": product.priceKsh,
-          "availability": product.availability === 'in-stock' 
-            ? "https://schema.org/InStock" 
-            : product.availability === 'low-stock' 
-            ? "https://schema.org/LimitedAvailability" 
-            : "https://schema.org/OutOfStock",
-          "itemCondition": "https://schema.org/NewCondition"
+        offers: {
+          '@type': 'Offer',
+          url: `https://theiconsbarber.co.ke/products/${product.slug}`,
+          priceCurrency: 'KES',
+          price: product.priceKsh,
+          availability:
+            product.availability === 'in-stock'
+              ? 'https://schema.org/InStock'
+              : product.availability === 'low-stock'
+                ? 'https://schema.org/LimitedAvailability'
+                : 'https://schema.org/OutOfStock',
+          itemCondition: 'https://schema.org/NewCondition',
         },
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": product.rating,
-          "reviewCount": product.reviewCount
-        }
+        aggregateRating: {
+          '@type': 'AggregateRating',
+          ratingValue: product.rating,
+          reviewCount: product.reviewCount,
+        },
       };
 
       updatePageSEO({
@@ -85,8 +115,8 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
         description: `${product.shortDescription} Available for pickup at ${businessInfo.name} ${businessInfo.address.neighborhood} or courier delivery across Kenya.`,
         canonicalUrl: `https://theiconsbarber.co.ke/products/${product.slug}`,
         ogImage: product.imageUrl,
-        type: "product",
-        customSchema: productSchema
+        type: 'product',
+        customSchema: productSchema,
       });
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -111,37 +141,61 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
   const isWishlisted = wishlistSlugs.includes(product.slug);
   const formatKsh = (amount: number) => `KSh ${amount.toLocaleString()}`;
 
+  const handleSubmitReview = async (data: {
+    authorName: string;
+    rating: number;
+    comment: string;
+  }) => {
+    await reviewService.submitProductReview({
+      productId: product.id,
+      authorName: data.authorName,
+      rating: data.rating,
+      comment: data.comment,
+    });
+    setShowReviewForm(false);
+  };
+
   // Find related services
-  const relatedServices: ServiceItem[] = services.filter(s => 
-    product.relatedServiceSlugs?.includes(s.slug)
+  const relatedServices: ServiceItem[] = services.filter((s) =>
+    product.relatedServiceSlugs?.includes(s.slug),
   );
 
   // Find related products
-  const relatedProducts: ProductItem[] = products.filter(p => 
-    p.slug !== product.slug && (product.relatedProductSlugs?.includes(p.slug) || p.category === product.category)
-  ).slice(0, 3);
+  const relatedProducts: ProductItem[] = products
+    .filter(
+      (p) =>
+        p.slug !== product.slug &&
+        (product.relatedProductSlugs?.includes(p.slug) ||
+          p.category === product.category),
+    )
+    .slice(0, 3);
 
   const allImages = [product.imageUrl, ...(product.secondaryImages || [])];
 
   const handleWhatsAppInquiry = () => {
     const text = `Hello The Icons Barber & Spa Concierge, I have an inquiry regarding "${product.name}" (KSh ${product.priceKsh.toLocaleString()}). Is it currently available for immediate studio pickup or dispatch?`;
-    window.open(`https://wa.me/254712345678?text=${encodeURIComponent(text)}`, '_blank');
+    window.open(
+      `https://wa.me/254712345678?text=${encodeURIComponent(text)}`,
+      '_blank',
+    );
   };
 
   return (
     <div className="min-h-screen bg-background text-foreground pt-24 pb-20">
-      
       {/* Breadcrumbs Navigation */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <nav className="flex items-center gap-2 text-xs text-muted-foreground" aria-label="Breadcrumb">
-          <button 
+        <nav
+          className="flex items-center gap-2 text-xs text-muted-foreground"
+          aria-label="Breadcrumb"
+        >
+          <button
             onClick={() => navigateTo('/')}
             className="hover:text-white transition-colors cursor-pointer"
           >
             Home
           </button>
           <ChevronRight className="w-3 h-3 text-muted-foreground" />
-          <button 
+          <button
             onClick={() => navigateTo('/products')}
             className="hover:text-white transition-colors cursor-pointer"
           >
@@ -157,11 +211,9 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
       {/* Main Product Hero / Purchase Showcase */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 mb-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14">
-          
           {/* Left Column: Product Gallery Frame (Matching reference image light neutral container) */}
           <div className="lg:col-span-6 flex flex-col gap-4">
             <div className="relative bg-product-surface rounded-2xl p-8 flex items-center justify-center min-h-[380px] sm:min-h-[460px] border border-white/10 overflow-hidden shadow-2xl">
-              
               {product.badge && (
                 <span className="absolute top-5 left-5 z-10 px-3 py-1 text-xs font-bold tracking-wider uppercase bg-card text-white rounded-sm shadow-md">
                   {product.badge}
@@ -171,18 +223,20 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
               <button
                 onClick={() => toggleWishlist(product.slug)}
                 className={`absolute top-5 right-5 z-10 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer shadow-md ${
-                  isWishlisted 
-                    ? 'bg-primary text-primary-foreground' 
+                  isWishlisted
+                    ? 'bg-primary text-primary-foreground'
                     : 'bg-white/90 hover:bg-white text-gray-700 hover:text-black'
                 }`}
                 aria-label={`Save ${product.name} to wishlist`}
               >
-                <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
+                <Heart
+                  className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`}
+                />
               </button>
 
-              <img 
-                src={selectedImage} 
-                alt={`${product.name} - The Icons Barber and Spa Nairobi`} 
+              <SafeImage
+                src={selectedImage}
+                alt={`${product.name} - The Icons Barber and Spa Nairobi`}
                 className="max-h-[360px] sm:max-h-[400px] w-auto object-contain drop-shadow-xl select-none"
               />
             </div>
@@ -195,10 +249,16 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
                     key={idx}
                     onClick={() => setSelectedImage(img)}
                     className={`w-20 h-20 rounded-xl bg-product-surface p-2 border-2 transition-all cursor-pointer flex items-center justify-center overflow-hidden ${
-                      selectedImage === img ? 'border-primary scale-105' : 'border-white/10 hover:border-white/30'
+                      selectedImage === img
+                        ? 'border-primary scale-105'
+                        : 'border-white/10 hover:border-white/30'
                     }`}
                   >
-                    <img src={img} alt="Thumbnail preview" className="max-h-full max-w-full object-contain" />
+                    <SafeImage
+                      src={img}
+                      alt="Thumbnail preview"
+                      className="max-h-full max-w-full object-contain"
+                    />
                   </button>
                 ))}
               </div>
@@ -231,7 +291,9 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
                     <Star key={i} className="w-4 h-4 fill-current" />
                   ))}
                 </div>
-                <span className="text-sm font-bold text-white">{product.rating}</span>
+                <span className="text-sm font-bold text-white">
+                  {product.rating}
+                </span>
                 <span className="text-xs text-muted-foreground">
                   ({product.reviewCount} verified client reviews)
                 </span>
@@ -243,7 +305,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
                   {formatKsh(product.priceKsh)}
                 </span>
                 {product.originalPriceKsh && (
-                  <span className="text-base text-muted-foreground italic line-through">
+                  <span className="text-base text-primary italic line-through">
                     {formatKsh(product.originalPriceKsh)}
                   </span>
                 )}
@@ -270,7 +332,6 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
                   >
                     <span>Buy / Reserve</span>
                     <ShoppingBag className="w-4 h-4" />
-
                   </Button>
 
                   <Button
@@ -288,7 +349,10 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs text-muted-foreground">
                   <div className="flex items-center gap-2 p-3 bg-card rounded-lg border border-white/5">
                     <MapPin className="w-4 h-4 text-primary shrink-0" />
-                    <span>Pickup ready in  at {businessInfo.name} {businessInfo.address.neighborhood}</span>
+                    <span>
+                      Pickup ready in at {businessInfo.name}{' '}
+                      {businessInfo.address.neighborhood}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 p-3 bg-card rounded-lg border border-white/5">
                     <Truck className="w-4 h-4 text-primary shrink-0" />
@@ -296,7 +360,6 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
                   </div>
                 </div>
               </div>
-
             </div>
 
             {/* Quick Scent / Suitable For summary */}
@@ -310,16 +373,13 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
                 <span>{product.suitableFor}</span>
               </div>
             </div>
-
           </div>
-
         </div>
       </section>
 
       {/* In-Depth Specifications & Ritual Tabs */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-white/10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          
           {/* Detailed Formulation Description */}
           <div className="lg:col-span-7 space-y-8">
             <div>
@@ -357,15 +417,18 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
                 <span>Key Active Botanical Ingredients</span>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {product.specifications.keyIngredients ? product.specifications.keyIngredients.map((ingredient, i) => (
-                   <span>
-                     <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                    <span>{ingredient}</span>
-                   </span>
-                )) : null}
+                {product.specifications.keyIngredients
+                  ? product.specifications.keyIngredients.map(
+                      (ingredient, i) => (
+                        <span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                          <span>{ingredient}</span>
+                        </span>
+                      ),
+                    )
+                  : null}
               </div>
             </div>
-
           </div>
 
           {/* Right Specifications Card */}
@@ -378,23 +441,35 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
               <dl className="space-y-4 text-xs">
                 <div className="flex justify-between py-2 border-b border-white/5">
                   <dt className="text-muted-foreground">Volume / Size</dt>
-                  <dd className="text-white font-medium text-right">{product.specifications.volume}</dd>
+                  <dd className="text-white font-medium text-right">
+                    {product.specifications.volume}
+                  </dd>
                 </div>
                 <div className="flex justify-between py-2 border-b border-white/5">
                   <dt className="text-muted-foreground">Origin & Quality</dt>
-                  <dd className="text-white font-medium text-right">{product.specifications.origin}</dd>
+                  <dd className="text-white font-medium text-right">
+                    {product.specifications.origin}
+                  </dd>
                 </div>
                 <div className="flex justify-between py-2 border-b border-white/5">
                   <dt className="text-muted-foreground">Recommended Usage</dt>
-                  <dd className="text-white font-medium text-right">{product.specifications.usageFrequency}</dd>
+                  <dd className="text-white font-medium text-right">
+                    {product.specifications.usageFrequency}
+                  </dd>
                 </div>
                 <div className="flex justify-between py-2 border-b border-white/5">
                   <dt className="text-muted-foreground">Availability</dt>
-                  <dd className="text-emerald-400 font-bold uppercase text-right">In Stock</dd>
+                  <dd className="text-emerald-400 font-bold uppercase text-right">
+                    In Stock
+                  </dd>
                 </div>
                 <div className="flex justify-between py-2">
-                  <dt className="text-muted-foreground">Cruelty Free & Paraben Free</dt>
-                  <dd className="text-white font-medium text-right">Yes, 100% Certified</dd>
+                  <dt className="text-muted-foreground">
+                    Cruelty Free & Paraben Free
+                  </dt>
+                  <dd className="text-white font-medium text-right">
+                    Yes, 100% Certified
+                  </dd>
                 </div>
               </dl>
             </div>
@@ -405,7 +480,8 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
                 Need Hair or Scalp Guidance?
               </h4>
               <p className="text-xs text-muted-foreground-light mb-4 leading-relaxed">
-                Our master barbers and trichologists provide personalized scalp and hair consultations with every studio visit.
+                Our master barbers and trichologists provide personalized scalp
+                and hair consultations with every studio visit.
               </p>
               <button
                 onClick={() => openBookingModal()}
@@ -414,67 +490,74 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
                 Book Studio Consultation
               </button>
             </div>
-
           </div>
-
         </div>
       </section>
 
       {/* Verified Client Reviews */}
-      {product.reviews && product.reviews.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-white/10">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-heading font-bold text-white">
-                Verified Client Reviews
-              </h2>
-              <p className="text-xs text-muted-foreground mt-1">
-                Real feedback from studio clients 
-              </p>
-            </div>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-white/10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-heading font-bold text-white">
+              Verified Client Reviews
+            </h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              Real feedback from studio clients
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <div className="flex items-center text-primary">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-current" />
+                  <Star
+                    key={i}
+                    className={`w-4 h-4 ${i < Math.round(product.rating) ? 'fill-current' : 'opacity-30'}`}
+                  />
                 ))}
               </div>
-              <span className="text-sm font-bold text-white">{product.rating} / 5.0</span>
+              <span className="text-sm font-bold text-white">
+                {product.rating} / 5.0
+              </span>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowReviewForm(!showReviewForm)}
+              className="text-xs"
+            >
+              {showReviewForm ? 'Hide Review Form' : 'Write a Review'}
+            </Button>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {product.reviews.map((rev) => (
-              <div 
-                key={rev.id}
-                className="bg-card border border-white/10 rounded-xl p-5 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center text-primary">
-                      {[...Array(rev.rating)].map((_, i) => (
-                        <Star key={i} className="w-3.5 h-3.5 fill-current" />
-                      ))}
-                    </div>
-                    <span className="text-[10px] text-muted-foreground">{rev.date}</span>
-                  </div>
-                  <p className="text-xs text-foreground leading-relaxed mb-4">
-                    "{rev.comment}"
-                  </p>
-                </div>
-                <div className="flex items-center justify-between pt-3 border-t border-white/5 text-xs">
-                  <span className="font-semibold text-white">{rev.authorName}</span>
-                  {rev.verifiedPurchase && (
-                    <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400">
-                      <ShieldCheck className="w-3 h-3" />
-                      <span>Verified Client</span>
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
+        {reviewsError && (
+          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-xl text-xs text-destructive mb-4">
+            {reviewsError}
           </div>
-        </section>
-      )}
+        )}
+
+        {showReviewForm && (
+          <div className="mb-8 max-w-xl">
+            <ReviewForm
+              onSubmit={handleSubmitReview}
+              title="Rate This Product"
+              subtitle="Share your experience with this product. Your review will be published after admin approval."
+              submitLabel="Submit Product Review"
+            />
+          </div>
+        )}
+
+        {reviewsLoading ? (
+          <div className="p-8 text-center bg-card border border-white/10 rounded-2xl">
+            <p className="text-xs text-muted-foreground">Loading reviews...</p>
+          </div>
+        ) : (
+          <ReviewList
+            reviews={reviews}
+            emptyMessage="No reviews yet. Be the first to share your experience with this product!"
+          />
+        )}
+      </section>
 
       {/* Related Studio Services (Cross-linking for SEO & Discovery) */}
       {relatedServices.length > 0 && (
@@ -484,7 +567,8 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
               Complementary Studio Services
             </h2>
             <p className="text-xs text-muted-foreground">
-              Services featuring this product or designed to maximize its benefits
+              Services featuring this product or designed to maximize its
+              benefits
             </p>
           </div>
 
@@ -500,7 +584,9 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
                     <span className="text-[10px] font-mono text-primary uppercase tracking-wider">
                       {service.category}
                     </span>
-                    <span className="text-xs text-muted-foreground">{service.durationMinutes} mins</span>
+                    <span className="text-xs text-muted-foreground">
+                      {service.durationMinutes} mins
+                    </span>
                   </div>
                   <h3 className="text-base font-bold text-white group-hover:text-primary transition-colors mb-2">
                     {service.name}
@@ -510,7 +596,9 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
                   </p>
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-white/5">
-                  <span className="text-sm font-bold text-white">KSh {service.priceKsh.toLocaleString()}</span>
+                  <span className="text-sm font-bold text-white">
+                    KSh {service.priceKsh.toLocaleString()}
+                  </span>
                   <span className="text-xs text-primary font-semibold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                     <span>View Service</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -551,21 +639,28 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
                 className="group bg-card border border-white/10 hover:border-primary/50 rounded-xl overflow-hidden cursor-pointer transition-all p-4 flex items-center gap-4"
               >
                 <div className="w-20 h-20 bg-product-surface rounded-lg p-2 flex items-center justify-center shrink-0">
-                  <img src={rel.imageUrl} alt={rel.name} className="max-h-full max-w-full object-contain" />
+                  <SafeImage
+                    src={rel.imageUrl}
+                    alt={rel.name}
+                    className="max-h-full max-w-full object-contain"
+                  />
                 </div>
                 <div className="flex-grow min-w-0">
                   <h4 className="text-sm font-semibold text-white truncate group-hover:text-primary transition-colors">
                     {rel.name}
                   </h4>
-                  <div className="text-xs text-muted-foreground mb-1">{rel.specifications.volume}</div>
-                  <div className="text-sm font-bold text-primary">{formatKsh(rel.priceKsh)}</div>
+                  <div className="text-xs text-muted-foreground mb-1">
+                    {rel.specifications.volume}
+                  </div>
+                  <div className="text-sm font-bold text-primary">
+                    {formatKsh(rel.priceKsh)}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </section>
       )}
-
     </div>
   );
 };

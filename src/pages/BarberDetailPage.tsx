@@ -1,3 +1,4 @@
+import { SafeImage } from '../components/ui/SafeImage';
 import React, { useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { updatePageSEO } from '../utils/seo';
@@ -68,7 +69,7 @@ export const BarberDetailPage: React.FC<BarberDetailPageProps> = ({ slug }) => {
           {/* Left: Big Portrait & Schedule */}
           <div className="md:col-span-5 space-y-6">
             <div className="relative aspect-[3/4] rounded-sm overflow-hidden bg-card border border-border shadow-2xl">
-              <img
+              <SafeImage
                 src={barber.avatarUrl}
                 alt={`${barber.name} - ${barber.title}`}
                 className="w-full h-full object-cover object-top"

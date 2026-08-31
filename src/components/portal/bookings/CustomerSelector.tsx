@@ -25,10 +25,15 @@ export const CustomerSelector: React.FC<CustomerSelectorProps> = ({
   onEmailChange,
   error
 }) => {
-  const { customers } = useCustomerStore();
+  const { customers, loadCustomers } = useCustomerStore();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Load customers from the database when the lookup opens
+  useEffect(() => {
+    if (isOpen) loadCustomers();
+  }, [isOpen, loadCustomers]);
 
   // Close outside
   useEffect(() => {

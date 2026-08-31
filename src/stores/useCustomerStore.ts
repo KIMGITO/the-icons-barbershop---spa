@@ -1,237 +1,181 @@
 import { create } from 'zustand';
 import { CustomerProfile } from '../types';
-
-const INITIAL_CUSTOMERS: CustomerProfile[] = [
-  {
-    id: 'cust-1',
-    name: 'Kiplagat Tanui',
-    email: 'kiplagat.t@gmail.com',
-    phone: '+254722100200',
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop',
-    preferredBarberId: 'barber-1',
-    preferredBarberName: 'Samuel Mwangi',
-    frequentlyBookedServiceNames: ['Classic Icon Haircut', 'Royal Hot Towel Beard Sculpting'],
-    totalVisits: 14,
-    totalSpendKsh: 37800,
-    lastVisitDate: '2026-08-27',
-    notes: 'Prefers low taper fade, eucalyptus scented towel, and Kenyan single-origin black coffee.',
-    tags: ['VIP', 'Executive', 'Regular'],
-    vipStatus: true,
-    createdAt: '2025-09-15',
-  },
-  {
-    id: 'cust-2',
-    name: 'Kelvin Mutiso',
-    email: 'kelvin.mutiso@safari.co.ke',
-    phone: '+254711334455',
-    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300&auto=format&fit=crop',
-    preferredBarberId: 'barber-2',
-    preferredBarberName: 'Eric Omondi',
-    frequentlyBookedServiceNames: ['The CEO Signature Experience'],
-    totalVisits: 8,
-    totalSpendKsh: 44000,
-    lastVisitDate: '2026-08-20',
-    notes: 'CEO at tech startup in Westlands. Always books CEO package on Friday afternoons.',
-    tags: ['VIP', 'Spa Regular'],
-    vipStatus: true,
-    createdAt: '2025-11-04',
-  },
-  {
-    id: 'cust-3',
-    name: 'Dr. Brian Oduor',
-    email: 'brian.oduor@hospital.org',
-    phone: '+254733998877',
-    avatarUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?q=80&w=300&auto=format&fit=crop',
-    preferredBarberId: 'barber-3',
-    preferredBarberName: 'David Kiprono',
-    frequentlyBookedServiceNames: ['Moroccan Scalp Detox & Hair Spa', 'Executive Skin Fade & Taper'],
-    totalVisits: 6,
-    totalSpendKsh: 21600,
-    lastVisitDate: '2026-08-14',
-    notes: 'Sensitive skin. Use antibacterial and non-alcoholic aftershave balm only.',
-    tags: ['Regular', 'Sensitive Skin'],
-    vipStatus: false,
-    createdAt: '2026-01-10',
-  },
-  {
-    id: 'cust-4',
-    name: 'Victor Maina',
-    email: 'victor.m@investments.co.ke',
-    phone: '+254722880011',
-    avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=300&auto=format&fit=crop',
-    preferredBarberId: 'barber-5',
-    preferredBarberName: 'Lucas Vance',
-    frequentlyBookedServiceNames: ['Executive Skin Fade & Taper'],
-    totalVisits: 3,
-    totalSpendKsh: 5400,
-    lastVisitDate: '2026-08-02',
-    notes: 'Likes razor sharp contour lineup.',
-    tags: ['New Client'],
-    vipStatus: false,
-    createdAt: '2026-06-18',
-  },
-  {
-    id: 'cust-5',
-    name: 'James Kariuki',
-    email: 'james.k@lawchambers.co.ke',
-    phone: '+254700554433',
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop',
-    preferredBarberId: 'barber-1',
-    preferredBarberName: 'Samuel Mwangi',
-    frequentlyBookedServiceNames: ['Classic Icon Haircut', 'Gentleman\'s Charcoal Purifying Facial'],
-    totalVisits: 11,
-    totalSpendKsh: 35200,
-    lastVisitDate: '2026-08-25',
-    notes: 'Corporate attorney. Usually buys the Argan Beard Oil at checkout.',
-    tags: ['VIP', 'Product Buyer'],
-    vipStatus: true,
-    createdAt: '2025-10-22',
-  },
-];
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 interface CustomerStore {
   customers: CustomerProfile[];
   searchQuery: string;
   selectedTag: string | 'all';
   selectedCustomer: CustomerProfile | null;
+  loading: boolean;
+  error: string | null;
 
+  loadCustomers: () => Promise<void>;
   setSearchQuery: (query: string) => void;
   setSelectedTag: (tag: string | 'all') => void;
   setSelectedCustomer: (customer: CustomerProfile | null) => void;
 
-  addCustomer: (customer: Omit<CustomerProfile, 'id' | 'createdAt' | 'totalVisits' | 'totalSpendKsh'>) => CustomerProfile;
-  updateCustomer: (id: string, updates: Partial<CustomerProfile>) => void;
-  deleteCustomer: (id: string) => void;
-  addVisitRecord: (customerId: string, spendKsh: number, serviceName: string, date: string) => void;
+  addCustomer: (customer: Omit<CustomerProfile, 'id' | 'createdAt' | 'totalVisits' | 'totalSpendKsh'>) => Promise<CustomerProfile>;
+  updateCustomer: (id: string, updates: Partial<CustomerProfile>) => Promise<void>;
+  deleteCustomer: (id: string) => Promise<void>;
+  addVisitRecord: (customerId: string, spendKsh: number, serviceName: string, date: string) => Promise<void>;
 
   getFilteredCustomers: () => CustomerProfile[];
   getCustomerById: (id: string) => CustomerProfile | undefined;
 }
 
-export const useCustomerStore = create<CustomerStore>((set, get) => {
-  const savedCustomers = (() => {
-    try {
-      const item = localStorage.getItem('theicons_customers');
-      return item ? JSON.parse(item) : INITIAL_CUSTOMERS;
-    } catch {
-      return INITIAL_CUSTOMERS;
-    }
-  })();
-
-  return {
-    customers: savedCustomers,
-    searchQuery: '',
-    selectedTag: 'all',
-    selectedCustomer: null,
-
-    setSearchQuery: (query) => set({ searchQuery: query }),
-    setSelectedTag: (tag) => set({ selectedTag: tag }),
-    setSelectedCustomer: (customer) => set({ selectedCustomer: customer }),
-
-    addCustomer: (data) => {
-      const newCustomer: CustomerProfile = {
-        ...data,
-        id: `cust-${Date.now()}`,
-        totalVisits: 1,
-        totalSpendKsh: 0,
-        createdAt: new Date().toISOString().split('T')[0],
-      };
-
-      set((state) => {
-        const updated = [newCustomer, ...state.customers];
-        try {
-          localStorage.setItem('theicons_customers', JSON.stringify(updated));
-        } catch {
-          // ignore
-        }
-        return { customers: updated };
-      });
-
-      return newCustomer;
-    },
-
-    updateCustomer: (id, updates) => {
-      set((state) => {
-        const updated = state.customers.map((c) => (c.id === id ? { ...c, ...updates } : c));
-        try {
-          localStorage.setItem('theicons_customers', JSON.stringify(updated));
-        } catch {
-          // ignore
-        }
-        const updatedSelected = state.selectedCustomer?.id === id 
-          ? { ...state.selectedCustomer, ...updates } 
-          : state.selectedCustomer;
-        return { customers: updated, selectedCustomer: updatedSelected };
-      });
-    },
-
-    deleteCustomer: (id) => {
-      set((state) => {
-        const updated = state.customers.filter((c) => c.id !== id);
-        try {
-          localStorage.setItem('theicons_customers', JSON.stringify(updated));
-        } catch {
-          // ignore
-        }
-        return { 
-          customers: updated, 
-          selectedCustomer: state.selectedCustomer?.id === id ? null : state.selectedCustomer 
-        };
-      });
-    },
-
-    addVisitRecord: (customerId, spendKsh, serviceName, date) => {
-      set((state) => {
-        const updated = state.customers.map((c) => {
-          if (c.id === customerId) {
-            const currentServices = c.frequentlyBookedServiceNames || [];
-            const updatedServices = currentServices.includes(serviceName)
-              ? currentServices
-              : [...currentServices, serviceName];
-            return {
-              ...c,
-              totalVisits: c.totalVisits + 1,
-              totalSpendKsh: c.totalSpendKsh + spendKsh,
-              lastVisitDate: date,
-              frequentlyBookedServiceNames: updatedServices,
-            };
-          }
-          return c;
-        });
-        try {
-          localStorage.setItem('theicons_customers', JSON.stringify(updated));
-        } catch {
-          // ignore
-        }
-        return { customers: updated };
-      });
-    },
-
-    getFilteredCustomers: () => {
-      const { customers, searchQuery, selectedTag } = get();
-      return customers.filter((c) => {
-        if (selectedTag !== 'all') {
-          if (selectedTag === 'VIP' && !c.vipStatus) return false;
-          if (selectedTag !== 'VIP' && (!c.tags || !c.tags.includes(selectedTag))) return false;
-        }
-
-        if (searchQuery.trim()) {
-          const q = searchQuery.toLowerCase();
-          const matchName = c.name.toLowerCase().includes(q);
-          const matchPhone = c.phone.includes(q);
-          const matchEmail = c.email.toLowerCase().includes(q);
-          const matchBarber = c.preferredBarberName?.toLowerCase().includes(q);
-          if (!matchName && !matchPhone && !matchEmail && !matchBarber) {
-            return false;
-          }
-        }
-
-        return true;
-      });
-    },
-
-    getCustomerById: (id) => {
-      return get().customers.find((c) => c.id === id);
-    },
-  };
+const mapDbCustomer = (row: any): CustomerProfile => ({
+  id: row.id,
+  name: row.name,
+  email: row.email || '',
+  phone: row.phone || '',
+  avatarUrl: row.avatar_url || '',
+  preferredBarberId: row.preferred_provider_id || undefined,
+  preferredBarberName: row.preferred_provider_name || undefined,
+  frequentlyBookedServiceNames: row.frequently_booked_services || [],
+  totalVisits: row.total_visits || 0,
+  totalSpendKsh: Number(row.total_spend_ksh || 0),
+  lastVisitDate: row.last_visit_date || undefined,
+  notes: row.notes,
+  tags: row.tags || [],
+  vipStatus: row.vip_status || false,
+  createdAt: row.created_at
 });
+
+export const useCustomerStore = create<CustomerStore>((set, get) => ({
+  customers: [],
+  searchQuery: '',
+  selectedTag: 'all',
+  selectedCustomer: null,
+  loading: false,
+  error: null,
+
+  loadCustomers: async () => {
+    if (!isSupabaseConfigured) return;
+    set({ loading: true, error: null });
+    try {
+      const { data, error } = await supabase
+        .from('customers')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(200);
+      if (error) throw new Error(error.message);
+      set({ customers: (data || []).map(mapDbCustomer), loading: false });
+    } catch (err: any) {
+      set({ error: err.message, loading: false });
+    }
+  },
+
+  setSearchQuery: (query) => set({ searchQuery: query }),
+  setSelectedTag: (tag) => set({ selectedTag: tag }),
+  setSelectedCustomer: (customer) => set({ selectedCustomer: customer }),
+
+  addCustomer: async (data) => {
+    if (!isSupabaseConfigured) throw new Error('Supabase not configured.');
+    const { data: created, error } = await supabase
+      .from('customers')
+      .insert({
+        name: data.name,
+        email: data.email || null,
+        phone: data.phone,
+        avatar_url: data.avatarUrl || null,
+        preferred_provider_id: data.preferredBarberId || null,
+        preferred_provider_name: data.preferredBarberName || null,
+        notes: data.notes || null,
+        tags: data.tags || [],
+        vip_status: data.vipStatus || false,
+        total_visits: 1
+      })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+
+    const newCustomer = mapDbCustomer(created);
+    set(state => ({ customers: [newCustomer, ...state.customers] }));
+    return newCustomer;
+  },
+
+  updateCustomer: async (id, updates) => {
+    if (!isSupabaseConfigured) return;
+    const db: any = {};
+    if (updates.name !== undefined) db.name = updates.name;
+    if (updates.email !== undefined) db.email = updates.email;
+    if (updates.phone !== undefined) db.phone = updates.phone;
+    if (updates.avatarUrl !== undefined) db.avatar_url = updates.avatarUrl;
+    if (updates.preferredBarberId !== undefined) db.preferred_provider_id = updates.preferredBarberId;
+    if (updates.preferredBarberName !== undefined) db.preferred_provider_name = updates.preferredBarberName;
+    if (updates.frequentlyBookedServiceNames !== undefined) db.frequently_booked_services = updates.frequentlyBookedServiceNames;
+    if (updates.totalVisits !== undefined) db.total_visits = updates.totalVisits;
+    if (updates.totalSpendKsh !== undefined) db.total_spend_ksh = updates.totalSpendKsh;
+    if (updates.lastVisitDate !== undefined) db.last_visit_date = updates.lastVisitDate;
+    if (updates.notes !== undefined) db.notes = updates.notes;
+    if (updates.tags !== undefined) db.tags = updates.tags;
+    if (updates.vipStatus !== undefined) db.vip_status = updates.vipStatus;
+
+    const { data: updated, error } = await supabase
+      .from('customers')
+      .update(db)
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+
+    const mapped = mapDbCustomer(updated);
+    set(state => ({
+      customers: state.customers.map(c => c.id === id ? mapped : c),
+      selectedCustomer: state.selectedCustomer?.id === id ? mapped : state.selectedCustomer
+    }));
+  },
+
+  deleteCustomer: async (id) => {
+    if (!isSupabaseConfigured) return;
+    const { error } = await supabase.from('customers').delete().eq('id', id);
+    if (error) throw new Error(error.message);
+    set(state => ({
+      customers: state.customers.filter(c => c.id !== id),
+      selectedCustomer: state.selectedCustomer?.id === id ? null : state.selectedCustomer
+    }));
+  },
+
+  addVisitRecord: async (customerId, spendKsh, serviceName, date) => {
+    const customer = get().customers.find(c => c.id === customerId);
+    if (!customer) return;
+    const currentServices = customer.frequentlyBookedServiceNames || [];
+    const updatedServices = currentServices.includes(serviceName)
+      ? currentServices
+      : [...currentServices, serviceName];
+    await get().updateCustomer(customerId, {
+      totalVisits: customer.totalVisits + 1,
+      totalSpendKsh: customer.totalSpendKsh + spendKsh,
+      lastVisitDate: date,
+      frequentlyBookedServiceNames: updatedServices
+    });
+  },
+
+  getFilteredCustomers: () => {
+    const { customers, searchQuery, selectedTag } = get();
+    return customers.filter((c) => {
+      if (selectedTag !== 'all') {
+        if (selectedTag === 'VIP' && !c.vipStatus) return false;
+        if (selectedTag !== 'VIP' && (!c.tags || !c.tags.includes(selectedTag))) return false;
+      }
+
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchName = c.name.toLowerCase().includes(q);
+        const matchPhone = c.phone.includes(q);
+        const matchEmail = c.email.toLowerCase().includes(q);
+        const matchBarber = c.preferredBarberName?.toLowerCase().includes(q);
+        if (!matchName && !matchPhone && !matchEmail && !matchBarber) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  },
+
+  getCustomerById: (id) => {
+    return get().customers.find((c) => c.id === id);
+  },
+}));

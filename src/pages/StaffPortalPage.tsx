@@ -9,6 +9,7 @@ import { ProvidersPage } from '../components/portal/providers/ProvidersPage';
 import { ServicesManagementPage } from '../components/portal/services/ServicesManagementPage';
 import { ProductsManagementPage } from '../components/portal/products/ProductsManagementPage';
 import { BusinessManagementPage } from '../components/portal/business/BusinessManagementPage';
+import { ReceiptLookup } from '../components/portal/receipts/ReceiptLookup';
 import { StaffProfileView } from '../components/portal/staff/StaffProfileView';
 import { StaffScheduleView } from '../components/portal/staff/StaffScheduleView';
 import { MessagesDashboard } from '../components/portal/messages/MessagesDashboard';
@@ -63,6 +64,8 @@ export const StaffPortalPage: React.FC<StaffPortalPageProps> = ({ onExitToPublic
         return role === 'admin' ? <BusinessManagementPage /> : <PortalOverview onNavigateTab={(t) => setCurrentTab(t)} />;
       case 'schedule':
         return <StaffScheduleView />;
+      case 'receipts':
+        return <ReceiptLookup />;
       case 'profile':
         return <StaffProfileView />;
       default:

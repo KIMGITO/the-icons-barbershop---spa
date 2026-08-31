@@ -51,6 +51,17 @@ export interface ProductReview {
   productId?: string;
 }
 
+export interface ServiceReview {
+  id: string;
+  serviceId?: string;
+  authorName: string;
+  rating: number; // 1-5
+  date: string;
+  comment: string;
+  verifiedPurchase: boolean;
+  reviewStatus?: 'pending' | 'approved' | 'rejected' | 'archived';
+}
+
 export interface ProductItem {
   id: string;
   slug: string;

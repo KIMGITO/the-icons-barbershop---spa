@@ -1,3 +1,4 @@
+import { SafeImage } from './ui/SafeImage';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
 import { ServiceCategory, ServiceItem } from '../types';
@@ -177,7 +178,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
                 >
                   {/* High Quality Service Image */}
                   <div className="relative aspect-[16/10] w-full overflow-hidden bg-secondary">
-                    <img
+                    <SafeImage
                       src={service.imageUrl}
                       alt={`${service.name} at The Icons Barber & Spa Nairobi`}
                       className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
@@ -326,7 +327,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
                 >
                   {/* High Quality Rounded Image (matching reference 16:10 / 4:3 rounded look) */}
                   <div className="relative aspect-[16/10] sm:aspect-[4/3] w-full rounded-xl overflow-hidden bg-secondary mb-4">
-                    <img
+                    <SafeImage
                       src={service.imageUrl}
                       alt={service.name}
                       className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"

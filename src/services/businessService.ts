@@ -1,6 +1,5 @@
 import { StaffBusinessProfile } from '../types/staff';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import { BUSINESS_INFO } from '../data/initialData';
 
 const BUSINESS_STORAGE_KEY = 'theicons_business_info';
 
@@ -14,13 +13,13 @@ const mapDbBusiness = (row: any): StaffBusinessProfile => ({
   city: row.city || '',
   locationDetails: row.location_details || '',
   openingHours: {
-    weekdays: row.opening_hours?.weekdays || BUSINESS_INFO.hours.weekdays,
-    saturday: row.opening_hours?.saturday || BUSINESS_INFO.hours.saturday,
-    sunday: row.opening_hours?.sunday || BUSINESS_INFO.hours.sunday
+    weekdays: row.opening_hours?.weekdays || '',
+    saturday: row.opening_hours?.saturday || '',
+    sunday: row.opening_hours?.sunday || ''
   },
   socialLinks: {
-    whatsapp: row.social_links?.whatsapp || BUSINESS_INFO.whatsapp,
-    instagram: row.social_links?.instagram || '@theiconsbarber.ke',
+    whatsapp: row.social_links?.whatsapp || '',
+    instagram: row.social_links?.instagram || '',
     facebook: row.social_links?.facebook || ''
   },
   logoUrl: row.logo_url || '',
@@ -33,38 +32,7 @@ export const businessService = {
    */
   async getBusinessProfile(): Promise<StaffBusinessProfile> {
     if (!isSupabaseConfigured) {
-      await new Promise(r => setTimeout(r, 150));
-      try {
-        const raw = localStorage.getItem(BUSINESS_STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && parsed.name) return parsed;
-        }
-      } catch {}
-      const fallback = {
-        name: BUSINESS_INFO.name,
-        description: BUSINESS_INFO.tagline,
-        phone: BUSINESS_INFO.phoneDisplay,
-        email: BUSINESS_INFO.email,
-        address: `${BUSINESS_INFO.address.street}, ${BUSINESS_INFO.address.suite}`,
-        neighborhood: BUSINESS_INFO.address.neighborhood,
-        city: BUSINESS_INFO.address.city,
-        locationDetails: "Located at Four Ways Village on Kiambu Road. Convenient executive parking and private penthouse access.",
-        openingHours: {
-          weekdays: BUSINESS_INFO.hours.weekdays,
-          saturday: BUSINESS_INFO.hours.saturday,
-          sunday: BUSINESS_INFO.hours.sunday
-        },
-        socialLinks: {
-          whatsapp: BUSINESS_INFO.whatsapp,
-          instagram: "@theiconsbarber.ke",
-          facebook: "The Icons Barber & Spa Nairobi"
-        },
-        logoUrl: "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=400&auto=format&fit=crop",
-        coverImageUrl: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=1200&auto=format&fit=crop"
-      };
-      localStorage.setItem(BUSINESS_STORAGE_KEY, JSON.stringify(fallback));
-      return fallback;
+      throw new Error('Supabase not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env');
     }
 
     const { data, error } = await supabase.from('businesses').select('*').maybeSingle();

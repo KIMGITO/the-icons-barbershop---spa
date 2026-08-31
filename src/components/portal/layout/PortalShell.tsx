@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { 
   LayoutDashboard, Calendar, Scissors, Users, Building2, 
   User, Clock, LogOut, ExternalLink, Menu, X, Sparkles, 
-  ChevronRight, ArrowLeftRight, MessageSquare, Package 
+  ChevronRight, ArrowLeftRight, MessageSquare, Package, ReceiptText 
 } from 'lucide-react';
 import { useAuthStore } from '../../../stores/authStore';
-import { SEEDED_STAFF_ACCOUNTS } from '../../../services/authService';
+// import { SEEDED_STAFF_ACCOUNTS } from '../../../services/authService';
 import { Badge } from '../../ui/Badge';
 import { ToastContainer } from '../notifications/ToastContainer';
 
@@ -22,7 +22,7 @@ export const PortalShell: React.FC<PortalShellProps> = ({
   onExitToPublicWebsite,
   children
 }) => {
-  const { user, role, logout, switchAccount } = useAuthStore();
+  const { user, role, logout } = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [roleSwitcherOpen, setRoleSwitcherOpen] = useState(false);
 
@@ -34,6 +34,7 @@ export const PortalShell: React.FC<PortalShellProps> = ({
     { id: 'providers', label: 'Providers', icon: Users },
     { id: 'services', label: 'Services & Pricing', icon: Scissors },
     { id: 'products', label: 'Products & Reviews', icon: Package },
+    { id: 'receipts', label: 'Receipts & Schedules', icon: ReceiptText },
     { id: 'messages', label: 'SMS Messages', icon: MessageSquare },
     { id: 'business', label: 'Business Profile', icon: Building2 },
   ];
@@ -41,7 +42,9 @@ export const PortalShell: React.FC<PortalShellProps> = ({
   const providerNav = [
     { id: 'overview', label: 'Station Overview', icon: LayoutDashboard },
     { id: 'bookings', label: 'My Bookings', icon: Clock },
+    { id: 'calendar', label: 'Calendar', icon: Calendar },
     { id: 'schedule', label: 'My Schedule', icon: Calendar },
+    { id: 'receipts', label: 'Receipts & Schedules', icon: ReceiptText },
     { id: 'profile', label: 'My Profile', icon: User },
   ];
 
@@ -113,7 +116,7 @@ export const PortalShell: React.FC<PortalShellProps> = ({
                 <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-2 py-1">
                   Switch Active Role
                 </div>
-                {SEEDED_STAFF_ACCOUNTS.map((acc) => (
+                {/* {SEEDED_STAFF_ACCOUNTS.map((acc) => (
                   <button
                     key={acc.id}
                     type="button"
@@ -132,7 +135,7 @@ export const PortalShell: React.FC<PortalShellProps> = ({
                       <span className="w-2 h-2 rounded-full bg-primary" />
                     )}
                   </button>
-                ))}
+                ))} */}
               </div>
             )}
           </div>

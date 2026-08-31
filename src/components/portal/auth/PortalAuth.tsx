@@ -12,7 +12,6 @@ import {
   UserCheck,
 } from 'lucide-react';
 import { useAuthStore } from '../../../stores/authStore';
-import { SEEDED_STAFF_ACCOUNTS } from '../../../services/authService';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 
@@ -42,7 +41,7 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({
   const [confirmPassword, setConfirmPassword] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [resetToken, setResetToken] = useState('demo-token');
+  const [resetToken, setResetToken] = useState('');
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -78,21 +77,6 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({
     } catch (err: any) {
       setFeedbackMessage(err.message || 'Failed to update password.');
     }
-  };
-
-  const handleQuickLogin = async (demoEmail: string, demoPass: string) => {
-    setEmail(demoEmail);
-    setPassword(demoPass);
-    clearError();
-    setFeedbackMessage(null);
-    const ok = await login(demoEmail, demoPass);
-    if (!ok) return;
-    const { user } = useAuthStore.getState();
-    if (user?.mustChangePassword) {
-      setForcedChange(true);
-      return;
-    }
-    if (onSuccess) onSuccess();
   };
 
   const handleForgot = async (e: React.FormEvent) => {
@@ -423,32 +407,6 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({
             </div>
           </form>
         )}
-
-        {/* Demo Fast-Login Bar (Convenient testing for evaluation of both Admin and Service Provider roles) */}
-        <div className="pt-3 border-t border-border space-y-2">
-          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-            <span className="font-bold uppercase tracking-wider text-[10px]">
-              Demo Role
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1  gap-2">
-            <button
-              type="button"
-              onClick={() =>
-                handleQuickLogin('admin@theicons.co.ke', 'Admin@123')
-              }
-              className="p-2 rounded-xl bg-muted/40 hover:bg-muted border border-border text-left transition-all group"
-            >
-              <div className="text-[11px] font-bold text-foreground group-hover:text-primary">
-                Executive Manager
-              </div>
-              <div className="text-[10px] text-muted-foreground font-mono">
-                Role: Admin
-              </div>
-            </button>
-          </div>
-        </div>
 
         {/* Public Website Exit link */}
         {onExitPortal && (

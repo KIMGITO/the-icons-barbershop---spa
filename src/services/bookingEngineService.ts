@@ -58,7 +58,7 @@ export const bookingEngineService = {
    * Create a booking atomically with full availability validation.
    */
   async createBooking(payload: {
-    customerId: string;
+    customerId?: string | null;
     serviceId: string;
     desiredStartTs: string;
     preferredStaffIds?: string[];
@@ -74,7 +74,7 @@ export const bookingEngineService = {
       return { success: false, error: 'Supabase not configured' };
     }
     const { data, error } = await supabase.rpc('check_and_reserve', {
-      p_customer_id: payload.customerId,
+      p_customer_id: payload.customerId || null,
       p_service_id: payload.serviceId,
       p_desired_start_ts: payload.desiredStartTs,
       p_preferred_staff_ids: payload.preferredStaffIds || null,

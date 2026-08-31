@@ -1,7 +1,29 @@
 import React from 'react';
-import { WHY_CHOOSE_THE_ICONS } from '../data/initialData';
 import { ShieldCheck, Sparkles, Coffee, CalendarCheck } from 'lucide-react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
+
+const WHY_CHOOSE_THE_ICONS = [
+  {
+    title: "Master Barbers & Artisans",
+    subtitle: "Precision Over Speed",
+    description: "Our groomers are certified artisans with a minimum of 6 years of elite salon and barbershop experience, constantly trained in contemporary precision fades, beard geometry, and trichology."
+  },
+  {
+    title: "Hospital-Grade Sterilization",
+    subtitle: "Absolute Hygiene Standard",
+    description: "Every clipper guard and shear undergoes multi-stage medical sterilization. All straight razor blades are 100% single-use and unsealed right in front of you."
+  },
+  {
+    title: "Executive Private Suites",
+    subtitle: "Sanctuary of Tranquility",
+    description: "Escape the noise of generic walk-in shops. Enjoy ergonomic Italian leather grooming chairs, acoustic dampening, personal entertainment, and complimentary barista espresso."
+  },
+  {
+    title: "Guaranteed Zero-Wait Booking",
+    subtitle: "Respect For Your Time",
+    description: "Your reserved chair is prepped and waiting the moment you step through our doors. Seamless digital scheduling ensures punctual, unhurried service from start to finish."
+  }
+];
 
 export const WhyChooseUs: React.FC = () => {
   const icons = [Sparkles, ShieldCheck, Coffee, CalendarCheck];

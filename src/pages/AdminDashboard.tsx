@@ -84,8 +84,8 @@ export const AdminDashboard: React.FC = () => {
       fullDescription: newServiceDesc,
       durationMinutes: Number(newServiceDuration),
       priceKsh: Number(newServicePrice),
-      features: ['Standard precision grooming', 'Hot towel finish', 'Sterilized implements'],
-      imageUrl: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=800&auto=format&fit=crop'
+      features: [],
+      imageUrl: ''
     });
     setIsNewServiceModalOpen(false);
     setNewServiceName('');

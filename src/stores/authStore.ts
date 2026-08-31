@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { StaffUser, StaffSession, PortalRole } from '../types/staff';
-import { authService, SEEDED_STAFF_ACCOUNTS } from '../services/authService';
+import { authService } from '../services/authService';
 
 interface AuthState {
   user: StaffUser | null;
@@ -17,7 +17,6 @@ interface AuthState {
   forgotPassword: (email: string) => Promise<{ success: boolean; message: string }>;
   resetPassword: (token: string, newPassword: string) => Promise<{ success: boolean; message: string }>;
   changePassword: (newPassword: string) => Promise<void>;
-  switchAccount: (email: string) => Promise<void>;
   clearError: () => void;
 }
 
@@ -96,23 +95,6 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch (err: any) {
       set({ loading: false, error: err.message || 'Failed to update password.' });
       throw err;
-    }
-  },
-
-  switchAccount: async (email: string) => {
-    const account = SEEDED_STAFF_ACCOUNTS.find(a => a.email.toLowerCase() === email.toLowerCase());
-    if (account) {
-      await authService.login(account.email, account.passwordHash);
-      const session = await authService.getCurrentSession();
-      if (session) {
-        set({
-          session,
-          user: session.user,
-          role: session.user.role,
-          isAuthenticated: true,
-          error: null
-        });
-      }
     }
   },
 

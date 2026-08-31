@@ -24,7 +24,29 @@ import { serviceService } from '../services/serviceService';
 import { providerService } from '../services/providerService';
 import { businessService } from '../services/businessService';
 import { categoryService } from '../services/categoryService';
-import { BUSINESS_INFO } from '../data/initialData';
+const DEFAULT_EMPTY_BUSINESS_INFO: BusinessInfo = {
+  name: '',
+  tagline: '',
+  address: {
+    street: '',
+    suite: '',
+    neighborhood: '',
+    city: '',
+    country: '',
+    mapsEmbedUrl: '',
+    directionsUrl: ''
+  },
+  phone: '',
+  phoneDisplay: '',
+  whatsapp: '',
+  whatsappUrl: '',
+  email: '',
+  hours: {
+    weekdays: '09:00 AM – 06:00 PM',
+    saturday: '09:00 AM – 06:00 PM',
+    sunday: 'Closed'
+  }
+};
 
 interface AppContextType {
   services: ServiceItem[];
@@ -84,7 +106,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [faqs, setFaqs] = useState<FAQItem[]>([]);
   const [customers, setCustomers] = useState<CustomerProfile[]>([]);
   const [bookings, setBookings] = useState<BookingRecord[]>([]);
-  const [businessInfo, setBusinessInfo] = useState<BusinessInfo>(BUSINESS_INFO);
+  const [businessInfo, setBusinessInfo] = useState<BusinessInfo>(DEFAULT_EMPTY_BUSINESS_INFO);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

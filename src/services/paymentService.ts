@@ -67,17 +67,7 @@ export const paymentService = {
     }
 
     if (!isSupabaseConfigured) {
-      // Simulated for local dev without Supabase
-      await new Promise(r => setTimeout(r, 1200));
-      const randomReceipt = `ICN${Math.random().toString(36).substring(2, 6).toUpperCase()}${Math.floor(1000 + Math.random() * 9000)}`;
-      const checkoutRequestId = `ws_CO_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
-      return {
-        success: true,
-        checkoutRequestId,
-        receiptNumber: randomReceipt,
-        amountKsh: request.amountKsh,
-        message: `M-Pesa STK push prompt dispatched to ${phoneCheck.formatted}. Customer enters M-Pesa PIN to complete payment of KSh ${request.amountKsh.toLocaleString()}.`
-      };
+      throw new Error('Supabase not configured. M-Pesa payments are unavailable.');
     }
 
     try {
@@ -111,19 +101,6 @@ export const paymentService = {
         message: data.message || 'M-Pesa STK push initiated successfully.'
       };
     } catch (err: any) {
-      // If edge function not deployed or returns error, fall back to simulated for demo
-      if (err.message?.includes('Failed to fetch') || err.message?.includes('not configured')) {
-        console.warn('M-Pesa edge function unavailable, using simulation:', err.message);
-        await new Promise(r => setTimeout(r, 800));
-        const randomReceipt = `ICN${Math.random().toString(36).substring(2, 6).toUpperCase()}${Math.floor(1000 + Math.random() * 9000)}`;
-        return {
-          success: true,
-          checkoutRequestId: `ws_CO_${Date.now()}_${Math.floor(Math.random() * 100000)}`,
-          receiptNumber: randomReceipt,
-          amountKsh: request.amountKsh,
-          message: `M-Pesa STK push prompt dispatched to ${phoneCheck.formatted}. Customer enters M-Pesa PIN to complete payment.`
-        };
-      }
       throw err;
     }
   },
@@ -162,11 +139,7 @@ export const paymentService = {
    */
   async checkPaymentStatus(checkoutRequestId: string): Promise<{ completed: boolean; receiptNumber: string; status?: string }> {
     if (!isSupabaseConfigured) {
-      await new Promise(r => setTimeout(r, 800));
-      return {
-        completed: true,
-        receiptNumber: `MP-${checkoutRequestId.substring(checkoutRequestId.length - 8).toUpperCase()}`
-      };
+      throw new Error('Supabase not configured. Payment status is unavailable.');
     }
 
     try {
@@ -187,13 +160,8 @@ export const paymentService = {
         receiptNumber: data.receiptNumber || '',
         status: data.status
       };
-    } catch {
-      // Fallback simulation for local dev without edge function
-      await new Promise(r => setTimeout(r, 800));
-      return {
-        completed: true,
-        receiptNumber: `MP-${checkoutRequestId.substring(checkoutRequestId.length - 8).toUpperCase()}`
-      };
+    } catch (err: any) {
+      throw err;
     }
   }
 };

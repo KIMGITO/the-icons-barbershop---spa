@@ -1,3 +1,4 @@
+import { SafeImage } from './ui/SafeImage';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
 import { ServiceItem, BarberProfile } from '../types';
@@ -527,7 +528,7 @@ export const BookingModal: React.FC = () => {
       ).toISOString();
 
       const result = await bookingEngineService.createBooking({
-        customerId: '00000000-0000-0000-0000-000000000000', // guest booking
+        customerId: null,
         serviceId: selectedServiceIds[0],
         desiredStartTs,
         preferredStaffIds: [resolvedProvider.id],
@@ -868,14 +869,10 @@ export const BookingModal: React.FC = () => {
                             : 'cursor-pointer bg-background border-border hover:border-border-strong'
                       }`}
                     >
-                      <img
+                      <SafeImage
                         src={barber.avatarUrl}
                         alt={barber.name}
                         className="w-12 h-12 rounded-sm object-cover border border-border-strong flex-shrink-0"
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).src =
-                            'https://images.unsplash.com/photo-1599351431613-18ef1fdd27e1?w=500&auto=format&fit=crop&q=60';
-                        }}
                       />
                       <div className="flex-1 min-w-0">
                         <h4 className="text-xs sm:text-sm font-bold text-white truncate">

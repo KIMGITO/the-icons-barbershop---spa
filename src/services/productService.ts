@@ -1,9 +1,6 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { ProductItem, ProductReview } from '../types';
 
-const PRODUCTS_STORAGE_KEY = 'theicons_products';
-const REVIEWS_STORAGE_KEY = 'theicons_product_reviews';
-
 const mapDbProduct = (row: any): ProductItem => ({
   id: row.id,
   slug: row.slug,
@@ -47,13 +44,7 @@ export const productService = {
    * Fetch all active products from the database (public-facing)
    */
   async getProducts(includeReviews: boolean = false): Promise<ProductItem[]> {
-    if (!isSupabaseConfigured) {
-      try {
-        const raw = localStorage.getItem(PRODUCTS_STORAGE_KEY);
-        if (raw) return JSON.parse(raw);
-      } catch {}
-      return [];
-    }
+    if (!isSupabaseConfigured) return [];
 
     const { data, error } = await supabase.from('products').select('*').order('name');
     if (error) throw new Error(error.message);

@@ -1,3 +1,4 @@
+import { SafeImage } from './ui/SafeImage';
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
@@ -185,7 +186,7 @@ export const ProductPurchaseModal: React.FC = () => {
             {/* Selected Product Summary Card */}
             <div className="flex items-center gap-4 bg-secondary border border-white/10 rounded-xl p-3.5 mb-6">
               <div className="w-16 h-16 rounded-lg bg-product-surface p-1.5 flex items-center justify-center shrink-0">
-                <img 
+                <SafeImage 
                   src={activeProduct.imageUrl} 
                   alt={activeProduct.name} 
                   className="max-h-full max-w-full object-contain"

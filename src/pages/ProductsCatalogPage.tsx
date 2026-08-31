@@ -1,3 +1,4 @@
+import { SafeImage } from '../components/ui/SafeImage';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import {
@@ -210,7 +211,7 @@ export const ProductsCatalogPage: React.FC = () => {
                     onClick={() => navigateTo(`/products/${product.slug}`)}
                     className="absolute inset-0 w-full h-full cursor-pointer overflow-hidden"
                   >
-                    <img
+                    <SafeImage
                       src={product.imageUrl}
                       alt={product.name}
                       className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 select-none"

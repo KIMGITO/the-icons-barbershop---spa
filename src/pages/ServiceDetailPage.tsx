@@ -1,9 +1,14 @@
-import React, { useEffect } from 'react';
+import { SafeImage } from '../components/ui/SafeImage';
+import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { updatePageSEO } from '../utils/seo';
-import { Clock, Calendar, Check, ArrowLeft, Shield, User, ArrowRight } from 'lucide-react';
+import { Clock, Calendar, Check, ArrowLeft, Shield, User, ArrowRight, Star } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
+import { ReviewForm } from '../components/reviews/ReviewForm';
+import { ReviewList } from '../components/reviews/ReviewList';
+import { reviewService } from '../services/reviewService';
+import { ServiceReview } from '../types';
 
 interface ServiceDetailPageProps {
   slug: string;
@@ -12,6 +17,22 @@ interface ServiceDetailPageProps {
 export const ServiceDetailPage: React.FC<ServiceDetailPageProps> = ({ slug }) => {
   const { services, openBookingModal, navigateTo, barbers, businessInfo } = useApp();
   const service = services.find(s => s.slug === slug) || services[0];
+  const [reviews, setReviews] = useState<ServiceReview[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsError, setReviewsError] = useState<string | null>(null);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+
+  // Load approved service reviews from database
+  useEffect(() => {
+    if (service) {
+      setReviewsLoading(true);
+      setReviewsError(null);
+      reviewService.getServiceReviews(service.id)
+        .then(list => setReviews(list))
+        .catch(err => setReviewsError(err.message || 'Failed to load reviews.'))
+        .finally(() => setReviewsLoading(false));
+    }
+  }, [service?.id]);
 
   useEffect(() => {
     if (service) {
@@ -66,6 +87,16 @@ export const ServiceDetailPage: React.FC<ServiceDetailPageProps> = ({ slug }) =>
   // Find barbers that offer this service
   const qualifiedBarbers = barbers.filter(b => b.servicesOfferedIds.includes(service.id));
 
+  const handleSubmitReview = async (data: { authorName: string; rating: number; comment: string }) => {
+    await reviewService.submitServiceReview({
+      serviceId: service.id,
+      authorName: data.authorName,
+      rating: data.rating,
+      comment: data.comment
+    });
+    setShowReviewForm(false);
+  };
+
   // Related services (other services in catalog)
   const relatedServices = services.filter(s => s.id !== service.id).slice(0, 3);
 
@@ -99,7 +130,7 @@ export const ServiceDetailPage: React.FC<ServiceDetailPageProps> = ({ slug }) =>
           {/* Left Column: Image & Inclusions */}
           <div className="lg:col-span-6 space-y-6">
             <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-card border border-border shadow-2xl">
-              <img
+              <SafeImage
                 src={service.imageUrl}
                 alt={`${service.name} at The Icons Barber & Spa Kilimani Nairobi`}
                 className="w-full h-full object-cover"
@@ -189,7 +220,7 @@ export const ServiceDetailPage: React.FC<ServiceDetailPageProps> = ({ slug }) =>
                       onClick={() => openBookingModal(service.id, barber.id)}
                       className="card-interactive p-3 rounded-xl cursor-pointer flex items-center gap-3 group"
                     >
-                      <img
+                      <SafeImage
                         src={barber.avatarUrl}
                         alt={barber.name}
                         className="w-10 h-10 rounded-lg object-cover"
@@ -206,6 +237,56 @@ export const ServiceDetailPage: React.FC<ServiceDetailPageProps> = ({ slug }) =>
 
           </div>
 
+        </div>
+
+        {/* Client Reviews */}
+        <div className="pt-12 border-t border-border space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="font-display text-xl sm:text-2xl font-bold text-white">
+                Client Reviews
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Real feedback from clients who have experienced this treatment
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowReviewForm(!showReviewForm)}
+              className="text-xs"
+            >
+              {showReviewForm ? 'Hide Review Form' : 'Write a Review'}
+            </Button>
+          </div>
+
+          {reviewsError && (
+            <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-xl text-xs text-destructive">
+              {reviewsError}
+            </div>
+          )}
+
+          {showReviewForm && (
+            <div className="max-w-xl">
+              <ReviewForm
+                onSubmit={handleSubmitReview}
+                title="Rate This Service"
+                subtitle="Share your experience with this treatment. Your review will be published after admin approval."
+                submitLabel="Submit Service Review"
+              />
+            </div>
+          )}
+
+          {reviewsLoading ? (
+            <div className="p-8 text-center bg-card border border-border rounded-2xl">
+              <p className="text-xs text-muted-foreground">Loading reviews...</p>
+            </div>
+          ) : (
+            <ReviewList
+              reviews={reviews}
+              emptyMessage="No reviews yet. Be the first to share your experience with this service!"
+            />
+          )}
         </div>
 
         {/* Section 15 Requirement: Related Services */}
@@ -231,7 +312,7 @@ export const ServiceDetailPage: React.FC<ServiceDetailPageProps> = ({ slug }) =>
                 className="group bg-card border border-border hover:border-primary/50 rounded-xl p-4 transition-all duration-300 cursor-pointer flex flex-col justify-between space-y-3"
               >
                 <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden bg-secondary">
-                  <img
+                  <SafeImage
                     src={rel.imageUrl}
                     alt={rel.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

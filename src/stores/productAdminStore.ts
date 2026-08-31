@@ -1,10 +1,12 @@
 import { create } from 'zustand';
-import { ProductItem, ProductReview } from '../types';
+import { ProductItem, ProductReview, ServiceReview } from '../types';
 import { productService } from '../services/productService';
+import { reviewService } from '../services/reviewService';
 
 interface ProductAdminState {
   products: ProductItem[];
   reviews: ProductReview[];
+  serviceReviews: ServiceReview[];
   loading: boolean;
   error: string | null;
 
@@ -18,11 +20,14 @@ interface ProductAdminState {
   adjustStock: (id: string, delta: number) => Promise<void>;
   setReviewStatus: (reviewId: string, status: 'pending' | 'approved' | 'rejected' | 'archived') => Promise<void>;
   deleteReview: (reviewId: string) => Promise<void>;
+  setServiceReviewStatus: (reviewId: string, status: 'pending' | 'approved' | 'rejected' | 'archived') => Promise<void>;
+  deleteServiceReview: (reviewId: string) => Promise<void>;
 }
 
 export const useProductAdminStore = create<ProductAdminState>((set, get) => ({
   products: [],
   reviews: [],
+  serviceReviews: [],
   loading: false,
   error: null,
 
@@ -39,8 +44,11 @@ export const useProductAdminStore = create<ProductAdminState>((set, get) => ({
   loadReviews: async () => {
     set({ loading: true, error: null });
     try {
-      const list = await productService.adminListReviews();
-      set({ reviews: list, loading: false });
+      const [productReviews, serviceReviews] = await Promise.all([
+        productService.adminListReviews(),
+        reviewService.adminListServiceReviews()
+      ]);
+      set({ reviews: productReviews, serviceReviews, loading: false });
     } catch (err: any) {
       set({ error: err.message, loading: false });
     }
@@ -138,6 +146,34 @@ export const useProductAdminStore = create<ProductAdminState>((set, get) => ({
       await productService.deleteReview(reviewId);
       set(state => ({
         reviews: state.reviews.filter(r => r.id !== reviewId),
+        loading: false
+      }));
+    } catch (err: any) {
+      set({ loading: false, error: err.message });
+      throw err;
+    }
+  },
+
+  setServiceReviewStatus: async (reviewId, status) => {
+    set({ loading: true, error: null });
+    try {
+      await reviewService.setServiceReviewStatus(reviewId, status);
+      set(state => ({
+        serviceReviews: state.serviceReviews.map(r => r.id === reviewId ? { ...r, reviewStatus: status } : r),
+        loading: false
+      }));
+    } catch (err: any) {
+      set({ loading: false, error: err.message });
+      throw err;
+    }
+  },
+
+  deleteServiceReview: async (reviewId) => {
+    set({ loading: true, error: null });
+    try {
+      await reviewService.deleteServiceReview(reviewId);
+      set(state => ({
+        serviceReviews: state.serviceReviews.filter(r => r.id !== reviewId),
         loading: false
       }));
     } catch (err: any) {

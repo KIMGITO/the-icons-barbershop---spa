@@ -1,3 +1,4 @@
+import { SafeImage } from './ui/SafeImage';
 import React, { useRef, useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { Heart, ArrowRight, Sparkles, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
@@ -100,7 +101,7 @@ export const ProductsSection: React.FC = () => {
                   onClick={() => handleProductClick(product.slug)}
                   className="absolute inset-0 w-full h-full cursor-pointer overflow-hidden"
                 >
-                  <img 
+                  <SafeImage 
                     src={product.imageUrl} 
                     alt={product.name}
                     className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 select-none"

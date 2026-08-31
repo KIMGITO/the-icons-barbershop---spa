@@ -5,6 +5,7 @@ import { Hero } from './components/Hero';
 import { ServicesSection } from './components/ServicesSection';
 import { ProductsSection } from './components/ProductsSection';
 import { BarbersSection } from './components/BarbersSection';
+import { TestimonialsSection } from './components/TestimonialsSection';
 import { AboutSection } from './components/AboutSection';
 import { GallerySection } from './components/GallerySection';
 import { LocationContactSection } from './components/LocationContactSection';
@@ -182,6 +183,9 @@ const MainContent: React.FC = () => {
 
         {/* 4. Featured Barbers */}
         <BarbersSection />
+
+        {/* 5. What Our Customers Say (Real DB reviews, biased to services) */}
+        <TestimonialsSection />
 
         {/* 6. About */}
         <AboutSection />
