@@ -231,8 +231,8 @@ export const BookingModal: React.FC = () => {
   const openDisplay = formatTimeDisplay(minutesToHHMM(openMin));
   const closeDisplay = formatTimeDisplay(minutesToHHMM(closeMin));
 
-  // Same-day bookings require at least 2 hours advance notice (matches 2hr slot system)
-  const MIN_ADVANCE_MINUTES = 120;
+  // Same-day bookings require at least 1 hour advance notice
+  const MIN_ADVANCE_MINUTES = 60;
   const selectedDayStr = selectedDate
     ? format(selectedDate, 'yyyy-MM-dd')
     : '';
@@ -276,7 +276,7 @@ export const BookingModal: React.FC = () => {
   }, [busyRanges, selectedStartMin, selectedEndMin]);
 
   /** First minute >= fromMin where a full-duration window fits with no overlap.
-   * Uses 2-hour slot intervals from the unified time system. */
+   * Uses 15-minute slot intervals from the unified time system. */
   const suggestNextFreeStartLocal = (fromMin: number): number => {
     return suggestNextFreeStart(fromMin, busyRanges, totalDuration, closeMin, SLOT_INTERVAL_MINUTES);
   };
@@ -295,7 +295,7 @@ export const BookingModal: React.FC = () => {
     if (isSameDay && selectedStartMin < earliestBookableMin) {
       return {
         status: 'error' as const,
-        message: `Same-day bookings need at least 2 hours notice — try ${formatTimeDisplay(minutesToHHMM(earliestBookableMin))} or later.`,
+        message: `Same-day bookings need at least 1 hour notice — try ${formatTimeDisplay(minutesToHHMM(earliestBookableMin))} or later.`,
       };
     }
     if (selectedStartMin < openMin || selectedStartMin > closeMin) {
@@ -1038,7 +1038,7 @@ export const BookingModal: React.FC = () => {
                 </div>
 
                 <div className="space-y-3">
-                  {/* Custom masked time input — type digits directly, steppers ±2 hours */}
+                  {/* Custom masked time input — type digits directly, steppers ±15 minutes */}
                   <div className="flex items-stretch gap-2">
                     <div className="relative flex-1">
                       <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary pointer-events-none" />
@@ -1077,7 +1077,7 @@ export const BookingModal: React.FC = () => {
                     <div className="flex flex-col rounded-sm border border-border-strong overflow-hidden">
                       <button
                         type="button"
-                        aria-label="Increase time by 2 hours"
+                        aria-label="Increase time by 15 minutes"
                         onClick={() => {
                           setScheduleError(null);
                           const base = selectedStartMin >= 0 ? selectedStartMin : earliestBookableMin;
@@ -1090,7 +1090,7 @@ export const BookingModal: React.FC = () => {
                       </button>
                       <button
                         type="button"
-                        aria-label="Decrease time by 2 hours"
+                        aria-label="Decrease time by 15 minutes"
                         onClick={() => {
                           setScheduleError(null);
                           const base = selectedStartMin >= 0 ? selectedStartMin : earliestBookableMin;

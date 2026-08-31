@@ -1,12 +1,12 @@
 import { StaffBooking } from '../types/staff';
 
 // ============================================================
-// UNIFIED TIME SYSTEM: 2-hour intervals, Africa/Nairobi (UTC+3)
+// UNIFIED TIME SYSTEM: 15-minute intervals, Africa/Nairobi (UTC+3)
 // ============================================================
 
 export const NAIROBI_TIMEZONE = 'Africa/Nairobi';
-export const SLOT_INTERVAL_HOURS = 2;
-export const SLOT_INTERVAL_MINUTES = SLOT_INTERVAL_HOURS * 60; // 120 minutes
+export const SLOT_INTERVAL_HOURS = 0.25;
+export const SLOT_INTERVAL_MINUTES = 15; // 15-minute intervals
 
 /**
  * Parse time string ("10:30 AM", "02:15 PM", "14:30") into total minutes from midnight (0 - 1439)
