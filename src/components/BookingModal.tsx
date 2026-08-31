@@ -32,6 +32,21 @@ import { Input } from './ui/Input';
 import { bookingService } from '../services/bookingService';
 import { bookingEngineService } from '../services/bookingEngineService';
 import { paymentService } from '../services/paymentService';
+import {
+  parseTimeToMinutes,
+  minutesToTimeString,
+  minutesToHHMM,
+  formatTimeDisplay,
+  parseHoursRange,
+  generateTimeSlots,
+  generateTimeSlotsFromRange,
+  createNairobiTimestamp,
+  getNairobiMinutesNow,
+  isTodayInNairobi,
+  suggestNextFreeStart,
+  SLOT_INTERVAL_MINUTES,
+  NAIROBI_TIMEZONE,
+} from '../utils/timeUtils';
 
 interface BookedSlotInfo {
   time_slot: string;
@@ -195,45 +210,9 @@ export const BookingModal: React.FC = () => {
     }
   };
 
-  /** Parse "10:00 AM", "10:00", or "22:30" into minutes since midnight. */
-  const toMin = (t: string): number => {
-    const match = t.trim().match(/^(\d{1,2}):(\d{2})(?:\s*(AM|PM))?$/i);
-    if (!match) return -1;
-    let h = parseInt(match[1], 10);
-    const m = parseInt(match[2], 10);
-    const suffix = match[3]?.toUpperCase();
-    if (suffix === 'PM' && h !== 12) h += 12;
-    if (suffix === 'AM' && h === 12) h = 0;
-    return h * 60 + m;
-  };
-
-  const minutesToHHMM = (min: number): string => {
-    const h = Math.floor(min / 60);
-    const m = min % 60;
-    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-  };
-
-  /** Format "10:00" or "10:00 AM" to a "10:00 AM" style display. */
-  const formatTimeDisplay = (t: string): string => {
-    const min = toMin(t);
-    if (min < 0) return t;
-    const h = Math.floor(min / 60);
-    const m = min % 60;
-    const h12 = h % 12 === 0 ? 12 : h % 12;
-    return `${h12}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`;
-  };
-
-  /** Parse an opening-hours range like "08:00 AM – 08:30 PM". */
-  const parseHoursRange = (range: string): { open: number; close: number } => {
-    const parts = range.split(/\s*[–—-]\s*/);
-    if (parts.length < 2) {
-      return { open: 8 * 60, close: 20 * 60 + 30 };
-    }
-    return {
-      open: toMin(parts[0]),
-      close: toMin(parts[1]),
-    };
-  };
+  // All time utilities imported from unified timeUtils.ts
+  // parseTimeToMinutes, minutesToTimeString, minutesToHHMM, formatTimeDisplay,
+  // parseHoursRange, generateTimeSlots, createNairobiTimestamp, etc.
 
   // Opening hours for the selected weekday
   const dayHours = useMemo(() => {
@@ -252,14 +231,13 @@ export const BookingModal: React.FC = () => {
   const openDisplay = formatTimeDisplay(minutesToHHMM(openMin));
   const closeDisplay = formatTimeDisplay(minutesToHHMM(closeMin));
 
-  // Same-day bookings require at least 1 hour advance notice
-  const MIN_ADVANCE_MINUTES = 60;
-  const nowRef = new Date();
+  // Same-day bookings require at least 2 hours advance notice (matches 2hr slot system)
+  const MIN_ADVANCE_MINUTES = 120;
   const selectedDayStr = selectedDate
     ? format(selectedDate, 'yyyy-MM-dd')
     : '';
-  const isSameDay = selectedDayStr === format(nowRef, 'yyyy-MM-dd');
-  const nowMinOfDay = nowRef.getHours() * 60 + nowRef.getMinutes();
+  const isSameDay = isTodayInNairobi(selectedDayStr);
+  const nowMinOfDay = getNairobiMinutesNow();
   const earliestBookableMin = isSameDay
     ? Math.max(openMin, nowMinOfDay + MIN_ADVANCE_MINUTES)
     : openMin;
@@ -269,8 +247,8 @@ export const BookingModal: React.FC = () => {
     () =>
       bookedSlots
         .map((b) => {
-          const start = toMin(b.time_slot);
-          const rawEnd = toMin(b.end_time || b.time_slot);
+          const start = parseTimeToMinutes(b.time_slot);
+          const rawEnd = parseTimeToMinutes(b.end_time || b.time_slot);
           const end = rawEnd > start ? rawEnd : start + 30;
           return {
             start,
@@ -284,7 +262,7 @@ export const BookingModal: React.FC = () => {
   );
 
   // Current selection window in minutes
-  const selectedStartMin = toMin(selectedTimeSlot);
+  const selectedStartMin = parseTimeToMinutes(selectedTimeSlot);
   const selectedEndMin =
     selectedStartMin >= 0 ? selectedStartMin + totalDuration : -1;
 
@@ -297,19 +275,13 @@ export const BookingModal: React.FC = () => {
     );
   }, [busyRanges, selectedStartMin, selectedEndMin]);
 
-  /** First minute >= fromMin where a full-duration window fits with no overlap. */
-  const suggestNextFreeStart = (fromMin: number): number => {
-    const start = Math.ceil(fromMin / 5) * 5;
-    // Only the start must fall within business hours — the service may run
-    // past closing time as long as it begins before close.
-    for (let m = start; m <= closeMin; m += 5) {
-      const e = m + totalDuration;
-      if (!busyRanges.some((r) => m < r.end && e > r.start)) return m;
-    }
-    return -1;
+  /** First minute >= fromMin where a full-duration window fits with no overlap.
+   * Uses 2-hour slot intervals from the unified time system. */
+  const suggestNextFreeStartLocal = (fromMin: number): number => {
+    return suggestNextFreeStart(fromMin, busyRanges, totalDuration, closeMin, SLOT_INTERVAL_MINUTES);
   };
 
-  const hasAnyFreeWindow = suggestNextFreeStart(openMin) >= 0;
+  const hasAnyFreeWindow = suggestNextFreeStartLocal(openMin) >= 0;
 
   // Live validation on every change of the typed/picked time
   const timeValidation = useMemo(() => {
@@ -323,7 +295,7 @@ export const BookingModal: React.FC = () => {
     if (isSameDay && selectedStartMin < earliestBookableMin) {
       return {
         status: 'error' as const,
-        message: `Same-day bookings need at least 1 hour notice — try ${formatTimeDisplay(minutesToHHMM(earliestBookableMin))} or later.`,
+        message: `Same-day bookings need at least 2 hours notice — try ${formatTimeDisplay(minutesToHHMM(earliestBookableMin))} or later.`,
       };
     }
     if (selectedStartMin < openMin || selectedStartMin > closeMin) {
@@ -335,7 +307,7 @@ export const BookingModal: React.FC = () => {
     // The service is allowed to run past closing time — only the start time
     // must fall within business hours.
     if (selectedConflict) {
-      const nextFree = suggestNextFreeStart(selectedConflict.end + 5);
+      const nextFree = suggestNextFreeStartLocal(selectedConflict.end + SLOT_INTERVAL_MINUTES);
       const suggestion =
         nextFree >= 0
           ? `try ${formatTimeDisplay(minutesToHHMM(nextFree))} or later.`
@@ -522,10 +494,11 @@ export const BookingModal: React.FC = () => {
       // 1. Create the booking atomically via check_and_reserve (race-condition-safe).
       // Use a strict 24-hour HH:mm:ss timestamp — "10:00 AM" is not parseable by Date.
       const startMinForSubmit =
-        selectedStartMin >= 0 ? selectedStartMin : toMin(selectedTimeSlot);
+        selectedStartMin >= 0 ? selectedStartMin : parseTimeToMinutes(selectedTimeSlot);
       const desiredStartTs = new Date(
-        `${format(selectedDate, 'yyyy-MM-dd')}T${minutesToHHMM(startMinForSubmit)}:00`,
+        `${format(selectedDate, 'yyyy-MM-dd')}T${minutesToHHMM(startMinForSubmit)}:00+03:00`,
       ).toISOString();
+
 
       const result = await bookingEngineService.createBooking({
         customerId: null,
@@ -543,6 +516,7 @@ export const BookingModal: React.FC = () => {
 
       if (!result.success) {
         setPaymentStatus('failed');
+      console.log('time starts', result.error);
         setPaymentError(bookingEngineService.mapError(result.error || ''));
         return;
       }
@@ -1064,7 +1038,7 @@ export const BookingModal: React.FC = () => {
                 </div>
 
                 <div className="space-y-3">
-                  {/* Custom masked time input — type digits directly, steppers ±15 min */}
+                  {/* Custom masked time input — type digits directly, steppers ±2 hours */}
                   <div className="flex items-stretch gap-2">
                     <div className="relative flex-1">
                       <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary pointer-events-none" />
@@ -1103,11 +1077,11 @@ export const BookingModal: React.FC = () => {
                     <div className="flex flex-col rounded-sm border border-border-strong overflow-hidden">
                       <button
                         type="button"
-                        aria-label="Increase time by 15 minutes"
+                        aria-label="Increase time by 2 hours"
                         onClick={() => {
                           setScheduleError(null);
                           const base = selectedStartMin >= 0 ? selectedStartMin : earliestBookableMin;
-                          const next = Math.min(closeMin, base + 15);
+                          const next = Math.min(closeMin, base + SLOT_INTERVAL_MINUTES);
                           setSelectedTimeSlot(minutesToHHMM(next));
                         }}
                         className="flex-1 px-3 py-1 bg-secondary hover:bg-secondary-hover text-muted-foreground-light hover:text-white transition-colors cursor-pointer"
@@ -1116,11 +1090,11 @@ export const BookingModal: React.FC = () => {
                       </button>
                       <button
                         type="button"
-                        aria-label="Decrease time by 15 minutes"
+                        aria-label="Decrease time by 2 hours"
                         onClick={() => {
                           setScheduleError(null);
                           const base = selectedStartMin >= 0 ? selectedStartMin : earliestBookableMin;
-                          const prev = Math.max(earliestBookableMin, base - 15);
+                          const prev = Math.max(earliestBookableMin, base - SLOT_INTERVAL_MINUTES);
                           setSelectedTimeSlot(minutesToHHMM(prev));
                         }}
                         className="flex-1 px-3 py-1 bg-secondary hover:bg-secondary-hover text-muted-foreground-light hover:text-white transition-colors cursor-pointer border-t border-border-subtle"
@@ -1182,7 +1156,7 @@ export const BookingModal: React.FC = () => {
                         onClick={() =>
                           setSelectedTimeSlot(
                             minutesToHHMM(
-                              suggestNextFreeStart(selectedConflict.end + 5),
+                              suggestNextFreeStartLocal(selectedConflict.end + SLOT_INTERVAL_MINUTES),
                             ),
                           )
                         }

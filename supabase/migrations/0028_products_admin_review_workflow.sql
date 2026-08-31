@@ -12,21 +12,6 @@ alter table public.product_reviews
 
 create index if not exists idx_product_reviews_status on public.product_reviews(review_status);
 
--- Seed a couple of pending reviews so the admin approval queue has content.
-insert into public.product_reviews (
-  id, product_id, author_name, rating, comment, date, verified_purchase, review_status
-) values
-  (
-    '00000000-0000-0000-0000-0000000000b9', '00000000-0000-0000-0000-0000000000b1',
-    'Njuguna W.', 5, 'Finally a shampoo that actually clears my scalp after the gym. The mint tingling is next level.',
-    '2026-08-26', true, 'pending'
-  ),
-  (
-    '00000000-0000-0000-0000-0000000000ba', '00000000-0000-0000-0000-0000000000b5',
-    'Michael Otieno', 4, 'Great oil, absorbs fast and the sandalwood scent lasts all day. Would love a bigger bottle option.',
-    '2026-08-27', true, 'pending'
-  )
-on conflict (id) do nothing;
 
 -- Public select policy for product_reviews must only expose approved reviews.
 drop policy if exists "Public can view product reviews" on public.product_reviews;

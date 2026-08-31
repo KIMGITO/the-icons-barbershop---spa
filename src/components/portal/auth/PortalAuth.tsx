@@ -14,6 +14,7 @@ import {
 import { useAuthStore } from '../../../stores/authStore';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
+import Logo from '../../bland/logo';
 
 interface PortalAuthProps {
   onSuccess?: () => void;
@@ -109,17 +110,8 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({
       <div className="relative w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/40 text-primary mx-auto shadow-inner">
-            <Sparkles className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground font-serif">
-              THE ICONS
-            </h1>
-            <p className="text-xs uppercase tracking-widest text-primary font-bold">
-              Staff & Artisan Portal
-            </p>
-          </div>
+          
+          <Logo/>
         </div>
 
         {/* Global Error Notice */}

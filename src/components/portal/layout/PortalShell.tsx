@@ -8,6 +8,7 @@ import { useAuthStore } from '../../../stores/authStore';
 // import { SEEDED_STAFF_ACCOUNTS } from '../../../services/authService';
 import { Badge } from '../../ui/Badge';
 import { ToastContainer } from '../notifications/ToastContainer';
+import logo from '../../../assets/images/logo.png';
 
 interface PortalShellProps {
   currentTab: string;
@@ -74,71 +75,13 @@ export const PortalShell: React.FC<PortalShellProps> = ({
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
 
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/25 to-primary/5 border border-primary/40 flex items-center justify-center text-primary font-serif font-bold text-sm shadow-inner">
-              I
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-serif font-bold text-sm tracking-wide text-foreground">
-                  THE ICONS
-                </span>
-                <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
-                  Staff Portal
-                </span>
-              </div>
-              <span className="text-[10px] text-muted-foreground hidden sm:block">
-                Barber & Spa Operations
-              </span>
-            </div>
+          <div className="flex items-center gap-2.5 ">
+            <img src={logo} alt="The Icons Logo" width={100} />
           </div>
         </div>
 
-        {/* Right: Role Switcher, Current User & Logout */}
         <div className="flex items-center gap-2.5 sm:gap-3">
-          {/* Fast Role Switcher Dropdown (Essential for testing Admin vs Provider) */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setRoleSwitcherOpen(!roleSwitcherOpen)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-border bg-input hover:bg-muted text-xs font-semibold text-foreground transition-colors"
-              title="Switch between Admin and Service Provider"
-            >
-              <ArrowLeftRight className="w-3.5 h-3.5 text-primary" />
-              <span className="capitalize hidden md:inline">{role === 'admin' ? 'Manager (Admin)' : 'Artisan'}</span>
-              <Badge variant={role === 'admin' ? 'primary' : 'neutral'} className="text-[10px] py-0 px-1.5">
-                {role === 'admin' ? 'Admin' : 'Provider'}
-              </Badge>
-            </button>
-
-            {roleSwitcherOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-card border border-border rounded-xl shadow-2xl p-2 z-50 space-y-1 animate-in fade-in duration-150">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-2 py-1">
-                  Switch Active Role
-                </div>
-                {/* {SEEDED_STAFF_ACCOUNTS.map((acc) => (
-                  <button
-                    key={acc.id}
-                    type="button"
-                    onClick={() => handleSwitchAccount(acc.email)}
-                    className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs transition-colors flex items-center justify-between ${
-                      user?.email === acc.email
-                        ? 'bg-primary/15 text-primary font-bold'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                    }`}
-                  >
-                    <div>
-                      <div className="text-xs font-medium text-foreground">{acc.fullName}</div>
-                      <div className="text-[10px] text-muted-foreground font-mono">{acc.role}</div>
-                    </div>
-                    {user?.email === acc.email && (
-                      <span className="w-2 h-2 rounded-full bg-primary" />
-                    )}
-                  </button>
-                ))} */}
-              </div>
-            )}
-          </div>
+         
 
           {/* User profile capsule */}
           <div className="flex items-center gap-2 pl-2 border-l border-border">

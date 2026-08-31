@@ -70,20 +70,13 @@ export const PortalOverview: React.FC<PortalOverviewProps> = ({ onNavigateTab })
       <div className="bg-card border border-border p-4 sm:p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-primary uppercase tracking-wider">
-              {role === 'admin' ? 'Management Console' : 'Artisan Station'}
-            </span>
-            <span className="text-xs text-muted-foreground">• {formattedToday}</span>
+           
+            <span className="text-xs text-muted-foreground"> {formattedToday}</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">
-            Welcome, {user?.fullName || 'Staff Member'}
+            <span className='text-primary'>Welcome </span>{user?.fullName || ''}
           </h1>
-          <p className="text-xs text-muted-foreground">
-            {role === 'admin' 
-              ? `Operational overview for The Icons Barber & Spa. ${todayBookings.length} appointments scheduled today.`
-              : `Your personalized station view. You have ${todayBookings.length} appointments scheduled today.`
-            }
-          </p>
+         
         </div>
 
         {/* Primary Action */}

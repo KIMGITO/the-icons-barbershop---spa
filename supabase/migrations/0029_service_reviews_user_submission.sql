@@ -21,35 +21,6 @@ create table if not exists public.service_reviews (
 create index if not exists idx_service_reviews_service on public.service_reviews(service_id);
 create index if not exists idx_service_reviews_status on public.service_reviews(review_status);
 
--- Seed a couple of approved service reviews for existing services
-insert into public.service_reviews (
-  id, service_id, author_name, rating, comment, date, verified_purchase, review_status
-) values
-  (
-    '00000000-0000-0000-0000-0000000000c1',
-    (select id from public.services where slug = 'classic-icon-haircut' limit 1),
-    'Brian K.', 5, 'Best haircut I have had in Nairobi. The attention to detail on the fade is unmatched.',
-    '2026-08-15', true, 'approved'
-  ),
-  (
-    '00000000-0000-0000-0000-0000000000c2',
-    (select id from public.services where slug = 'royal-hot-towel-beard' limit 1),
-    'Collins R.', 5, 'The hot towel beard sculpting is pure luxury. My beard has never looked sharper.',
-    '2026-08-10', true, 'approved'
-  ),
-  (
-    '00000000-0000-0000-0000-0000000000c3',
-    (select id from public.services where slug = 'moroccan-scalp-detox' limit 1),
-    'Dennis N.', 5, 'Incredible scalp detox experience. My scalp felt completely renewed after the treatment.',
-    '2026-08-05', true, 'approved'
-  ),
-  (
-    '00000000-0000-0000-0000-0000000000c4',
-    (select id from public.services where slug = 'classic-icon-haircut' limit 1),
-    'Samuel G.', 4, 'Great service and professional barbers. Booking was easy and the studio is top class.',
-    '2026-07-28', true, 'approved'
-  )
-on conflict (id) do nothing;
 
 -- ============================================================
 -- RLS POLICIES
