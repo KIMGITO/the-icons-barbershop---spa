@@ -93,7 +93,7 @@ export const ThemeSelect: React.FC<Props> = ({
   const triggerPad = compact ? 'px-2 py-1 text-xs rounded-lg' : 'px-3 py-2.5 text-sm rounded-xl';
 
   return (
-    <div className={`relative space-y-1.5 ${className}`} ref={ref}>
+    <div className={`relative `} ref={ref}>
       <button type="button" id={id || gid} role="combobox" aria-expanded={open} aria-haspopup="listbox"
         disabled={disabled} onClick={() => !disabled && setOpen(p => !p)} onKeyDown={key} onBlur={onBlur as any} onFocus={onFocus as any}
         className={`w-full flex items-center justify-between gap-2 border text-left transition-all ${triggerPad} ${

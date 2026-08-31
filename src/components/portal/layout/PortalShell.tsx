@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   LayoutDashboard, Calendar, Scissors, Users, Building2, 
   User, Clock, LogOut, ExternalLink, Menu, X, Sparkles, 
-  ChevronRight, ArrowLeftRight, MessageSquare 
+  ChevronRight, ArrowLeftRight, MessageSquare, Package 
 } from 'lucide-react';
 import { useAuthStore } from '../../../stores/authStore';
 import { SEEDED_STAFF_ACCOUNTS } from '../../../services/authService';
@@ -33,6 +33,7 @@ export const PortalShell: React.FC<PortalShellProps> = ({
     { id: 'calendar', label: 'Calendar', icon: Calendar },
     { id: 'providers', label: 'Providers', icon: Users },
     { id: 'services', label: 'Services & Pricing', icon: Scissors },
+    { id: 'products', label: 'Products & Reviews', icon: Package },
     { id: 'messages', label: 'SMS Messages', icon: MessageSquare },
     { id: 'business', label: 'Business Profile', icon: Building2 },
   ];

@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
-import { 
-  Lock, Mail, ArrowRight, ShieldCheck, CheckCircle2, 
-  AlertCircle, Loader2, Sparkles, KeyRound, UserCheck 
+import {
+  Lock,
+  Mail,
+  ArrowRight,
+  ShieldCheck,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  Sparkles,
+  KeyRound,
+  UserCheck,
 } from 'lucide-react';
 import { useAuthStore } from '../../../stores/authStore';
 import { SEEDED_STAFF_ACCOUNTS } from '../../../services/authService';
@@ -13,8 +21,19 @@ interface PortalAuthProps {
   onExitPortal?: () => void;
 }
 
-export const PortalAuth: React.FC<PortalAuthProps> = ({ onSuccess, onExitPortal }) => {
-  const { login, forgotPassword, resetPassword, changePassword, loading, error, clearError } = useAuthStore();
+export const PortalAuth: React.FC<PortalAuthProps> = ({
+  onSuccess,
+  onExitPortal,
+}) => {
+  const {
+    login,
+    forgotPassword,
+    resetPassword,
+    changePassword,
+    loading,
+    error,
+    clearError,
+  } = useAuthStore();
 
   const [mode, setMode] = useState<'login' | 'forgot' | 'reset'>('login');
   const [forcedChange, setForcedChange] = useState(false);
@@ -142,9 +161,12 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({ onSuccess, onExitPortal 
               <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10 border border-primary/30 text-primary mx-auto mb-2 shadow-inner">
                 <KeyRound className="w-5 h-5" />
               </div>
-              <h3 className="text-sm font-bold text-foreground">Security — Change Required</h3>
+              <h3 className="text-sm font-bold text-foreground">
+                Security — Change Required
+              </h3>
               <p className="text-xs text-muted-foreground">
-                For your account security, you must set a new password before continuing.
+                For your account security, you must set a new password before
+                continuing.
               </p>
             </div>
 
@@ -202,7 +224,10 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({ onSuccess, onExitPortal 
 
             <button
               type="button"
-              onClick={() => { setForcedChange(false); setMode('login'); }}
+              onClick={() => {
+                setForcedChange(false);
+                setMode('login');
+              }}
               className="w-full text-center text-[11px] text-muted-foreground hover:text-foreground transition-colors"
             >
               Log out instead
@@ -235,7 +260,11 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({ onSuccess, onExitPortal 
                 </label>
                 <button
                   type="button"
-                  onClick={() => { clearError(); setFeedbackMessage(null); setMode('forgot'); }}
+                  onClick={() => {
+                    clearError();
+                    setFeedbackMessage(null);
+                    setMode('forgot');
+                  }}
                   className="text-[11px] text-primary hover:underline"
                 >
                   Forgot password?
@@ -279,9 +308,12 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({ onSuccess, onExitPortal 
         {mode === 'forgot' && (
           <form onSubmit={handleForgot} className="space-y-4">
             <div className="space-y-1 text-center">
-              <h3 className="text-sm font-bold text-foreground">Reset Your Password</h3>
+              <h3 className="text-sm font-bold text-foreground">
+                Reset Your Password
+              </h3>
               <p className="text-xs text-muted-foreground">
-                Enter your staff email to receive a secure password recovery instruction.
+                Enter your staff email to receive a secure password recovery
+                instruction.
               </p>
             </div>
 
@@ -333,8 +365,12 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({ onSuccess, onExitPortal 
         {mode === 'reset' && (
           <form onSubmit={handleReset} className="space-y-4">
             <div className="space-y-1 text-center">
-              <h3 className="text-sm font-bold text-foreground">Set New Password</h3>
-              <p className="text-xs text-muted-foreground">Enter verification token and new credential.</p>
+              <h3 className="text-sm font-bold text-foreground">
+                Set New Password
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Enter verification token and new credential.
+              </p>
             </div>
 
             <div className="space-y-1.5">
@@ -391,16 +427,17 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({ onSuccess, onExitPortal 
         {/* Demo Fast-Login Bar (Convenient testing for evaluation of both Admin and Service Provider roles) */}
         <div className="pt-3 border-t border-border space-y-2">
           <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-            <span className="font-bold uppercase tracking-wider text-[10px]">Instant Demo Roles</span>
-            <span className="flex items-center gap-1 text-primary text-[10px]">
-              <UserCheck className="w-3 h-3" /> One-Click Switch
+            <span className="font-bold uppercase tracking-wider text-[10px]">
+              Demo Role
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="grid grid-cols-1  gap-2">
             <button
               type="button"
-              onClick={() => handleQuickLogin('admin@theicons.co.ke', 'admin123')}
+              onClick={() =>
+                handleQuickLogin('admin@theicons.co.ke', 'Admin@123')
+              }
               className="p-2 rounded-xl bg-muted/40 hover:bg-muted border border-border text-left transition-all group"
             >
               <div className="text-[11px] font-bold text-foreground group-hover:text-primary">
@@ -408,45 +445,6 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({ onSuccess, onExitPortal 
               </div>
               <div className="text-[10px] text-muted-foreground font-mono">
                 Role: Admin
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('samuel@theicons.co.ke', 'barber123')}
-              className="p-2 rounded-xl bg-muted/40 hover:bg-muted border border-border text-left transition-all group"
-            >
-              <div className="text-[11px] font-bold text-foreground group-hover:text-primary">
-                Samuel Mwangi
-              </div>
-              <div className="text-[10px] text-muted-foreground font-mono">
-                Role: Barber Provider
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('david@theicons.co.ke', 'spa123')}
-              className="p-2 rounded-xl bg-muted/40 hover:bg-muted border border-border text-left transition-all group"
-            >
-              <div className="text-[11px] font-bold text-foreground group-hover:text-primary">
-                David Njenga
-              </div>
-              <div className="text-[10px] text-muted-foreground font-mono">
-                Role: Spa Therapist
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('brian@theicons.co.ke', 'scalp123')}
-              className="p-2 rounded-xl bg-muted/40 hover:bg-muted border border-border text-left transition-all group"
-            >
-              <div className="text-[11px] font-bold text-foreground group-hover:text-primary">
-                Brian Mutua
-              </div>
-              <div className="text-[10px] text-muted-foreground font-mono">
-                Role: Scalp Specialist
               </div>
             </button>
           </div>

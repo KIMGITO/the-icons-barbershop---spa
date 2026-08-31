@@ -24,7 +24,7 @@ interface ImageUploaderProps {
   currentImageUrl?: string;
   onImageUploaded: (url: string) => void;
   onImageRemoved?: () => void;
-  bucket?: 'avatars' | 'services' | 'business';
+  bucket?: 'avatars' | 'services' | 'business' | 'products';
   aspectRatio?: 'square' | 'wide' | 'banner';
   label?: string;
   helperText?: string;

@@ -82,7 +82,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
 
       updatePageSEO({
         title: `${product.name} — Luxury Grooming`,
-        description: `${product.shortDescription} Available for pickup at The Icons Kilimani Nairobi or courier delivery across Kenya.`,
+        description: `${product.shortDescription} Available for pickup at ${businessInfo.name} ${businessInfo.address.neighborhood} or courier delivery across Kenya.`,
         canonicalUrl: `https://theiconsbarber.co.ke/products/${product.slug}`,
         ogImage: product.imageUrl,
         type: "product",
@@ -243,13 +243,13 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
                   {formatKsh(product.priceKsh)}
                 </span>
                 {product.originalPriceKsh && (
-                  <span className="text-base text-muted-foreground line-through">
+                  <span className="text-base text-muted-foreground italic line-through">
                     {formatKsh(product.originalPriceKsh)}
                   </span>
                 )}
                 <Badge variant="success" pill className="gap-1.5 py-1">
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>In Stock at Kilimani Studio</span>
+                  <span>In Stock </span>
                 </Badge>
               </div>
 
@@ -268,8 +268,9 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
                     onClick={() => openPurchaseModal(product)}
                     className="flex-1 uppercase tracking-wider text-sm shadow-xl hover:shadow-primary/20"
                   >
+                    <span>Buy / Reserve</span>
                     <ShoppingBag className="w-4 h-4" />
-                    <span>Buy / Reserve For Studio Pickup</span>
+
                   </Button>
 
                   <Button
@@ -287,11 +288,11 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs text-muted-foreground">
                   <div className="flex items-center gap-2 p-3 bg-card rounded-lg border border-white/5">
                     <MapPin className="w-4 h-4 text-primary shrink-0" />
-                    <span>Pickup ready in 15 mins at Suite 4B Kilimani</span>
+                    <span>Pickup ready in  at {businessInfo.name} {businessInfo.address.neighborhood}</span>
                   </div>
                   <div className="flex items-center gap-2 p-3 bg-card rounded-lg border border-white/5">
                     <Truck className="w-4 h-4 text-primary shrink-0" />
-                    <span>Same-day Nairobi delivery courier dispatch</span>
+                    <span>Same day delivery </span>
                   </div>
                 </div>
               </div>
@@ -333,7 +334,6 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
             {/* How to Use Step-by-Step Ritual */}
             <div className="bg-card border border-white/10 rounded-2xl p-6 sm:p-8">
               <h3 className="text-lg font-heading font-bold text-white mb-4 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-primary" />
                 <span>The Icons Master Application Ritual</span>
               </h3>
               <div className="space-y-4">
@@ -357,12 +357,12 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
                 <span>Key Active Botanical Ingredients</span>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {product.specifications.keyIngredients.map((ingredient, i) => (
-                  <div key={i} className="p-3 bg-card border border-white/5 rounded-lg flex items-center gap-2.5 text-xs text-foreground">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                {product.specifications.keyIngredients ? product.specifications.keyIngredients.map((ingredient, i) => (
+                   <span>
+                     <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                     <span>{ingredient}</span>
-                  </div>
-                ))}
+                   </span>
+                )) : null}
               </div>
             </div>
 
@@ -429,7 +429,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) =>
                 Verified Client Reviews
               </h2>
               <p className="text-xs text-muted-foreground mt-1">
-                Real feedback from studio clients in Nairobi
+                Real feedback from studio clients 
               </p>
             </div>
             <div className="flex items-center gap-2">

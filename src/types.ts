@@ -47,6 +47,8 @@ export interface ProductReview {
   date: string;
   comment: string;
   verifiedPurchase: boolean;
+  reviewStatus?: 'pending' | 'approved' | 'rejected' | 'archived';
+  productId?: string;
 }
 
 export interface ProductItem {
