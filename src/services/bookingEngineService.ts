@@ -1,6 +1,17 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { AvailableSlot, CheckAndReserveResult } from '../types/booking';
 
+/** Normalize a single service id and/or a list into one deduped list. */
+function resolveServiceIds(
+  serviceId?: string,
+  serviceIds?: string[],
+  extraIds?: string[]
+): string[] {
+  const all = [...(serviceIds || []), ...(extraIds || [])];
+  if (serviceId) all.push(serviceId);
+  return Array.from(new Set(all.filter(Boolean)));
+}
+
 export const bookingEngineService = {
   /**
    * Get available slots for a service on a date.
@@ -31,22 +42,26 @@ export const bookingEngineService = {
 
   /**
    * Check if a specific slot is available (dry-run).
+   * Accepts a single serviceId or a list of serviceIds (multi-service).
    */
   async checkAvailability(
     customerId: string,
     serviceId: string,
     desiredStartTs: string,
-    preferredStaffIds?: string[]
+    preferredStaffIds?: string[],
+    serviceIds?: string[]
   ): Promise<CheckAndReserveResult> {
     if (!isSupabaseConfigured) {
       return { success: false, error: 'Supabase not configured' };
     }
+    const ids = resolveServiceIds(serviceId, undefined, serviceIds);
     const { data, error } = await supabase.rpc('check_and_reserve', {
       p_customer_id: customerId,
-      p_service_id: serviceId,
+      p_service_id: ids[0] || null,
       p_desired_start_ts: desiredStartTs,
       p_preferred_staff_ids: preferredStaffIds || null,
-      p_check_only: true
+      p_check_only: true,
+      p_service_ids: ids.length ? ids : null
     });
     if (error) {
       return { success: false, error: error.message };
@@ -56,10 +71,13 @@ export const bookingEngineService = {
 
   /**
    * Create a booking atomically with full availability validation.
+   * All selected services are submitted in one atomic booking —
+   * the RPC prices and sizes the slot across the whole list.
    */
   async createBooking(payload: {
     customerId?: string | null;
-    serviceId: string;
+    serviceIds?: string[];
+    serviceId?: string;
     desiredStartTs: string;
     preferredStaffIds?: string[];
     customerName?: string;
@@ -73,9 +91,13 @@ export const bookingEngineService = {
     if (!isSupabaseConfigured) {
       return { success: false, error: 'Supabase not configured' };
     }
+    const serviceIds = resolveServiceIds(payload.serviceId, payload.serviceIds);
+    if (serviceIds.length === 0) {
+      return { success: false, error: 'SERVICE_NOT_FOUND' };
+    }
     const { data, error } = await supabase.rpc('check_and_reserve', {
       p_customer_id: payload.customerId || null,
-      p_service_id: payload.serviceId,
+      p_service_id: serviceIds[0],
       p_desired_start_ts: payload.desiredStartTs,
       p_preferred_staff_ids: payload.preferredStaffIds || null,
       p_check_only: false,
@@ -85,7 +107,8 @@ export const bookingEngineService = {
       p_special_requests: payload.specialRequests || null,
       p_require_payment: payload.requirePayment || false,
       p_payment_method: payload.paymentMethod || 'unpaid',
-      p_payment_ref: payload.paymentRef || null
+      p_payment_ref: payload.paymentRef || null,
+      p_service_ids: serviceIds
     });
     if (error) {
       return { success: false, error: error.message };

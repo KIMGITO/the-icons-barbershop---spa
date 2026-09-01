@@ -107,18 +107,52 @@ export const businessService = {
       raw
     };
 
+    // NOTE: business_hours stores one independent row per weekday
+    // (0=Sun..6=Sat), but the settings UI only exposes 3 buckets
+    // (weekdays / saturday / sunday). Bug fix: this used to assign
+    // `result.weekdays` inside the loop for weekday 1,2,3,4,5 in
+    // ascending order, so it was silently overwritten on every
+    // iteration and ended up holding whichever weekday was processed
+    // LAST (Friday) — not necessarily representative of Mon-Thu.
+    // Monday is used as the canonical representative for the
+    // "weekdays" bucket below. Callers that need the exact hours for
+    // a specific date should use getHoursForWeekday()/raw instead of
+    // this collapsed bucket, since Mon-Fri are not guaranteed to be
+    // identical in the underlying table.
     for (const entry of raw) {
       if (!entry.is_open) continue;
       const range = { start: entry.open_time, end: entry.close_time };
-      switch (entry.weekday) {
-        case 0: result.sunday = range; break;
-        case 1: case 2: case 3: case 4: result.weekdays = range; break;
-        case 5: result.weekdays = range; break; // Friday
-        case 6: result.saturday = range; break;
-      }
+      if (entry.weekday === 0) result.sunday = range;
+      else if (entry.weekday === 1) result.weekdays = range; // Monday = canonical "weekdays" representative
+      else if (entry.weekday === 6) result.saturday = range;
     }
 
     return result;
+  },
+
+  /**
+   * Look up the exact business hours for a specific weekday (0=Sun..6=Sat)
+   * directly from the raw per-weekday rows, with no bucket-collapsing.
+   * This is what the booking UI should use to validate a selected slot,
+   * since it mirrors exactly what check_and_reserve checks server-side.
+   * Returns null if the business is closed that day or no row exists.
+   */
+  getHoursForWeekday(
+    hours: BusinessHoursResult | null,
+    weekday: number
+  ): { start: string; end: string } | null {
+    if (!hours) return null;
+    const entry = hours.raw.find((e) => e.weekday === weekday);
+    if (entry && entry.is_open) {
+      return { start: entry.open_time, end: entry.close_time };
+    }
+    if (entry && !entry.is_open) return null; // explicitly closed that day
+    // No row for this weekday at all (e.g. business_hours not yet
+    // synced) — fall back to the collapsed bucket so the UI degrades
+    // gracefully instead of showing "closed all day".
+    if (weekday === 0) return hours.sunday;
+    if (weekday === 6) return hours.saturday;
+    return hours.weekdays;
   },
 
   /**
@@ -182,6 +216,34 @@ export const businessService = {
 
     const { data, error } = await supabase.from('businesses').update(db).eq('id', '00000000-0000-0000-0000-000000000001').select().single();
     if (error) throw new Error(error.message);
+
+    // The business_hours table (read by check_and_reserve /
+    // get_available_slots on the backend) is kept in sync by a
+    // database trigger whenever opening_hours changes (see migration
+    // 0038). That trigger is the source of truth and covers every
+    // write path, but we also upsert it directly here so the UI's
+    // own booking preview reflects the change immediately within the
+    // same session, without waiting on a refetch.
+    if (updates.openingHours !== undefined) {
+      const rows = [
+        { weekday: 0, open_time: db.opening_hours.sunday.start, close_time: db.opening_hours.sunday.end, is_open: true },
+        { weekday: 1, open_time: db.opening_hours.weekdays.start, close_time: db.opening_hours.weekdays.end, is_open: true },
+        { weekday: 2, open_time: db.opening_hours.weekdays.start, close_time: db.opening_hours.weekdays.end, is_open: true },
+        { weekday: 3, open_time: db.opening_hours.weekdays.start, close_time: db.opening_hours.weekdays.end, is_open: true },
+        { weekday: 4, open_time: db.opening_hours.weekdays.start, close_time: db.opening_hours.weekdays.end, is_open: true },
+        { weekday: 5, open_time: db.opening_hours.weekdays.start, close_time: db.opening_hours.weekdays.end, is_open: true },
+        { weekday: 6, open_time: db.opening_hours.saturday.start, close_time: db.opening_hours.saturday.end, is_open: true },
+      ].map((r) => ({ ...r, business_id: '00000000-0000-0000-0000-000000000001' }));
+
+      const { error: hoursError } = await supabase
+        .from('business_hours')
+        .upsert(rows, { onConflict: 'business_id,weekday' });
+      if (hoursError) {
+        // Non-fatal: the DB trigger will still apply the change.
+        console.error('Failed to eagerly sync business_hours:', hoursError.message);
+      }
+    }
+
     return mapDbBusiness(data);
   }
 };

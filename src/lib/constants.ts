@@ -13,7 +13,6 @@ export const GALLERY_TABLE = 'gallery_items';
 export const FAQS_TABLE = 'faqs';
 export const SCHEDULE_BLOCKS_TABLE = 'schedule_blocks';
 export const MPESA_PAYMENTS_TABLE = 'mpesa_payments';
-export const PROVIDER_AVAILABILITY_TABLE = 'provider_availability';
 
 // Default business UUID
 export const DEFAULT_BUSINESS_ID = '00000000-0000-0000-0000-000000000001';

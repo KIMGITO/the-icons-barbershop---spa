@@ -1,5 +1,6 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { ServiceProvider, DaySchedule, DAYS_OF_WEEK } from '../types/staff';
+import { businessService } from './businessService';
 
 export const createDefaultSchedule = (): DaySchedule[] => {
   return DAYS_OF_WEEK.map(day => ({
@@ -11,6 +12,47 @@ export const createDefaultSchedule = (): DaySchedule[] => {
       { start: '13:00', end: '14:00' }
     ]
   }));
+};
+
+/**
+ * Build a weekly schedule from the business hours stored in the
+ * database (business_hours table, synced from business info).
+ * Falls back to the standard default schedule if the DB is
+ * unavailable. This keeps provider weekly hours consistent with
+ * what the booking engine (check_and_reserve) enforces.
+ */
+export const createScheduleFromBusinessHours = async (): Promise<DaySchedule[]> => {
+  try {
+    const hours = await businessService.getBusinessHours();
+    if (!hours) return createDefaultSchedule();
+    return DAYS_OF_WEEK.map(day => {
+      const weekday = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'].indexOf(day.key);
+      const entry = hours.raw.find(h => h.weekday === weekday);
+      if (entry) {
+        return {
+          day: day.key,
+          isWorking: entry.is_open,
+          startTime: entry.open_time.slice(0, 5),
+          endTime: entry.close_time.slice(0, 5),
+          breaks: []
+        };
+      }
+      // No explicit entry: derive from grouped ranges
+      const range =
+        day.key === 'sunday' ? hours.sunday :
+        day.key === 'saturday' ? hours.saturday :
+        hours.weekdays;
+      return {
+        day: day.key,
+        isWorking: true,
+        startTime: range.start,
+        endTime: range.end,
+        breaks: []
+      };
+    });
+  } catch {
+    return createDefaultSchedule();
+  }
 };
 
 const mapDbProvider = (row: any): ServiceProvider => ({
@@ -111,10 +153,14 @@ export const providerService = {
       throw new Error('Failed to create provider profile. Please check staff account was created and retry.');
     }
 
-    // Perform an update to save the schedule and services offered array which are not handled by the edge function
+    // Perform an update to save the schedule and services offered array which are not handled by the edge function.
+    // Default weekly hours come from business hours in the database (not hardcoded standard times).
+    const schedule = providerData.schedule && providerData.schedule.length > 0
+      ? providerData.schedule
+      : await createScheduleFromBusinessHours();
     const updated = await this.updateProvider(providerId, {
       servicesOfferedIds: providerData.servicesOfferedIds || [],
-      schedule: providerData.schedule && providerData.schedule.length > 0 ? providerData.schedule : createDefaultSchedule()
+      schedule
     });
 
     return updated;

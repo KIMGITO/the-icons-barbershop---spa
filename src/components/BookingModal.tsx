@@ -230,27 +230,22 @@ export const BookingModal: React.FC = () => {
     }
   };
 
-  // All time utilities imported from unified timeUtils.ts
-  // parseTimeToMinutes, minutesToTimeString, minutesToHHMM, formatTimeDisplay,
-  // parseHoursRange, generateTimeSlots, createNairobiTimestamp, etc.
-
-  // Opening hours for the selected weekday — uses database business_hours table
-  // (same source as check_and_reserve RPC) for consistency with backend validation
   const dayHours = useMemo(() => {
     if (!selectedDate) return { open: 8 * 60, close: 20 * 60 + 30 };
     const day = selectedDate.getDay();
 
     // Use database business hours if available (preferred - matches backend)
     if (dbBusinessHours) {
-      const range = day === 0
-        ? dbBusinessHours.sunday
-        : day === 6
-          ? dbBusinessHours.saturday
-          : dbBusinessHours.weekdays;
-      const open = parseTimeToMinutes(range.start);
-      const close = parseTimeToMinutes(range.end);
-      if (open >= 0 && close > open) {
-        return { open, close };
+      const range = businessService.getHoursForWeekday(dbBusinessHours, day);
+      if (range) {
+        const open = parseTimeToMinutes(range.start);
+        const close = parseTimeToMinutes(range.end);
+        if (open >= 0 && close > open) {
+          return { open, close };
+        }
+      } else {
+        // Explicitly closed that day per business_hours.is_open = false
+        return { open: 0, close: 0 };
       }
     }
 
@@ -263,7 +258,6 @@ export const BookingModal: React.FC = () => {
           : businessInfo.hours.weekdays;
     return parseHoursRange(rangeStr);
   }, [selectedDate, businessInfo.hours, dbBusinessHours]);
-
   const { open: openMin, close: closeMin } = dayHours;
   const openDisplay = formatTimeDisplay(minutesToHHMM(openMin));
   const closeDisplay = formatTimeDisplay(minutesToHHMM(closeMin));
@@ -496,6 +490,27 @@ export const BookingModal: React.FC = () => {
     setStep(target as 1 | 2 | 3 | 4 | 5);
   };
 
+  /** Initiate the M-Pesa STK push for the 50% deposit of a reserved booking. */
+  const initiateDepositPayment = async (
+    bookingId: string,
+    referenceNumber: string,
+    amountKsh: number,
+  ) => {
+    setStep(5);
+    setPaymentStatus('pushing');
+
+    const res = await paymentService.initiateMpesaStkPush({
+      phoneNumber: paymentService.formatKenyanPhone(customerPhone).formatted,
+      amountKsh: amountKsh > 0 ? amountKsh : depositKsh > 0 ? depositKsh : 1,
+      bookingId,
+      referenceNumber,
+      customerName: customerName.trim(),
+    });
+
+    setCheckoutRequestId(res.checkoutRequestId || null);
+    setPaymentStatus('awaiting_pin');
+  };
+
   /** Submit details → create pending booking → initiate STK push for 50% deposit. */
   const handleSubmitBooking = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -539,7 +554,9 @@ export const BookingModal: React.FC = () => {
 
       const result = await bookingEngineService.createBooking({
         customerId: null,
-        serviceId: selectedServiceIds[0],
+        // Submit ALL selected services — one atomic booking covering
+        // the full list (priced and sized by the database RPC).
+        serviceIds: selectedServiceIds,
         desiredStartTs,
         preferredStaffIds: [resolvedProvider.id],
         customerName: customerName.trim(),
@@ -553,7 +570,6 @@ export const BookingModal: React.FC = () => {
 
       if (!result.success) {
         setPaymentStatus('failed');
-      console.log('time starts', result.error);
         setPaymentError(bookingEngineService.mapError(result.error || ''));
         return;
       }
@@ -565,20 +581,13 @@ export const BookingModal: React.FC = () => {
         depositKsh: result.depositPaidKsh,
         remainingKsh: result.remainingBalanceKsh,
       });
-      setStep(5);
-      setPaymentStatus('pushing');
 
       // 2. Initiate M-Pesa STK push for exactly the 50% deposit
-      const res = await paymentService.initiateMpesaStkPush({
-        phoneNumber: paymentService.formatKenyanPhone(customerPhone).formatted,
-        amountKsh: depositKsh,
-        bookingId: result.bookingId!,
-        referenceNumber: result.referenceNumber!,
-        customerName: customerName.trim(),
-      });
-
-      setCheckoutRequestId(res.checkoutRequestId || null);
-      setPaymentStatus('awaiting_pin');
+      await initiateDepositPayment(
+        result.bookingId!,
+        result.referenceNumber!,
+        result.depositPaidKsh || depositKsh,
+      );
     } catch (err: any) {
       setPaymentStatus('failed');
       setPaymentError(
@@ -1573,10 +1582,31 @@ export const BookingModal: React.FC = () => {
                   <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
                     <Button
                       variant="primary"
-                      onClick={() => {
-                        setPaymentStatus('pushing');
+                      onClick={async () => {
                         setPaymentError(null);
-                        handleSubmitBooking(new Event('submit') as any);
+                        // Retry re-uses the already-reserved pending booking —
+                        // never create a duplicate booking for a retry.
+                        if (
+                          pendingBooking?.bookingId &&
+                          pendingBooking?.referenceNumber
+                        ) {
+                          try {
+                            await initiateDepositPayment(
+                              pendingBooking.bookingId,
+                              pendingBooking.referenceNumber,
+                              pendingBooking.depositKsh || depositKsh,
+                            );
+                          } catch (err: any) {
+                            setPaymentStatus('failed');
+                            setPaymentError(
+                              err.message ||
+                                'Failed to initiate M-Pesa payment.',
+                            );
+                          }
+                        } else {
+                          setPaymentStatus('pushing');
+                          handleSubmitBooking(new Event('submit') as any);
+                        }
                       }}
                       className="w-full sm:w-auto"
                     >
