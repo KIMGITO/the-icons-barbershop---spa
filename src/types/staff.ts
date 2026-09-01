@@ -112,10 +112,15 @@ export interface StaffBooking {
   createdAt: string;
 }
 
+export interface TimeRange {
+  start: string; // "HH:MM" 24h format, e.g. "09:00"
+  end: string;   // "HH:MM" 24h format, e.g. "18:00"
+}
+
 export interface BusinessHours {
-  weekdays: string;
-  saturday: string;
-  sunday: string;
+  weekdays: TimeRange;
+  saturday: TimeRange;
+  sunday: TimeRange;
 }
 
 export interface StaffBusinessProfile {

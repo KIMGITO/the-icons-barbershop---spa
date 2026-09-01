@@ -52,7 +52,7 @@ export const storageService = {
    */
   async uploadImage(
     file: File,
-    bucket: 'avatars' | 'services' | 'business' | 'products' = 'avatars'
+    bucket: 'avatars' | 'services' | 'business' | 'products' | 'gallery' = 'avatars'
   ): Promise<UploadResult> {
     const validation = this.validateImage(file);
     if (!validation.valid) {

@@ -41,12 +41,15 @@ export const BusinessManagementPage: React.FC = () => {
     setSavedSuccess(false);
   };
 
-  const handleHoursChange = (dayKey: 'weekdays' | 'saturday' | 'sunday', value: string) => {
+  const handleHoursChange = (dayKey: 'weekdays' | 'saturday' | 'sunday', field: 'start' | 'end', value: string) => {
     setFormData(prev => prev ? ({
       ...prev,
       openingHours: {
         ...prev.openingHours,
-        [dayKey]: value
+        [dayKey]: {
+          ...prev.openingHours[dayKey],
+          [field]: value
+        }
       }
     }) : null);
     setSavedSuccess(false);
@@ -270,43 +273,43 @@ export const BusinessManagementPage: React.FC = () => {
         <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
           <Clock className="w-3.5 h-3.5 text-primary" /> Shop Operating Hours
         </h2>
+        <p className="text-[10px] text-muted-foreground -mt-2">
+          Set opening and closing times. Use 24-hour format (e.g. 09:00 – 18:00). All times are in Nairobi time (EAT, UTC+3).
+        </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-          <div className="space-y-1">
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Monday - Friday
-            </label>
-            <Input
-              type="text"
-              value={formData.openingHours.weekdays}
-              onChange={(e) => handleHoursChange('weekdays', e.target.value)}
-              className="rounded-xl py-2 text-xs"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Saturday
-            </label>
-            <Input
-              type="text"
-              value={formData.openingHours.saturday}
-              onChange={(e) => handleHoursChange('saturday', e.target.value)}
-              className="rounded-xl py-2 text-xs"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Sunday & Public Holidays
-            </label>
-            <Input
-              type="text"
-              value={formData.openingHours.sunday}
-              onChange={(e) => handleHoursChange('sunday', e.target.value)}
-              className="rounded-xl py-2 text-xs"
-            />
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {([
+            { key: 'weekdays' as const, label: 'Monday – Friday' },
+            { key: 'saturday' as const, label: 'Saturday' },
+            { key: 'sunday' as const, label: 'Sunday & Public Holidays' },
+          ]).map(({ key, label }) => (
+            <div key={key} className="space-y-2 p-3 bg-background rounded-xl border border-border">
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                {label}
+              </span>
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  <label className="block text-[9px] text-muted-foreground mb-0.5">Opens</label>
+                  <input
+                    type="time"
+                    value={formData.openingHours[key].start}
+                    onChange={(e) => handleHoursChange(key, 'start', e.target.value)}
+                    className="w-full rounded-lg border border-border bg-card px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+                <span className="text-muted-foreground text-xs mt-3">–</span>
+                <div className="flex-1">
+                  <label className="block text-[9px] text-muted-foreground mb-0.5">Closes</label>
+                  <input
+                    type="time"
+                    value={formData.openingHours[key].end}
+                    onChange={(e) => handleHoursChange(key, 'end', e.target.value)}
+                    className="w-full rounded-lg border border-border bg-card px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

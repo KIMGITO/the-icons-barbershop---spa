@@ -558,6 +558,7 @@ button:disabled {
   border-left: none;
   border-right: none;
   border-bottom: none;
+  flex-shrink: 0;
 }
 
 .tab:hover,
@@ -863,4 +864,13 @@ input[type='number'] {
 
 .booking-calendar .rdp-day_disabled {
   opacity: 0.3;
+}
+
+/* Hide scrollbar for horizontal tab scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

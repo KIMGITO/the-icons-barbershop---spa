@@ -42,9 +42,9 @@ const DEFAULT_EMPTY_BUSINESS_INFO: BusinessInfo = {
   whatsappUrl: '',
   email: '',
   hours: {
-    weekdays: '09:00 AM – 06:00 PM',
-    saturday: '09:00 AM – 06:00 PM',
-    sunday: 'Closed'
+    weekdays: { start: '09:00', end: '18:00' },
+    saturday: { start: '09:00', end: '18:00' },
+    sunday: { start: '00:00', end: '00:00' }
   }
 };
 
@@ -94,6 +94,10 @@ interface AppContextType {
   deleteFAQ: (id: string) => void;
   updateBarber: (updated: BarberProfile) => void;
   updateProduct: (updated: ProductItem) => void;
+  addGalleryItem: (item: Omit<GalleryItem, 'id'>) => Promise<void>;
+  updateGalleryItem: (updated: GalleryItem) => Promise<void>;
+  deleteGalleryItem: (id: string) => Promise<void>;
+  reorderGallery: (items: GalleryItem[]) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -206,6 +210,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           phoneDisplay: business.phone,
           email: business.email,
           locationDetails: business.locationDetails || prev.locationDetails,
+          hours: {
+            weekdays: business.openingHours?.weekdays || prev.hours.weekdays,
+            saturday: business.openingHours?.saturday || prev.hours.saturday,
+            sunday: business.openingHours?.sunday || prev.hours.sunday
+          },
           address: {
             ...prev.address,
             street: business.address || prev.address.street,
@@ -441,6 +450,62 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setBarbers(prev => prev.map(b => b.id === updated.id ? updated : b));
   };
 
+  const addGalleryItem = async (item: Omit<GalleryItem, 'id'>) => {
+    const { data, error } = await supabase.from('gallery_items').insert({
+      title: item.title,
+      alt: item.alt || item.title,
+      category: item.category,
+      image_url: item.imageUrl,
+      caption: item.caption,
+      sort_order: item.sortOrder ?? 0,
+      is_active: item.isActive ?? true
+    }).select().single();
+    if (error) throw new Error(error.message);
+    setGallery(prev => [...prev, {
+      id: data.id,
+      title: data.title,
+      alt: data.alt,
+      category: data.category,
+      imageUrl: data.image_url,
+      caption: data.caption,
+      sortOrder: data.sort_order,
+      isActive: data.is_active
+    }]);
+  };
+
+  const updateGalleryItem = async (updated: GalleryItem) => {
+    const { error } = await supabase.from('gallery_items').update({
+      title: updated.title,
+      alt: updated.alt,
+      category: updated.category,
+      image_url: updated.imageUrl,
+      caption: updated.caption,
+      sort_order: updated.sortOrder ?? 0,
+      is_active: updated.isActive ?? true
+    }).eq('id', updated.id);
+    if (error) throw new Error(error.message);
+    setGallery(prev => prev.map(g => g.id === updated.id ? updated : g));
+  };
+
+  const deleteGalleryItem = async (id: string) => {
+    const { error } = await supabase.from('gallery_items').delete().eq('id', id);
+    if (error) throw new Error(error.message);
+    setGallery(prev => prev.filter(g => g.id !== id));
+  };
+
+  const reorderGallery = async (items: GalleryItem[]) => {
+    setGallery(items);
+    if (isSupabaseConfigured) {
+      try {
+        await Promise.all(items.map((item, index) =>
+          supabase.from('gallery_items').update({ sort_order: index }).eq('id', item.id)
+        ));
+      } catch (e) {
+        console.error('Failed to persist gallery order:', e);
+      }
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -480,7 +545,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addFAQ,
         deleteFAQ,
         updateBarber,
-        updateProduct
+        updateProduct,
+        addGalleryItem,
+        updateGalleryItem,
+        deleteGalleryItem,
+        reorderGallery
       }}
     >
       {children}

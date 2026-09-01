@@ -32,6 +32,7 @@ import { Input } from './ui/Input';
 import { bookingService } from '../services/bookingService';
 import { bookingEngineService } from '../services/bookingEngineService';
 import { paymentService } from '../services/paymentService';
+import { businessService, BusinessHoursResult } from '../services/businessService';
 import {
   parseTimeToMinutes,
   minutesToTimeString,
@@ -103,6 +104,10 @@ export const BookingModal: React.FC = () => {
   const [confirmedBooking, setConfirmedBooking] = useState<any>(null);
   const [pendingBooking, setPendingBooking] = useState<any>(null);
 
+  // Business hours from database (same source as check_and_reserve RPC)
+  const [dbBusinessHours, setDbBusinessHours] = useState<BusinessHoursResult | null>(null);
+  const [businessHoursLoading, setBusinessHoursLoading] = useState(false);
+
   const selectedServices = services.filter((s) =>
     selectedServiceIds.includes(s.id),
   );
@@ -130,6 +135,21 @@ export const BookingModal: React.FC = () => {
   );
 
   const barberDisplayName = resolvedProvider?.name || 'Master Barber';
+
+  // Load business hours from database (same source as check_and_reserve RPC)
+  useEffect(() => {
+    if (!isBookingModalOpen) return;
+    setBusinessHoursLoading(true);
+    businessService.getBusinessHours()
+      .then((hours) => {
+        setDbBusinessHours(hours);
+      })
+      .catch((err) => {
+        console.error('Failed to load business hours:', err);
+        setDbBusinessHours(null);
+      })
+      .finally(() => setBusinessHoursLoading(false));
+  }, [isBookingModalOpen]);
 
   // Initialize selections when modal opens
   useEffect(() => {
@@ -214,10 +234,27 @@ export const BookingModal: React.FC = () => {
   // parseTimeToMinutes, minutesToTimeString, minutesToHHMM, formatTimeDisplay,
   // parseHoursRange, generateTimeSlots, createNairobiTimestamp, etc.
 
-  // Opening hours for the selected weekday
+  // Opening hours for the selected weekday — uses database business_hours table
+  // (same source as check_and_reserve RPC) for consistency with backend validation
   const dayHours = useMemo(() => {
     if (!selectedDate) return { open: 8 * 60, close: 20 * 60 + 30 };
     const day = selectedDate.getDay();
+
+    // Use database business hours if available (preferred - matches backend)
+    if (dbBusinessHours) {
+      const range = day === 0
+        ? dbBusinessHours.sunday
+        : day === 6
+          ? dbBusinessHours.saturday
+          : dbBusinessHours.weekdays;
+      const open = parseTimeToMinutes(range.start);
+      const close = parseTimeToMinutes(range.end);
+      if (open >= 0 && close > open) {
+        return { open, close };
+      }
+    }
+
+    // Fallback to businessInfo.hours from businesses table
     const rangeStr =
       day === 0
         ? businessInfo.hours.sunday
@@ -225,7 +262,7 @@ export const BookingModal: React.FC = () => {
           ? businessInfo.hours.saturday
           : businessInfo.hours.weekdays;
     return parseHoursRange(rangeStr);
-  }, [selectedDate, businessInfo.hours]);
+  }, [selectedDate, businessInfo.hours, dbBusinessHours]);
 
   const { open: openMin, close: closeMin } = dayHours;
   const openDisplay = formatTimeDisplay(minutesToHHMM(openMin));
@@ -298,14 +335,14 @@ export const BookingModal: React.FC = () => {
         message: `Same-day bookings need at least 1 hour notice — try ${formatTimeDisplay(minutesToHHMM(earliestBookableMin))} or later.`,
       };
     }
-    if (selectedStartMin < openMin || selectedStartMin > closeMin) {
+    if (selectedStartMin < openMin || selectedStartMin >= closeMin) {
       return {
         status: 'error' as const,
         message: `That time is outside opening hours (${openDisplay} – ${closeDisplay}).`,
       };
     }
     // The service is allowed to run past closing time — only the start time
-    // must fall within business hours.
+    // must fall within business hours (strictly before closing, matching database validation).
     if (selectedConflict) {
       const nextFree = suggestNextFreeStartLocal(selectedConflict.end + SLOT_INTERVAL_MINUTES);
       const suggestion =
@@ -399,7 +436,7 @@ export const BookingModal: React.FC = () => {
         };
       if (isSameDay && selectedStartMin < earliestBookableMin)
         return { ok: false, message: timeValidation.message };
-      if (selectedStartMin < openMin || selectedStartMin > closeMin)
+      if (selectedStartMin < openMin || selectedStartMin >= closeMin)
         return { ok: false, message: timeValidation.message };
       if (selectedConflict)
         return { ok: false, message: timeValidation.message };

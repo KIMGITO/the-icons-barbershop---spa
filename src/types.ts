@@ -157,6 +157,8 @@ export interface GalleryItem {
   category: 'all' | 'haircut' | 'beard' | 'spa' | 'interior' | 'team';
   imageUrl: string;
   caption?: string;
+  sortOrder?: number;
+  isActive?: boolean;
 }
 
 export interface FAQItem {
@@ -259,6 +261,11 @@ export interface ManagementReview {
   };
 }
 
+export interface TimeRange {
+  start: string; // "HH:MM" 24h format, e.g. "09:00"
+  end: string;   // "HH:MM" 24h format, e.g. "18:00"
+}
+
 export interface BusinessInfo {
   name: string;
   tagline: string;
@@ -278,9 +285,9 @@ export interface BusinessInfo {
   whatsappUrl: string;
   email: string;
   hours: {
-    weekdays: string;
-    saturday: string;
-    sunday: string;
+    weekdays: TimeRange;
+    saturday: TimeRange;
+    sunday: TimeRange;
   };
 }
 

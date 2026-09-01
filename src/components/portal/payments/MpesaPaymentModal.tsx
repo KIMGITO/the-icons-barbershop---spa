@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Smartphone, CheckCircle2, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 import { paymentService } from '../../../services/paymentService';
 import { PaymentSummary } from './PaymentSummary';
@@ -44,6 +44,7 @@ export const MpesaPaymentModal: React.FC<MpesaPaymentModalProps> = ({
   const [status, setStatus] = useState<'idle' | 'pushing' | 'waiting_pin' | 'success' | 'error'>('idle');
   const [receipt, setReceipt] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [checkoutRequestId, setCheckoutRequestId] = useState<string | null>(null);
 
   const selectedAmount = paymentOption === 'deposit' 
     ? minDeposit 
@@ -78,23 +79,77 @@ export const MpesaPaymentModal: React.FC<MpesaPaymentModalProps> = ({
       });
 
       setStatus('waiting_pin');
+      setCheckoutRequestId(res.checkoutRequestId || null);
 
-      // Simulate customer entering PIN after 2 seconds
-      setTimeout(() => {
-        setStatus('success');
-        setReceipt(res.receiptNumber || 'ICN-MP-9842');
-        onPaymentCompleted(res.receiptNumber || 'ICN-MP-9842', selectedAmount);
-      }, 2000);
+      // Note: Payment status is polled via useEffect below
+      // The actual receipt number will be set when payment completes
     } catch (err: any) {
       setStatus('error');
       setErrorMessage(err.message || 'M-Pesa payment failed. Please check phone number and retry.');
     }
   };
 
+  /** Poll M-Pesa payment status until completed or failed */
+  useEffect(() => {
+    if (status !== 'waiting_pin' || !checkoutRequestId) return;
+
+    let cancelled = false;
+    let pollCount = 0;
+    const MAX_POLLS = 60; // 60 polls * 3 seconds = 3 minutes max
+
+    const poll = async () => {
+      if (cancelled || pollCount >= MAX_POLLS) {
+        if (!cancelled && pollCount >= MAX_POLLS) {
+          setStatus('error');
+          setErrorMessage('Payment timed out. Please check if the customer completed the M-Pesa payment and try again.');
+        }
+        return;
+      }
+
+      pollCount++;
+
+      try {
+        const paymentStatus = await paymentService.checkPaymentStatus(checkoutRequestId);
+
+        if (cancelled) return;
+
+        if (paymentStatus.completed) {
+          setStatus('success');
+          setReceipt(paymentStatus.receiptNumber || null);
+          onPaymentCompleted(paymentStatus.receiptNumber || '', selectedAmount);
+          return;
+        }
+
+        if (paymentStatus.status === 'failed') {
+          setStatus('error');
+          setErrorMessage('M-Pesa payment was not completed. The customer may have cancelled or insufficient funds.');
+          return;
+        }
+
+        // Payment still pending, poll again in 3 seconds
+        setTimeout(poll, 3000);
+      } catch {
+        if (!cancelled) {
+          // On network error, retry (don't immediately fail)
+          setTimeout(poll, 3000);
+        }
+      }
+    };
+
+    // Start polling after 2 seconds (give customer time to see the prompt)
+    const timer = setTimeout(poll, 2000);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [status, checkoutRequestId, selectedAmount, onPaymentCompleted]);
+
   const handleClose = () => {
     setStatus('idle');
     setErrorMessage(null);
     setReceipt(null);
+    setCheckoutRequestId(null);
     onClose();
   };
 

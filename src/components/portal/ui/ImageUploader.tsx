@@ -24,7 +24,7 @@ interface ImageUploaderProps {
   currentImageUrl?: string;
   onImageUploaded: (url: string) => void;
   onImageRemoved?: () => void;
-  bucket?: 'avatars' | 'services' | 'business' | 'products';
+  bucket?: 'avatars' | 'services' | 'business' | 'products' | 'gallery';
   aspectRatio?: 'square' | 'wide' | 'banner';
   label?: string;
   helperText?: string;
@@ -46,7 +46,7 @@ const ASPECT_RATIOS: Record<string, number> = {
 };
 
 const MAX_OUTPUT_BYTES = 5 * 1024 * 1024; // 5 MB storage limit
-const MIN_ZOOM = 1;
+const MIN_ZOOM = 0.99;
 const MAX_ZOOM = 10;
 const DEFAULT_MAX_DIMENSION = 2048;
 
@@ -582,16 +582,47 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 
   /* -------------------------- URL handling --------------------------- */
 
-  const handleUrlLoad = () => {
+  const handleUrlLoad = async () => {
     const url = urlInput.trim();
     if (!url) {
       setUploadError('Please enter an image URL.');
       return;
     }
     setUploadError(null);
-    setCropSource(url);
     setUrlInput('');
     setSourceMode(null);
+
+    // Test if the image host allows CORS — if not, skip cropping and upload directly
+    const isCorsEnabled = await new Promise<boolean>(resolve => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = url;
+    });
+
+    if (isCorsEnabled) {
+      setCropSource(url);
+    } else {
+      // Host blocks CORS — fetch as blob and upload directly without cropping
+      setIsUploading(true);
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const validation = storageService.validateImage(blob as File);
+        if (!validation.valid) {
+          throw new Error(validation.error || 'Invalid image file');
+        }
+        const file = new File([blob], 'image.jpg', { type: blob.type || 'image/jpeg' });
+        const result = await storageService.uploadImage(file, bucket as any);
+        setPreviewUrl(result.url);
+        onImageUploaded(result.url);
+      } catch (err: any) {
+        setUploadError(err.message || 'Failed to upload image from URL.');
+      } finally {
+        setIsUploading(false);
+      }
+    }
   };
 
   /* -------------------------- Crop lifecycle ------------------------- */

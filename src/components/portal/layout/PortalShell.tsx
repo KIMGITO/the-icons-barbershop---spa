@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { 
   LayoutDashboard, Calendar, Scissors, Users, Building2, 
   User, Clock, LogOut, ExternalLink, Menu, X, Sparkles, 
-  ChevronRight, ArrowLeftRight, MessageSquare, Package, ReceiptText 
+  ChevronRight, ArrowLeftRight, MessageSquare, Package, ReceiptText,
+  Image
 } from 'lucide-react';
 import { useAuthStore } from '../../../stores/authStore';
 // import { SEEDED_STAFF_ACCOUNTS } from '../../../services/authService';
@@ -38,6 +39,7 @@ export const PortalShell: React.FC<PortalShellProps> = ({
     { id: 'receipts', label: 'Receipts & Schedules', icon: ReceiptText },
     { id: 'messages', label: 'SMS Messages', icon: MessageSquare },
     { id: 'business', label: 'Business Profile', icon: Building2 },
+    { id: 'gallery', label: 'Style Gallery', icon: Image },
   ];
 
   const providerNav = [
@@ -246,34 +248,10 @@ export const PortalShell: React.FC<PortalShellProps> = ({
         )}
 
         {/* Main View Container */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pb-20 md:pb-8">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pb-8">
           {children}
         </main>
       </div>
-
-      {/* Mobile Bottom Navigation Bar (Touch targets >= 44px) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-md border-t border-border flex items-center justify-around h-16 px-1">
-        {navItems.slice(0, 4).map((item) => {
-          const Icon = item.icon;
-          const isActive = currentTab === item.id;
-
-          return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => handleNavClick(item.id)}
-              className={`flex flex-col items-center justify-center flex-1 h-full min-h-[44px] transition-colors ${
-                isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              <span className={`text-[10px] mt-1 truncate ${isActive ? 'font-bold' : 'font-normal'}`}>
-                {item.label.split(' ')[0]}
-              </span>
-            </button>
-          );
-        })}
-      </nav>
 
       {/* Global Staff Toast Notifications */}
       <ToastContainer />

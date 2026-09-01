@@ -1,5 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
+import { TimeRange } from '../types';
 import { 
   MapPin, 
   Phone, 
@@ -12,6 +13,13 @@ import {
   Pin
 } from 'lucide-react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
+
+/** Format a TimeRange (24h HH:MM) into a display string like "09:00 – 18:00" or "Closed" */
+const formatHoursDisplay = (hours: TimeRange): string => {
+  if (!hours || !hours.start || !hours.end) return 'Closed';
+  if (hours.start === '00:00' && hours.end === '00:00') return 'Closed';
+  return `${hours.start} – ${hours.end}`;
+};
 
 interface LocationContactSectionProps {
   isStandalonePage?: boolean;
@@ -107,15 +115,15 @@ export const LocationContactSection: React.FC<LocationContactSectionProps> = ({
               <div className="grid grid-cols-3 gap-1 text-center divide-x divide-border pt-0.5">
                 <div className="px-1">
                   <span className="block text-[10px] text-muted-foreground font-light">Mon – Fri</span>
-                  <span className="font-mono text-white text-[11px] font-medium leading-tight">{businessInfo.hours.weekdays}</span>
+                  <span className="font-mono text-white text-[11px] font-medium leading-tight">{formatHoursDisplay(businessInfo.hours.weekdays)}</span>
                 </div>
                 <div className="px-1">
                   <span className="block text-[10px] text-muted-foreground font-light">Saturday</span>
-                  <span className="font-mono text-white text-[11px] font-medium leading-tight">{businessInfo.hours.saturday}</span>
+                  <span className="font-mono text-white text-[11px] font-medium leading-tight">{formatHoursDisplay(businessInfo.hours.saturday)}</span>
                 </div>
                 <div className="px-1">
                   <span className="block text-[10px] text-muted-foreground font-light">Sun & Hol</span>
-                  <span className="font-mono text-white text-[11px] font-medium leading-tight">{businessInfo.hours.sunday}</span>
+                  <span className="font-mono text-white text-[11px] font-medium leading-tight">{formatHoursDisplay(businessInfo.hours.sunday)}</span>
                 </div>
               </div>
             </div>

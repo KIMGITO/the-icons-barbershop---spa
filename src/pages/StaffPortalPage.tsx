@@ -9,6 +9,7 @@ import { ProvidersPage } from '../components/portal/providers/ProvidersPage';
 import { ServicesManagementPage } from '../components/portal/services/ServicesManagementPage';
 import { ProductsManagementPage } from '../components/portal/products/ProductsManagementPage';
 import { BusinessManagementPage } from '../components/portal/business/BusinessManagementPage';
+import { GalleryManagementPage } from '../components/portal/gallery/GalleryManagementPage';
 import { ReceiptLookup } from '../components/portal/receipts/ReceiptLookup';
 import { StaffProfileView } from '../components/portal/staff/StaffProfileView';
 import { StaffScheduleView } from '../components/portal/staff/StaffScheduleView';
@@ -28,7 +29,7 @@ export const StaffPortalPage: React.FC<StaffPortalPageProps> = ({ onExitToPublic
 
   // If role changes, ensure current tab is valid for that role
   useEffect(() => {
-    if (role === 'provider' && (currentTab === 'providers' || currentTab === 'services' || currentTab === 'products' || currentTab === 'business' || currentTab === 'messages')) {
+    if (role === 'provider' && (currentTab === 'providers' || currentTab === 'services' || currentTab === 'products' || currentTab === 'business' || currentTab === 'messages' || currentTab === 'gallery')) {
       setCurrentTab('overview');
     }
   }, [role, currentTab]);
@@ -62,6 +63,8 @@ export const StaffPortalPage: React.FC<StaffPortalPageProps> = ({ onExitToPublic
         return role === 'admin' ? <MessagesDashboard /> : <PortalOverview onNavigateTab={(t) => setCurrentTab(t)} />;
       case 'business':
         return role === 'admin' ? <BusinessManagementPage /> : <PortalOverview onNavigateTab={(t) => setCurrentTab(t)} />;
+      case 'gallery':
+        return role === 'admin' ? <GalleryManagementPage /> : <PortalOverview onNavigateTab={(t) => setCurrentTab(t)} />;
       case 'schedule':
         return <StaffScheduleView />;
       case 'receipts':

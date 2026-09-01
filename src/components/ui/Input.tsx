@@ -61,6 +61,12 @@ export const Input = React.forwardRef<HTMLElement, InputProps>(
     }
 
     // Input rendering
+    // For number inputs, use text type with numeric inputMode so users can
+    // clear the value (including "0") and enter decimals like "0."
+    const isNumber = effectiveType === 'number';
+    const inputType = isNumber ? 'text' : effectiveType;
+    const inputMode = isNumber ? 'numeric' as const : undefined;
+
     return (
       <div className="relative w-full gap-4">
         {/* {icon && iconPosition === 'right' && (
@@ -71,7 +77,8 @@ export const Input = React.forwardRef<HTMLElement, InputProps>(
         <input
           ref={ref as React.Ref<HTMLInputElement>}
           disabled={disabled}
-          type={effectiveType}
+          type={inputType}
+          inputMode={inputMode}
           className={classes}
           {...props}
         />
