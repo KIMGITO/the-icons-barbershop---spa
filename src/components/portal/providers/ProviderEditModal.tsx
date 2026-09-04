@@ -109,7 +109,6 @@ export const ProviderEditModal: React.FC<ProviderEditModalProps> = ({
           firstName: firstName.trim(),
           lastName: lastName.trim(),
           fullName,
-          slug: generatedSlug,
           email: email.trim().toLowerCase(),
           phone: phone.trim(),
           providerType,

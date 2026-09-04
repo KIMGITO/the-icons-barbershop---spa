@@ -46,7 +46,7 @@ const ASPECT_RATIOS: Record<string, number> = {
 };
 
 const MAX_OUTPUT_BYTES = 5 * 1024 * 1024; // 5 MB storage limit
-const MIN_ZOOM = 0.99;
+const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 10;
 const DEFAULT_MAX_DIMENSION = 2048;
 

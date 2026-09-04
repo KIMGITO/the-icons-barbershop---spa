@@ -44,9 +44,9 @@ export const smsService = {
     return data;
   },
 
-  async getMessages(filter?: { search?: string; status?: string; smsType?: string }): Promise<SmsMessageRecord[]> {
+  async getMessages(filter?: { search?: string; status?: string; smsType?: string; limit?: number }): Promise<SmsMessageRecord[]> {
     if (!isSupabaseConfigured) return [];
-    let query = supabase.from('sms_messages').select('*').order('created_at', { ascending: false }).limit(500);
+    let query = supabase.from('sms_messages').select('*').order('created_at', { ascending: false }).limit(filter?.limit || 500);
     if (filter?.status && filter.status !== 'all') query = query.eq('status', filter.status);
     if (filter?.smsType && filter.smsType !== 'all') query = query.eq('sms_type', filter.smsType);
     let { data, error } = await query;

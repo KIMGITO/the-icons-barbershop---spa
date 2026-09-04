@@ -1,5 +1,11 @@
+-- ============================================================
+-- 0. HELPER FUNCTIONS (updated_at)
+-- ============================================================
+create or replace function public.handle_updated_at()
+returns trigger as $$ begin new.updated_at = now(); return new; end;
+$$ language plpgsql;
+
 -- 1. EXTENSIONS
-create extension if not exists "pgcrypto";
 
 -- 2. ENUMS
 do $$ begin create type staff_role as enum ('admin', 'provider'); exception when duplicate_object then null; end $$;
@@ -9,7 +15,9 @@ do $$ begin create type booking_status as enum ('pending', 'confirmed', 'complet
 do $$ begin create type payment_status as enum ('paid', 'deposit-paid', 'unpaid', 'refunded'); exception when duplicate_object then null; end $$;
 do $$ begin create type service_status as enum ('active', 'inactive', 'archived'); exception when duplicate_object then null; end $$;
 
+-- ============================================================
 -- 3. BUSINESSES
+-- ============================================================
 create table if not exists public.businesses (
   id uuid primary key default gen_random_uuid(),
   name text not null default 'The Icons Barber & Spa',
@@ -19,6 +27,46 @@ create table if not exists public.businesses (
   logo_url text, cover_image_url text,
   created_at timestamptz not null default now(), updated_at timestamptz not null default now()
 );
+
+-- ============================================================
+-- 3.5 SERVICE CATEGORIES (References public.businesses)
+-- ============================================================
+create table if not exists public.service_categories (
+  id uuid primary key default gen_random_uuid(),
+  slug text unique not null,
+  name text not null,
+  description text,
+  icon text,
+  sort_order int not null default 0,
+  is_active boolean not null default true,
+  business_id uuid references public.businesses(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists idx_service_categories_business on public.service_categories(business_id);
+create index if not exists idx_service_categories_active on public.service_categories(is_active);
+
+do $$ begin create trigger set_updated_at before update on public.service_categories for each row execute procedure public.handle_updated_at(); exception when duplicate_object then null; end $$;
+
+-- ============================================================
+-- 3.6 PRODUCT CATEGORIES
+-- ============================================================
+create table if not exists public.product_categories (
+  id uuid primary key default gen_random_uuid(),
+  slug text unique not null,
+  name text not null,
+  description text,
+  icon text,
+  sort_order int not null default 0,
+  is_active boolean not null default true,
+  business_id uuid references public.businesses(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists idx_product_categories_business on public.product_categories(business_id);
+create index if not exists idx_product_categories_active on public.product_categories(is_active);
+
+do $$ begin create trigger set_updated_at before update on public.product_categories for each row execute procedure public.handle_updated_at(); exception when duplicate_object then null; end $$;
 
 -- 4. SERVICE PROVIDERS
 create table if not exists public.service_providers (
@@ -307,24 +355,9 @@ alter publication supabase_realtime add table public.bookings;
 alter publication supabase_realtime add table public.service_providers;
 alter publication supabase_realtime add table public.services;
 alter publication supabase_realtime add table public.customers;-- ============================================================
--- 18. SERVICE CATEGORIES
+-- 18. SERVICE CATEGORIES (Moved up before services)
 -- ============================================================
-create table if not exists public.service_categories (
-  id uuid primary key default gen_random_uuid(),
-  slug text unique not null,
-  name text not null,
-  description text,
-  icon text,
-  sort_order int not null default 0,
-  is_active boolean not null default true,
-  business_id uuid references public.businesses(id) on delete cascade,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-create index if not exists idx_service_categories_business on public.service_categories(business_id);
-create index if not exists idx_service_categories_active on public.service_categories(is_active);
 
-do $$ begin create trigger set_updated_at before update on public.service_categories for each row execute procedure public.handle_updated_at(); exception when duplicate_object then null; end $$;
 
 -- ============================================================
 -- 19. PRODUCTS & PRODUCT REVIEWS

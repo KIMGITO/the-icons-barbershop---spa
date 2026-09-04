@@ -25,7 +25,7 @@ export function parseTimeToMinutes(timeStr: string): number {
   return 0;
 }
 
-export function minutesToTimeString(minutes: number, format: '12' | '24' = '24'): string {
+export function minutesToTimeString(minutes: number, format: '12' | '24' = '12'): string {
   const boundedMin = Math.max(0, Math.min(24 * 60 - 1, minutes));
   const hour24 = Math.floor(boundedMin / 60);
   const min = boundedMin % 60;
@@ -90,7 +90,7 @@ export function checkBookingConflict(
 export function generateTimeSlots(startHour = 8, endHour = 20, intervalMinutes = SLOT_INTERVAL_MINUTES): string[] {
   const slots: string[] = [];
   for (let min = startHour * 60; min < endHour * 60; min += intervalMinutes) {
-    slots.push(minutesToTimeString(min, '24'));
+    slots.push(minutesToTimeString(min, '12'));
   }
   return slots;
 }

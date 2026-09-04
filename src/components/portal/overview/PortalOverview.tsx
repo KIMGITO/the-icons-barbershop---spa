@@ -11,6 +11,8 @@ import { StaffBooking } from '../../../types/staff';
 import { Button } from '../../ui/Button';
 import { Badge } from '../../ui/Badge';
 import { BookingDrawer } from '../bookings/BookingDrawer';
+import { NewBookingModal } from '../bookings/NewBookingModal';
+import { BookingDetailsDrawer } from '../bookings/BookingDetailsDrawer';
 import { MpesaPaymentModal } from '../payments/MpesaPaymentModal';
 import { smsService, SmsMessageRecord } from '../../../services/smsService';
 
@@ -25,7 +27,9 @@ export const PortalOverview: React.FC<PortalOverviewProps> = ({ onNavigateTab })
     loadBookings, 
     recordPayment, 
     openCreateDrawer, 
-    openViewDrawer 
+    openViewDrawer,
+    selectedBooking,
+    setSelectedBooking
   } = useBookingStore();
   const { providers, loadProviders } = useProviderStore();
 
@@ -375,6 +379,11 @@ export const PortalOverview: React.FC<PortalOverviewProps> = ({ onNavigateTab })
       </div>
 
       <BookingDrawer />
+      <BookingDetailsDrawer
+        isOpen={Boolean(selectedBooking)}
+        onClose={() => setSelectedBooking(null)}
+        booking={selectedBooking}
+      />
 
       {/* M-Pesa Quick Modal */}
       {paymentBooking && (

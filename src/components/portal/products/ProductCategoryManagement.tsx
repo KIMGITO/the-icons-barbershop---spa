@@ -3,7 +3,8 @@ import {
   Package, Plus, Edit, Trash2, CheckCircle2, 
   Search, AlertTriangle, Save, X, Tag
 } from 'lucide-react';
-import { productService } from '../../../services/productService';
+import { useApp } from '../../../context/AppContext';
+import { supabase } from '../../../lib/supabase';
 import { useUIStore } from '../../../stores/uiStore';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
@@ -21,6 +22,7 @@ interface ProductCategoryRow {
 
 export const ProductCategoryManagement: React.FC = () => {
   const { addToast } = useUIStore();
+  const { productCategories } = useApp();
   const [categories, setCategories] = useState<ProductCategoryRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -40,7 +42,7 @@ export const ProductCategoryManagement: React.FC = () => {
     try {
       setLoading(true);
       // Re-using adminListProductCategories if it exists, or just get from supabase
-      const { data, error } = await productService.supabase
+      const { data, error } = await supabase
         .from('product_categories')
         .select('*')
         .order('sort_order');
@@ -97,7 +99,7 @@ export const ProductCategoryManagement: React.FC = () => {
     try {
       setIsSubmitting(true);
       if (editingCategory) {
-        const { error: updateError } = await productService.supabase
+        const { error: updateError } = await supabase
           .from('product_categories')
           .update({
             name: name.trim(),
@@ -111,7 +113,7 @@ export const ProductCategoryManagement: React.FC = () => {
         if (updateError) throw updateError;
         addToast({ type: 'success', title: 'Success', message: 'Category updated' });
       } else {
-        const { error: insertError } = await productService.supabase
+        const { error: insertError } = await supabase
           .from('product_categories')
           .insert({
             name: name.trim(),
@@ -136,7 +138,7 @@ export const ProductCategoryManagement: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Delete this product category? Products in this category might become un-categorized.')) return;
     try {
-      const { error: deleteError } = await productService.supabase
+      const { error: deleteError } = await supabase
         .from('product_categories')
         .delete()
         .eq('id', id);

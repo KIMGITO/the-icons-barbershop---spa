@@ -124,6 +124,8 @@ export const useProviderStore = create<ProviderState>((set) => ({
             id: row.id,
             fullName: row.full_name,
             slug: row.slug,
+            firstName: row.first_name || row.full_name?.split(' ')[0] || '',
+            lastName: row.last_name || row.full_name?.split(' ').slice(1).join(' ') || '',
             email: row.email,
             phone: row.phone,
             avatarUrl: row.avatar_url,
@@ -132,9 +134,9 @@ export const useProviderStore = create<ProviderState>((set) => ({
             yearsExperience: row.years_experience,
             instagramHandle: row.instagram_handle,
             status: row.status,
-            createdAt: row.created_at,
             servicesOfferedIds: row.services_offered_ids || [],
-            openingHours: row.opening_hours || []
+            openingHours: row.opening_hours || [],
+            schedule: row.schedule || []
           };
           set(state => ({ 
             providers: state.providers.some(p => p.id === newItem.id) 
@@ -147,6 +149,8 @@ export const useProviderStore = create<ProviderState>((set) => ({
             id: row.id,
             fullName: row.full_name,
             slug: row.slug,
+            firstName: row.first_name || row.full_name?.split(' ')[0] || '',
+            lastName: row.last_name || row.full_name?.split(' ').slice(1).join(' ') || '',
             email: row.email,
             phone: row.phone,
             avatarUrl: row.avatar_url,
@@ -155,9 +159,9 @@ export const useProviderStore = create<ProviderState>((set) => ({
             yearsExperience: row.years_experience,
             instagramHandle: row.instagram_handle,
             status: row.status,
-            createdAt: row.created_at,
             servicesOfferedIds: row.services_offered_ids || [],
-            openingHours: row.opening_hours || []
+            openingHours: row.opening_hours || [],
+            schedule: row.schedule || []
           };
           set(state => ({
             providers: state.providers.map(p => p.id === updated.id ? updated : p),
