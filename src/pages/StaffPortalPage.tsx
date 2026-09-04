@@ -54,7 +54,9 @@ export const StaffPortalPage: React.FC<StaffPortalPageProps> = ({ onExitToPublic
       case 'calendar':
         return <BookingCalendar />;
       case 'providers':
-        return role === 'admin' ? <ProvidersPage /> : <StaffProfileView />;
+        return <ProvidersPage />;
+      case 'profile':
+        return <StaffProfileView />;
       case 'services':
         return role === 'admin' ? <ServicesManagementPage /> : <PortalOverview onNavigateTab={(t) => setCurrentTab(t)} />;
       case 'products':

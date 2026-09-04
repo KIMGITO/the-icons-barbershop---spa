@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Phone, Mail, Scissors, Star, Save, CheckCircle2 } from 'lucide-react';
+import { User, Phone, Mail, Scissors, Star, Save, CheckCircle2, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '../../../stores/authStore';
 import { useProviderStore } from '../../../stores/providerStore';
 import { useServiceStore } from '../../../stores/serviceStore';
@@ -29,6 +29,13 @@ export const StaffProfileView: React.FC = () => {
   const [avatarUrl, setAvatarUrl] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
+  // Password change state
+  const [showPasswordSection, setShowPasswordSection] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
   useEffect(() => {
     if (currentProvider) {
       setPhone(currentProvider.phone || '');
@@ -38,16 +45,58 @@ export const StaffProfileView: React.FC = () => {
     }
   }, [currentProvider]);
 
-  if (!currentProvider) {
-    return <div className="p-8 text-center text-xs text-muted-foreground">Loading artisan profile...</div>;
-  }
-
-  const assignedServices = (currentProvider.servicesOfferedIds || [])
+  const assignedServices = (currentProvider?.servicesOfferedIds || [])
     .map(id => services.find(s => s.id === id))
     .filter(Boolean);
 
   const handleSubmit = async (e: React.FormEvent) => {
+  const { changePassword } = useAuthStore();
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!newPassword || newPassword !== confirmPassword) {
+      addToast({
+        type: 'error',
+        title: 'Validation Error',
+        message: 'Passwords do not match or are empty.'
+      });
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      addToast({
+        type: 'error',
+        title: 'Weak Password',
+        message: 'Password must be at least 8 characters long.'
+      });
+      return;
+    }
+
+    try {
+      setIsChangingPassword(true);
+      await changePassword(newPassword);
+      setIsChangingPassword(false);
+      setNewPassword('');
+      setConfirmPassword('');
+      setShowPasswordSection(false);
+      addToast({
+        type: 'success',
+        title: 'Password Updated',
+        message: 'Your password has been changed successfully.'
+      });
+    } catch (err: any) {
+      setIsChangingPassword(false);
+      addToast({
+        type: 'error',
+        title: 'Update Failed',
+        message: err.message || 'Failed to change password.'
+      });
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentProvider) return;
     try {
       setIsSaving(true);
       await updateProvider(currentProvider.id, {
@@ -60,7 +109,7 @@ export const StaffProfileView: React.FC = () => {
       addToast({
         type: 'success',
         title: 'Profile Updated',
-        message: 'Your personal artisan profile has been saved successfully.'
+        message: 'Your profile has been saved successfully.'
       });
     } catch (err: any) {
       setIsSaving(false);
@@ -73,12 +122,16 @@ export const StaffProfileView: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-3xl space-y-6">
+    <div className="max-w-3xl space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card p-4 sm:p-5 rounded-2xl border border-border">
         <div>
           <div className="flex items-center gap-2">
-            <Badge variant="primary">{PROVIDER_TYPE_LABELS[currentProvider.providerType] || currentProvider.providerType}</Badge>
-            {currentProvider.rating && (
+            {currentProvider ? (
+              <Badge variant="primary">{PROVIDER_TYPE_LABELS[currentProvider.providerType] || currentProvider.providerType}</Badge>
+            ) : (
+              <Badge variant="secondary">Administrator</Badge>
+            )}
+            {currentProvider?.rating && (
               <span className="text-xs text-primary font-semibold flex items-center gap-1">
                 <Star className="w-3.5 h-3.5 fill-primary" />
                 {currentProvider.rating.toFixed(2)} Rating
@@ -86,26 +139,30 @@ export const StaffProfileView: React.FC = () => {
             )}
           </div>
           <h1 className="text-xl font-bold text-foreground mt-1">
-            {currentProvider.fullName}
+            {currentProvider?.fullName || user?.fullName}
           </h1>
           <p className="text-xs text-muted-foreground">
-            Artisan Station • {currentProvider.email}
+            {user?.role === 'admin' ? 'Studio Management' : 'Artisan Station'} • {user?.email}
           </p>
         </div>
 
-        <Button
-          type="submit"
-          variant="primary"
-          size="sm"
-          disabled={isSaving}
-          className="text-xs font-bold"
-        >
-          <Save className="w-3.5 h-3.5 mr-1" />
-          <span>{isSaving ? 'Saving...' : 'Save Profile'}</span>
-        </Button>
+        {currentProvider && (
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            variant="primary"
+            size="sm"
+            disabled={isSaving}
+            className="text-xs font-bold"
+          >
+            <Save className="w-3.5 h-3.5 mr-1" />
+            <span>{isSaving ? 'Saving...' : 'Save Profile'}</span>
+          </Button>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 items-start bg-card p-5 rounded-2xl border border-border">
+      {currentProvider && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 items-start bg-card p-5 rounded-2xl border border-border">
         <div className="sm:col-span-1">
           <ImageUploader
             currentImageUrl={avatarUrl}
@@ -163,32 +220,112 @@ export const StaffProfileView: React.FC = () => {
       </div>
 
       {/* Services Assigned by Management */}
-      <div className="bg-card p-5 rounded-2xl border border-border space-y-3">
+      {currentProvider && assignedServices.length > 0 && (
+        <div className="bg-card p-5 rounded-2xl border border-border space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <Scissors className="w-3.5 h-3.5 text-primary" />
+              Your Assigned Services
+            </h2>
+            <span className="text-[11px] text-muted-foreground">
+              Managed by Studio Executive
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {assignedServices.map((s: any) => (
+              <div
+                key={s.id}
+                className="p-3 bg-muted/40 rounded-xl border border-border flex items-center justify-between text-xs"
+              >
+                <div>
+                  <span className="font-bold text-foreground block">{s.name}</span>
+                  <span className="text-[10px] text-muted-foreground">{s.durationMinutes} min • KSh {s.priceKsh.toLocaleString()}</span>
+                </div>
+                <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Security & Password Section */}
+      <div className="bg-card p-5 rounded-2xl border border-border space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-            <Scissors className="w-3.5 h-3.5 text-primary" />
-            Your Assigned Services
+            <Lock className="w-3.5 h-3.5 text-primary" />
+            Security & Authentication
           </h2>
-          <span className="text-[11px] text-muted-foreground">
-            Managed by Studio Executive
-          </span>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowPasswordSection(!showPasswordSection)}
+            className="text-[10px] h-7 px-3"
+          >
+            {showPasswordSection ? 'Cancel' : 'Change Password'}
+          </Button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {assignedServices.map((s: any) => (
-            <div
-              key={s.id}
-              className="p-3 bg-muted/40 rounded-xl border border-border flex items-center justify-between text-xs"
-            >
-              <div>
-                <span className="font-bold text-foreground block">{s.name}</span>
-                <span className="text-[10px] text-muted-foreground">{s.durationMinutes} min • KSh {s.priceKsh.toLocaleString()}</span>
+        {showPasswordSection ? (
+          <form onSubmit={handlePasswordChange} className="space-y-4 pt-2 animate-in slide-in-from-top-2 duration-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  New Password
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Min. 8 characters"
+                    className="rounded-xl py-2 text-xs pr-10"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
               </div>
-              <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+
+              <div className="space-y-1">
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Confirm New Password
+                </label>
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Repeat new password"
+                  className="rounded-xl py-2 text-xs"
+                  required
+                />
+              </div>
             </div>
-          ))}
-        </div>
+
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                variant="primary"
+                size="sm"
+                disabled={isChangingPassword}
+                className="text-xs font-bold"
+              >
+                {isChangingPassword ? 'Updating...' : 'Update Password'}
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <p className="text-[11px] text-muted-foreground">
+            Update your account password to ensure your account remains secure.
+          </p>
+        )}
       </div>
-    </form>
+    </div>
   );
 };

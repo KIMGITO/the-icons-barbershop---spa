@@ -32,6 +32,7 @@ export const PortalShell: React.FC<PortalShellProps> = ({
   const adminNav = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'bookings', label: 'Bookings', icon: Clock },
+    { id: 'profile', label: 'My Profile', icon: User },
     { id: 'calendar', label: 'Calendar', icon: Calendar },
     { id: 'providers', label: 'Providers', icon: Users },
     { id: 'services', label: 'Services & Pricing', icon: Scissors },
