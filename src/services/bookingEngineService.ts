@@ -66,7 +66,47 @@ export const bookingEngineService = {
     if (error) {
       return { success: false, error: error.message };
     }
-    return data as CheckAndReserveResult;
+    const row = data as any;
+    return {
+      success: !!row.success,
+      error: row.error,
+      bookingId: row.booking_id,
+      referenceNumber: row.reference_number,
+      receiptCode: row.receipt_code,
+      staffId: row.staff_id,
+      staffName: row.staff_name,
+      startTs: row.start_ts,
+      endTs: row.end_ts,
+      totalPriceKsh: Number(row.total_price_ksh || 0),
+      depositPaidKsh: Number(row.deposit_paid_ksh || 0),
+      remainingBalanceKsh: Number(row.remaining_balance_ksh || 0),
+      status: row.status,
+      paymentStatus: row.payment_status
+    };
+  },
+
+  /**
+   * Create a booking atomically with full availability validation.
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    const row = data as any;
+    return {
+      success: !!row.success,
+      error: row.error,
+      bookingId: row.booking_id,
+      referenceNumber: row.reference_number,
+      receiptCode: row.receipt_code,
+      staffId: row.staff_id,
+      staffName: row.staff_name,
+      startTs: row.start_ts,
+      endTs: row.end_ts,
+      totalPriceKsh: Number(row.total_price_ksh || 0),
+      depositPaidKsh: Number(row.deposit_paid_ksh || 0),
+      remainingBalanceKsh: Number(row.remaining_balance_ksh || 0),
+      status: row.status,
+      paymentStatus: row.payment_status
+    };
   },
 
   /**
@@ -113,7 +153,23 @@ export const bookingEngineService = {
     if (error) {
       return { success: false, error: error.message };
     }
-    return data as CheckAndReserveResult;
+    const row = data as any;
+    return {
+      success: !!row.success,
+      error: row.error,
+      bookingId: row.booking_id,
+      referenceNumber: row.reference_number,
+      receiptCode: row.receipt_code,
+      staffId: row.staff_id,
+      staffName: row.staff_name,
+      startTs: row.start_ts,
+      endTs: row.end_ts,
+      totalPriceKsh: Number(row.total_price_ksh || 0),
+      depositPaidKsh: Number(row.deposit_paid_ksh || 0),
+      remainingBalanceKsh: Number(row.remaining_balance_ksh || 0),
+      status: row.status,
+      paymentStatus: row.payment_status
+    };
   },
 
   /**

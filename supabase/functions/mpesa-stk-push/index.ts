@@ -20,9 +20,20 @@ const TransactionDesc = 'The Icons Barber & Spa Payment';
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   try {
-    const { phoneNumber, amountKsh, bookingId, referenceNumber, customerName } = await req.json();
+    const body = await req.json();
+    console.log('STK Push Request Body:', body);
+    const { phoneNumber, amountKsh, bookingId, referenceNumber, customerName } = body;
+
     if (!phoneNumber || !amountKsh || !bookingId) {
-      return Response.json({ error: 'phoneNumber, amountKsh, bookingId are required' }, { status: 400, headers: corsHeaders });
+      const missing = [];
+      if (!phoneNumber) missing.push('phoneNumber');
+      if (!amountKsh) missing.push('amountKsh');
+      if (!bookingId) missing.push('bookingId');
+      console.error('Missing required fields:', missing);
+      return Response.json({ 
+        error: `phoneNumber, amountKsh, bookingId are required. Missing: ${missing.join(', ')}`,
+        received: body 
+      }, { status: 400, headers: corsHeaders });
     }
     if (amountKsh < 1) {
       return Response.json({ error: 'Amount must be greater than 0' }, { status: 400, headers: corsHeaders });
