@@ -35,6 +35,7 @@ import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 import { Badge } from '../../ui/Badge';
 import { ThemeSelect } from '../../ui/ThemeSelect';
+import { ProductCategoryManagement } from './ProductCategoryManagement';
 
 type ProductFormState = {
   name: string;
@@ -203,7 +204,7 @@ export const ProductsManagementPage: React.FC = () => {
     deleteServiceReview
   } = useProductAdminStore();
 
-  const [activeTab, setActiveTab] = useState<'products' | 'reviews'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'reviews' | 'categories'>('products');
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -472,7 +473,28 @@ export const ProductsManagementPage: React.FC = () => {
             </span>
           )}
         </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('categories')}
+          className={`px-3 py-2 text-xs font-bold rounded-t-lg transition-all flex items-center gap-1.5 ${
+            activeTab === 'categories'
+              ? 'bg-primary text-black'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+          }`}
+        >
+          <Layers className="w-3.5 h-3.5" />
+          Categories
+        </button>
       </div>
+
+      {/* ============ CATEGORIES TAB ============ */}
+      {activeTab === 'categories' && (
+        <div className="space-y-4">
+          <div className="bg-card p-5 rounded-2xl border border-border">
+            <ProductCategoryManagement />
+          </div>
+        </div>
+      )}
 
       {/* ============ PRODUCTS TAB ============ */}
       {activeTab === 'products' && (

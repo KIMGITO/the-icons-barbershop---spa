@@ -186,6 +186,7 @@ export const providerService = {
     if (updates.bio !== undefined) db.bio = updates.bio;
     if (updates.avatarUrl !== undefined) db.avatar_url = updates.avatarUrl;
     if (updates.status !== undefined) db.status = updates.status;
+    if (updates.slug !== undefined) db.slug = updates.slug;
     if (updates.servicesOfferedIds !== undefined) db.services_offered_ids = updates.servicesOfferedIds;
     if (updates.schedule !== undefined) db.schedule = updates.schedule;
     if (updates.yearsExperience !== undefined) db.years_experience = updates.yearsExperience;

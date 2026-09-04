@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Calendar, Scissors, Users, Building2, 
   User, Clock, LogOut, ExternalLink, Menu, X, Sparkles, 
   ChevronRight, ArrowLeftRight, MessageSquare, Package, ReceiptText,
-  Image, HelpCircle
+  Image, HelpCircle, Briefcase
 } from 'lucide-react';
 import { useAuthStore } from '../../../stores/authStore';
 import { Badge } from '../../ui/Badge';
@@ -28,26 +28,17 @@ export const PortalShell: React.FC<PortalShellProps> = ({
 
   // Navigation Items per Role
   const adminNav = [
-    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'bookings', label: 'Bookings', icon: Clock },
-    { id: 'profile', label: 'My Profile', icon: User },
-    { id: 'calendar', label: 'Calendar', icon: Calendar },
-    { id: 'providers', label: 'Providers', icon: Users },
-    { id: 'services', label: 'Services & Pricing', icon: Scissors },
-    { id: 'products', label: 'Products & Reviews', icon: Package },
-    { id: 'receipts', label: 'Receipts & Schedules', icon: ReceiptText },
+    { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'operations', label: 'Operations', icon: Clock },
+    { id: 'catalog', label: 'Catalog', icon: Briefcase },
+    { id: 'team', label: 'Team', icon: Users },
     { id: 'messages', label: 'SMS Messages', icon: MessageSquare },
-    { id: 'business', label: 'Business Profile', icon: Building2 },
-    { id: 'faqs', label: 'FAQ Management', icon: HelpCircle },
-    { id: 'gallery', label: 'Style Gallery', icon: Image },
+    { id: 'business', label: 'Settings', icon: Building2 },
   ];
 
   const providerNav = [
-    { id: 'overview', label: 'Station Overview', icon: LayoutDashboard },
-    { id: 'bookings', label: 'My Bookings', icon: Clock },
-    { id: 'calendar', label: 'Calendar', icon: Calendar },
-    { id: 'schedule', label: 'My Schedule', icon: Calendar },
-    { id: 'receipts', label: 'Receipts & Schedules', icon: ReceiptText },
+    { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'operations', label: 'My Schedule', icon: Clock },
     { id: 'profile', label: 'My Profile', icon: User },
   ];
 

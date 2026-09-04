@@ -30,26 +30,9 @@ import { updatePageSEO } from './utils/seo';
 
 const MainContent: React.FC = () => {
   const { currentRoute, navigateTo, openBookingModal, refreshData, services, faqs, products, barbers, gallery, serviceCategories } = useApp();
-  const subscribeToServices = useServiceStore(state => state.subscribeToServices);
-  const subscribeToProducts = useProductAdminStore(state => state.subscribeToProducts);
-  const subscribeToProviders = useProviderStore(state => state.subscribeToProviders);
 
-  // Initialize Global Real-time Subscriptions
-  useEffect(() => {
-    const unsubServices = subscribeToServices();
-    const unsubProducts = subscribeToProducts();
-    const unsubProviders = subscribeToProviders();
-
-    // Re-fetch category and business data when related tables change
-    // AppContext already has some subscriptions, but ensuring we have a global hook here if needed
-    // Actually AppContext.tsx handles most of it now.
-
-    return () => {
-      unsubServices();
-      unsubProducts();
-      unsubProviders();
-    };
-  }, [subscribeToServices, subscribeToProducts, subscribeToProviders]);
+  // Global Real-time Subscriptions are now handled in AppContext.tsx to ensure 
+  // public UI is always in sync without redundant store subscriptions.
 
   // Root SEO initialization on route change
   useEffect(() => {

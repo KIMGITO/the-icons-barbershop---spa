@@ -1,19 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Building2, Phone, Mail, MapPin, Clock, Share2, 
-  CheckCircle2, Save, Sparkles 
+  CheckCircle2, Save, Sparkles, HelpCircle, ArrowLeftRight
 } from 'lucide-react';
 import { StaffBusinessProfile } from '../../../types/staff';
 import { useBusinessStore } from '../../../stores/businessStore';
 import { useUIStore } from '../../../stores/uiStore';
+import { CategoryManagement } from './CategoryManagement';
+import { ProductCategoryManagement } from '../products/ProductCategoryManagement';
 import { ImageUploader } from '../ui/ImageUploader';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
+import { FAQManagementPage } from './FAQManagementPage';
+import { TransactionsPage } from '../payments/TransactionsPage';
 
 export const BusinessManagementPage: React.FC = () => {
   const { profile, loadBusinessProfile, updateBusinessProfile, loading } = useBusinessStore();
   const { addToast } = useUIStore();
 
+  const [activeSubTab, setActiveSubTab] = useState<'profile' | 'faqs' | 'transactions'>('profile');
   const [formData, setFormData] = useState<StaffBusinessProfile | null>(profile);
   const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -92,39 +97,78 @@ export const BusinessManagementPage: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card p-4 sm:p-5 rounded-2xl border border-border">
-        <div>
-          <h1 className="text-lg sm:text-xl font-bold text-foreground">
-            Business Profile & Location
-          </h1>
-          <p className="text-xs text-muted-foreground">
-            Official shop branding, contact channels, operating hours, and location info
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {savedSuccess && (
-            <span className="text-xs font-semibold text-success flex items-center gap-1 animate-in fade-in">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              Saved
-            </span>
-          )}
-          <Button
-            type="submit"
-            variant="primary"
-            size="sm"
-            disabled={isSaving}
-            className="text-xs font-bold"
-          >
-            <Save className="w-3.5 h-3.5 mr-1" />
-            <span>{isSaving ? 'Saving...' : 'Save Profile'}</span>
-          </Button>
-        </div>
+    <div className="space-y-6 max-w-4xl">
+      {/* Tab Header */}
+      <div className="flex items-center gap-2 border-b border-border mb-4 overflow-x-auto no-scrollbar pb-1">
+        <button
+          onClick={() => setActiveSubTab('profile')}
+          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold transition-all border-b-2 ${
+            activeSubTab === 'profile'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Building2 className="w-4 h-4" />
+          <span>Profile & Location</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('faqs')}
+          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold transition-all border-b-2 ${
+            activeSubTab === 'faqs'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <HelpCircle className="w-4 h-4" />
+          <span>FAQs</span>
+        </button>
+        <button
+          onClick={() => setActiveSubTab('transactions')}
+          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold transition-all border-b-2 ${
+            activeSubTab === 'transactions'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <ArrowLeftRight className="w-4 h-4" />
+          <span>Transactions</span>
+        </button>
       </div>
 
-      {/* Brand Imagery (Logo & Cover) */}
+      {activeSubTab === 'profile' && (
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card p-4 sm:p-5 rounded-2xl border border-border">
+            <div>
+              <h1 className="text-lg sm:text-xl font-bold text-foreground">
+                Business Profile & Location
+              </h1>
+              <p className="text-xs text-muted-foreground">
+                Official shop branding, contact channels, operating hours, and location info
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {savedSuccess && (
+                <span className="text-xs font-semibold text-success flex items-center gap-1 animate-in fade-in">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  Saved
+                </span>
+              )}
+              <Button
+                type="submit"
+                variant="primary"
+                size="sm"
+                disabled={isSaving}
+                className="text-xs font-bold"
+              >
+                <Save className="w-3.5 h-3.5 mr-1" />
+                <span>{isSaving ? 'Saving...' : 'Save Profile'}</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Brand Imagery (Logo & Cover) */}
       <div className="bg-card p-5 rounded-2xl border border-border space-y-4">
         <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5 text-primary" /> Brand Imagery
@@ -268,6 +312,17 @@ export const BusinessManagementPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Service Categories Section */}
+      <div className="bg-card p-5 rounded-2xl border border-border space-y-4">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5 text-primary" /> Service Categories
+        </h2>
+        <p className="text-[10px] text-muted-foreground -mt-2">
+          Manage service categories used for organization and public menu filtering.
+        </p>
+        <CategoryManagement />
+      </div>
+
       {/* Operating Hours */}
       <div className="bg-card p-5 rounded-2xl border border-border space-y-4">
         <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
@@ -361,18 +416,23 @@ export const BusinessManagementPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex justify-end pt-2">
-        <Button
-          type="submit"
-          variant="primary"
-          size="sm"
-          disabled={isSaving}
-          className="text-xs font-bold px-6"
-        >
-          <Save className="w-3.5 h-3.5 mr-1" />
-          <span>{isSaving ? 'Saving...' : 'Save All Changes'}</span>
-        </Button>
-      </div>
-    </form>
+          <div className="flex justify-end pt-2">
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              disabled={isSaving}
+              className="text-xs font-bold px-6"
+            >
+              <Save className="w-3.5 h-3.5 mr-1" />
+              <span>{isSaving ? 'Saving...' : 'Save All Changes'}</span>
+            </Button>
+          </div>
+        </form>
+      )}
+
+      {activeSubTab === 'faqs' && <FAQManagementPage />}
+      {activeSubTab === 'transactions' && <TransactionsPage />}
+    </div>
   );
 };

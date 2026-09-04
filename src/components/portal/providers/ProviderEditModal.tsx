@@ -36,6 +36,7 @@ export const ProviderEditModal: React.FC<ProviderEditModalProps> = ({
   const [phone, setPhone] = useState('+254 ');
   const [providerType, setProviderType] = useState<ServiceProviderType>('barber');
   const [bio, setBio] = useState('');
+  const [slug, setSlug] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
@@ -55,6 +56,7 @@ export const ProviderEditModal: React.FC<ProviderEditModalProps> = ({
       setPhone(provider.phone);
       setProviderType(provider.providerType);
       setBio(provider.bio || '');
+      setSlug(provider.slug || '');
       setAvatarUrl(provider.avatarUrl || '');
       setStatus(provider.status);
       setSelectedServices(provider.servicesOfferedIds || []);
@@ -66,6 +68,7 @@ export const ProviderEditModal: React.FC<ProviderEditModalProps> = ({
       setPhone('+254 ');
       setProviderType('barber');
       setBio('');
+      setSlug('');
       setAvatarUrl('');
       setStatus('active');
       setSelectedServices([]);
@@ -99,11 +102,14 @@ export const ProviderEditModal: React.FC<ProviderEditModalProps> = ({
       setIsSubmitting(true);
       const fullName = `${firstName.trim()} ${lastName.trim()}`;
 
+      const generatedSlug = slug.trim() || fullName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+
       if (isCreating) {
         await addProvider({
           firstName: firstName.trim(),
           lastName: lastName.trim(),
           fullName,
+          slug: generatedSlug,
           email: email.trim().toLowerCase(),
           phone: phone.trim(),
           providerType,
@@ -118,6 +124,7 @@ export const ProviderEditModal: React.FC<ProviderEditModalProps> = ({
           firstName: firstName.trim(),
           lastName: lastName.trim(),
           fullName,
+          slug: generatedSlug,
           email: email.trim().toLowerCase(),
           phone: phone.trim(),
           providerType,
@@ -208,6 +215,20 @@ export const ProviderEditModal: React.FC<ProviderEditModalProps> = ({
                     required
                   />
                 </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  URL Slug (optional)
+                </label>
+                <Input
+                  type="text"
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value)}
+                  placeholder="e.g. samuel-mwangi"
+                  className="rounded-xl py-2 text-xs font-mono"
+                />
+                <p className="text-[9px] text-muted-foreground">Leave blank to auto-generate from name</p>
               </div>
 
               <div className="grid grid-cols-2 gap-2.5">

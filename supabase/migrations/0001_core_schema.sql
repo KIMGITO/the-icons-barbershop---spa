@@ -37,6 +37,7 @@ create index if not exists idx_providers_status on public.service_providers(stat
 create table if not exists public.services (
   id uuid primary key default gen_random_uuid(),
   slug text unique not null, name text not null,
+  category_id uuid references public.service_categories(id) on delete set null,
   category text not null default 'haircuts',
   description text, short_description text, full_description text,
   price_ksh numeric(10,2) not null default 0,
@@ -332,6 +333,7 @@ create table if not exists public.products (
   id uuid primary key default gen_random_uuid(),
   slug text unique not null,
   name text not null,
+  category_id uuid references public.product_categories(id) on delete set null,
   category text not null default 'scalp-care',
   short_description text,
   detailed_description text,

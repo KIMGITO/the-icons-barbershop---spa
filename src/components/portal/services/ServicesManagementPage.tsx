@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Scissors, Search, Plus, Clock, Edit, Trash2, CheckCircle2, 
-  User, Image as ImageIcon, Sparkles 
+  User, Image as ImageIcon, Sparkles, Layers
 } from 'lucide-react';
 import { ServiceItem } from '../../../types';
 import { useServiceStore } from '../../../stores/serviceStore';
@@ -12,6 +12,7 @@ import { Input } from '../../ui/Input';
 import { Badge } from '../../ui/Badge';
 import { ThemeSelect } from '../../ui/ThemeSelect';
 import { useApp } from '@/context/AppContext';
+import { ServiceCategoryManagement } from './ServiceCategoryManagement';
 
 export const ServicesManagementPage: React.FC = () => {
   const { 
@@ -25,6 +26,7 @@ export const ServicesManagementPage: React.FC = () => {
   const { providers, loadProviders } = useProviderStore();
   const { serviceCategories } = useApp();
 
+  const [activeTab, setActiveTab] = useState<'services' | 'categories'>('services');
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,6 +34,7 @@ export const ServicesManagementPage: React.FC = () => {
 
   // Form states
   const [name, setName] = useState('');
+  const [slug, setSlug] = useState('');
   const [category, setCategory] = useState<string>('haircuts');
   const [priceKsh, setPriceKsh] = useState<number>(1500);
   const [durationMinutes, setDurationMinutes] = useState<number>(45);
@@ -70,6 +73,7 @@ export const ServicesManagementPage: React.FC = () => {
   const handleOpenAdd = () => {
     setEditingService(null);
     setName('');
+    setSlug('');
     const firstCat = serviceCategories && serviceCategories.length > 0 ? serviceCategories[0].slug : 'haircuts';
     setCategory(firstCat);
     setPriceKsh(1500);
@@ -84,6 +88,7 @@ export const ServicesManagementPage: React.FC = () => {
   const handleOpenEdit = (s: ServiceItem) => {
     setEditingService(s);
     setName(s.name);
+    setSlug(s.slug);
     setCategory(s.category as any);
     setPriceKsh(s.priceKsh);
     setDurationMinutes(s.durationMinutes);
@@ -118,6 +123,7 @@ export const ServicesManagementPage: React.FC = () => {
           editingService.id,
           {
             name: name.trim(),
+            slug: slug.trim() || editingService.slug,
             category,
             priceKsh: Number(priceKsh),
             durationMinutes: Number(durationMinutes),
@@ -133,7 +139,7 @@ export const ServicesManagementPage: React.FC = () => {
         await addService(
           {
             name: name.trim(),
-            slug: name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+            slug: slug.trim() || name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
             category,
             priceKsh: Number(priceKsh),
             durationMinutes: Number(durationMinutes),
@@ -180,127 +186,168 @@ export const ServicesManagementPage: React.FC = () => {
         </Button>
       </div>
 
-      {/* Filter Bar */}
-      <div className="bg-card p-3.5 rounded-xl border border-border grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-        <Input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search services by title or description..."
-          className="rounded-lg py-1.5 text-xs"
-          icon={<Search className="w-3.5 h-3.5" />}
-        />
-
-        <div className="flex items-center gap-2">
-          <ThemeSelect
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="w-full bg-input border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary capitalize"
-          >
-            {categories.map(c => (
-              <option key={c} value={c} >
-                {c === 'all' ? 'All Categories' : c}
-              </option>
-            ))}
-          </ThemeSelect>
-        </div>
+      {/* Tabs */}
+      <div className="flex items-center gap-2 border-b border-border pb-1">
+        <button
+          type="button"
+          onClick={() => setActiveTab('services')}
+          className={`px-3 py-2 text-xs font-bold rounded-t-lg transition-all ${
+            activeTab === 'services'
+              ? 'bg-primary text-black'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+          }`}
+        >
+          Services ({services.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('categories')}
+          className={`px-3 py-2 text-xs font-bold rounded-t-lg transition-all flex items-center gap-1.5 ${
+            activeTab === 'categories'
+              ? 'bg-primary text-black'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+          }`}
+        >
+          <Layers className="w-3.5 h-3.5" />
+          Categories
+        </button>
       </div>
 
-      {/* Services Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredServices.map(service => {
-          const assignedIds = serviceProvidersMap[service.id] || [];
-          const assignedProviderNames = assignedIds
-            .map(id => providers.find(p => p.id === id)?.fullName)
-            .filter(Boolean);
+      {activeTab === 'services' ? (
+        <>
+          {/* Filter Bar */}
+          <div className="bg-card p-3.5 rounded-xl border border-border grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <Input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search services by title or description..."
+              className="rounded-lg py-1.5 text-xs"
+              icon={<Search className="w-3.5 h-3.5" />}
+            />
 
-          return (
-            <div
-              key={service.id}
-              className="bg-card border border-border hover:border-primary/40 rounded-2xl p-4 flex flex-col justify-between space-y-3 transition-all"
-            >
-              <div className="space-y-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="space-y-0.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
-                      {service.category}
-                    </span>
-                    <h3 className="text-sm font-bold text-foreground">
-                      {service.name}
-                    </h3>
-                  </div>
-
-                  <div className="text-right shrink-0">
-                    <div className="text-sm font-mono font-bold text-primary">
-                      KSh {service.priceKsh.toLocaleString()}
-                    </div>
-                    <span className="text-[10px] text-muted-foreground flex items-center gap-1 justify-end">
-                      <Clock className="w-3 h-3" />
-                      {service.durationMinutes} min
-                    </span>
-                  </div>
-                </div>
-
-                <p className="text-xs text-muted-foreground line-clamp-2">
-                  {service.description}
-                </p>
-
-                {/* Assigned Providers */}
-                <div className="pt-2 border-t border-border space-y-1">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
-                    Providers Offering ({assignedProviderNames.length}):
-                  </span>
-                  <div className="flex flex-wrap gap-1">
-                    {assignedProviderNames.length > 0 ? (
-                      assignedProviderNames.map((name, i) => (
-                        <span
-                          key={i}
-                          className="px-1.5 py-0.5 bg-muted text-[10px] rounded text-foreground border border-border/80"
-                        >
-                          {name}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-[10px] text-muted-foreground italic">
-                        Available to all active providers
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Action buttons */}
-              <div className="pt-2 border-t border-border flex items-center justify-between">
-                <Badge variant={service.status === 'active' ? 'success' : 'neutral'}>
-                  {service.status === 'active' ? 'Active' : 'Inactive'}
-                </Badge>
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleOpenEdit(service)}
-                    className="text-xs py-1 h-auto"
-                  >
-                    <Edit className="w-3 h-3 mr-1" />
-                    <span>Edit</span>
-                  </Button>
-
-                  <button
-                    type="button"
-                    onClick={() => deleteService(service.id)}
-                    className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive transition-colors"
-                    title="Delete Service"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
+            <div className="flex items-center gap-2">
+              <ThemeSelect
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="w-full bg-input border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary capitalize"
+              >
+                {categories.map(c => (
+                  <option key={c} value={c} >
+                    {c === 'all' ? 'All Categories' : c}
+                  </option>
+                ))}
+              </ThemeSelect>
             </div>
-          );
-        })}
-      </div>
+          </div>
+
+          {/* Services Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {filteredServices.map(service => {
+              const assignedIds = serviceProvidersMap[service.id] || [];
+              const assignedProviderNames = assignedIds
+                .map(id => providers.find(p => p.id === id)?.fullName)
+                .filter(Boolean);
+
+              return (
+                <div
+                  key={service.id}
+                  className="bg-card border border-border hover:border-primary/40 rounded-2xl p-4 flex flex-col justify-between space-y-3 transition-all"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="space-y-0.5">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                          {service.category}
+                        </span>
+                        <h3 className="text-sm font-bold text-foreground">
+                          {service.name}
+                        </h3>
+                      </div>
+
+                      <div className="text-right shrink-0">
+                        <div className="text-sm font-mono font-bold text-primary">
+                          KSh {service.priceKsh.toLocaleString()}
+                        </div>
+                        <span className="text-[10px] text-muted-foreground flex items-center gap-1 justify-end">
+                          <Clock className="w-3 h-3" />
+                          {service.durationMinutes} min
+                        </span>
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {service.description}
+                    </p>
+
+                    {/* Assigned Providers */}
+                    <div className="pt-2 border-t border-border space-y-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                        Providers Offering ({assignedProviderNames.length}):
+                      </span>
+                      <div className="flex flex-wrap gap-1">
+                        {assignedProviderNames.length > 0 ? (
+                          assignedProviderNames.map((name, i) => (
+                            <span
+                              key={i}
+                              className="px-1.5 py-0.5 bg-muted text-[10px] rounded text-foreground border border-border/80"
+                            >
+                              {name}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground italic">
+                            Available to all active providers
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="pt-2 border-t border-border flex items-center justify-between">
+                    <Badge variant={service.status === 'active' ? 'success' : 'neutral'}>
+                      {service.status === 'active' ? 'Active' : 'Inactive'}
+                    </Badge>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleOpenEdit(service)}
+                        className="text-xs py-1 h-auto"
+                      >
+                        <Edit className="w-3 h-3 mr-1" />
+                        <span>Edit</span>
+                      </Button>
+
+                      <button
+                        type="button"
+                        onClick={() => deleteService(service.id)}
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive transition-colors"
+                        title="Delete Service"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      ) : (
+        <div className="bg-card p-5 rounded-2xl border border-border space-y-4">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-primary" /> Service Categories
+          </h2>
+          <p className="text-[10px] text-muted-foreground -mt-2">
+            Manage service categories used for organization and public menu filtering.
+          </p>
+          <ServiceCategoryManagement />
+        </div>
+      )}
 
       {/* Add / Edit Service Modal */}
       {isModalOpen && (
@@ -338,6 +385,20 @@ export const ServicesManagementPage: React.FC = () => {
                   className="rounded-xl py-2 text-xs"
                   required
                 />
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  URL Slug (optional)
+                </label>
+                <Input
+                  type="text"
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value)}
+                  placeholder="e.g. royal-beard-sculpt"
+                  className="rounded-xl py-2 text-xs font-mono"
+                />
+                <p className="text-[9px] text-muted-foreground">Leave blank to auto-generate from name</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

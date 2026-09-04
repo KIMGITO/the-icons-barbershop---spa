@@ -3,18 +3,11 @@ import { useAuthStore } from '../stores/authStore';
 import { PortalAuth } from '../components/portal/auth/PortalAuth';
 import { PortalShell } from '../components/portal/layout/PortalShell';
 import { PortalOverview } from '../components/portal/overview/PortalOverview';
-import { BookingList } from '../components/portal/bookings/BookingList';
-import { BookingCalendar } from '../components/portal/calendar/BookingCalendar';
-import { ProvidersPage } from '../components/portal/providers/ProvidersPage';
-import { ServicesManagementPage } from '../components/portal/services/ServicesManagementPage';
-import { ProductsManagementPage } from '../components/portal/products/ProductsManagementPage';
 import { BusinessManagementPage } from '../components/portal/business/BusinessManagementPage';
-import { FAQManagementPage } from '../components/portal/business/FAQManagementPage';
-import { GalleryManagementPage } from '../components/portal/gallery/GalleryManagementPage';
-import { ReceiptLookup } from '../components/portal/receipts/ReceiptLookup';
-import { StaffProfileView } from '../components/portal/staff/StaffProfileView';
-import { StaffScheduleView } from '../components/portal/staff/StaffScheduleView';
 import { MessagesDashboard } from '../components/portal/messages/MessagesDashboard';
+import { OperationsHub } from '../components/portal/layout/OperationsHub';
+import { CatalogHub } from '../components/portal/layout/CatalogHub';
+import { TeamHub } from '../components/portal/layout/TeamHub';
 
 interface StaffPortalPageProps {
   onExitToPublicWebsite: () => void;
@@ -29,7 +22,7 @@ export const StaffPortalPage: React.FC<StaffPortalPageProps> = ({ onExitToPublic
   }, [init]);
 
   // Define restricted tabs for non-admin staff
-  const adminOnlyTabs = ['providers', 'services', 'products', 'business', 'messages', 'gallery', 'faqs'];
+  const adminOnlyTabs = ['catalog', 'team', 'business', 'messages'];
 
   // If role changes, ensure current tab is valid for that role
   useEffect(() => {
@@ -58,30 +51,16 @@ export const StaffPortalPage: React.FC<StaffPortalPageProps> = ({ onExitToPublic
     switch (currentTab) {
       case 'overview':
         return <PortalOverview onNavigateTab={(tab) => setCurrentTab(tab)} />;
-      case 'bookings':
-        return <BookingList />;
-      case 'calendar':
-        return <BookingCalendar />;
-      case 'providers':
-        return <ProvidersPage />;
-      case 'profile':
-        return <StaffProfileView />;
-      case 'services':
-        return <ServicesManagementPage />;
-      case 'products':
-        return <ProductsManagementPage />;
+      case 'operations':
+        return <OperationsHub />;
+      case 'catalog':
+        return <CatalogHub />;
+      case 'team':
+        return <TeamHub />;
       case 'messages':
         return <MessagesDashboard />;
       case 'business':
         return <BusinessManagementPage />;
-      case 'faqs':
-        return <FAQManagementPage />;
-      case 'gallery':
-        return <GalleryManagementPage />;
-      case 'schedule':
-        return <StaffScheduleView />;
-      case 'receipts':
-        return <ReceiptLookup />;
       default:
         return <PortalOverview onNavigateTab={(tab) => setCurrentTab(tab)} />;
     }

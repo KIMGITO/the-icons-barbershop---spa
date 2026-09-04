@@ -341,12 +341,179 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     refreshData();
   }, [refreshData]);
 
-  // Real-time Subscriptions
+  /**
+   * Real-time Subscriptions logic
+   * We use a single global channel for public website data to minimize connections.
+   * This ensures that any action done in the admin portal (creating/updating/deleting)
+   * reflects instantly on the public UI.
+   */
   useEffect(() => {
     if (!isSupabaseConfigured) return;
 
     const channel = supabase
-      .channel('app-context-realtime')
+      .channel('app-context-realtime-global')
+      // Real-time Bookings - Essential for both Staff and potentially public availability views
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, async (payload) => {
+        if (payload.eventType === 'INSERT') {
+          const row = payload.new as any;
+          const newBooking: BookingRecord = {
+            id: row.id,
+            referenceNumber: row.reference_number,
+            serviceIds: row.service_ids || [],
+            serviceNames: row.service_names || [],
+            barberId: row.provider_id,
+            barberName: row.provider_name,
+            date: row.date,
+            timeSlot: row.time_slot,
+            customerName: row.customer_name,
+            customerPhone: row.customer_phone || '',
+            customerEmail: row.customer_email || '',
+            specialRequests: row.special_requests,
+            totalPriceKsh: Number(row.total_price_ksh || 0),
+            totalDurationMinutes: row.duration_minutes || 0,
+            status: row.status,
+            paymentStatus: row.payment_status,
+            paymentMethod: row.payment_method,
+            staffNotes: row.staff_notes,
+            createdAt: row.created_at
+          };
+          setBookings(prev => prev.some(b => b.id === newBooking.id) ? prev : [newBooking, ...prev]);
+        } else if (payload.eventType === 'UPDATE') {
+          const row = payload.new as any;
+          const updated: BookingRecord = {
+            id: row.id,
+            referenceNumber: row.reference_number,
+            serviceIds: row.service_ids || [],
+            serviceNames: row.service_names || [],
+            barberId: row.provider_id,
+            barberName: row.provider_name,
+            date: row.date,
+            timeSlot: row.time_slot,
+            customerName: row.customer_name,
+            customerPhone: row.customer_phone || '',
+            customerEmail: row.customer_email || '',
+            specialRequests: row.special_requests,
+            totalPriceKsh: Number(row.total_price_ksh || 0),
+            totalDurationMinutes: row.duration_minutes || 0,
+            status: row.status,
+            paymentStatus: row.payment_status,
+            paymentMethod: row.payment_method,
+            staffNotes: row.staff_notes,
+            createdAt: row.created_at
+          };
+          setBookings(prev => prev.map(b => b.id === updated.id ? updated : b));
+        } else if (payload.eventType === 'DELETE') {
+          setBookings(prev => prev.filter(b => b.id !== payload.old.id));
+        }
+      })
+      // Services
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'services' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          const row = payload.new as any;
+          const newService: ServiceItem = {
+            id: row.id,
+            name: row.name,
+            slug: row.slug,
+            category: row.category,
+            priceKsh: row.price_ksh,
+            durationMinutes: row.duration_minutes,
+            description: row.description,
+            shortDescription: row.short_description,
+            fullDescription: row.full_description,
+            imageUrl: row.image_url,
+            status: row.status,
+            features: row.features || []
+          };
+          setServices(prev => prev.some(s => s.id === newService.id) ? prev : [...prev, newService]);
+        } else if (payload.eventType === 'UPDATE') {
+          const row = payload.new as any;
+          const updated: ServiceItem = {
+            id: row.id,
+            name: row.name,
+            slug: row.slug,
+            category: row.category,
+            priceKsh: row.price_ksh,
+            durationMinutes: row.duration_minutes,
+            description: row.description,
+            shortDescription: row.short_description,
+            fullDescription: row.full_description,
+            imageUrl: row.image_url,
+            status: row.status,
+            features: row.features || []
+          };
+          setServices(prev => prev.map(s => s.id === updated.id ? updated : s));
+        } else if (payload.eventType === 'DELETE') {
+          setServices(prev => prev.filter(s => s.id !== payload.old.id));
+        }
+      })
+      // Providers (Barbers)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'service_providers' }, (payload) => {
+        if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+          const row = payload.new as any;
+          const updatedBarber: BarberProfile = {
+            id: row.id,
+            slug: row.slug,
+            name: row.full_name,
+            title: 'Master',
+            specialty: row.provider_type,
+            bio: row.bio,
+            yearsExperience: row.years_experience || 0,
+            avatarUrl: row.avatar_url,
+            workingDays: [],
+            quote: '',
+            servicesOfferedIds: row.services_offered_ids || [],
+            instagramHandle: row.instagram_handle,
+            email: row.email,
+            phone: row.phone,
+            status: row.status
+          };
+          if (payload.eventType === 'INSERT') {
+            setBarbers(prev => prev.some(b => b.id === updatedBarber.id) ? prev : [...prev, updatedBarber]);
+          } else {
+            setBarbers(prev => prev.map(b => b.id === updatedBarber.id ? updatedBarber : b));
+          }
+        } else if (payload.eventType === 'DELETE') {
+          setBarbers(prev => prev.filter(b => b.id !== payload.old.id));
+        }
+      })
+      // Products
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          const row = payload.new as any;
+          const newItem: ProductItem = {
+            id: row.id,
+            slug: row.slug,
+            name: row.name,
+            category: row.category,
+            priceKsh: row.price_ksh,
+            stockQuantity: row.stock_quantity,
+            imageUrl: row.image_url,
+            status: row.status,
+            description: row.description,
+            shortDescription: row.short_description,
+            features: row.features || []
+          };
+          setProducts(prev => prev.some(p => p.id === newItem.id) ? prev : [newItem, ...prev]);
+        } else if (payload.eventType === 'UPDATE') {
+          const row = payload.new as any;
+          const updated: ProductItem = {
+            id: row.id,
+            slug: row.slug,
+            name: row.name,
+            category: row.category,
+            priceKsh: row.price_ksh,
+            stockQuantity: row.stock_quantity,
+            imageUrl: row.image_url,
+            status: row.status,
+            description: row.description,
+            shortDescription: row.short_description,
+            features: row.features || []
+          };
+          setProducts(prev => prev.map(p => p.id === updated.id ? updated : p));
+        } else if (payload.eventType === 'DELETE') {
+          setProducts(prev => prev.filter(p => p.id !== payload.old.id));
+        }
+      })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'service_categories' }, async () => {
         const cats = await categoryService.getCategories();
         setServiceCategories(cats);
@@ -404,7 +571,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             isActive: row.is_active
           } : item).sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)));
         } else if (payload.eventType === 'DELETE') {
-          setGallery(prev => prev.filter(item => item.id === payload.old.id));
+          setGallery(prev => prev.filter(item => item.id !== payload.old.id));
         }
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'faqs' }, (payload) => {
@@ -433,7 +600,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             internalLink: row.internal_link_url ? { text: row.internal_link_label || 'Learn more', url: row.internal_link_url } : undefined
           } : item).sort((a, b) => (a.order || 0) - (b.order || 0)));
         } else if (payload.eventType === 'DELETE') {
-          setFaqs(prev => prev.filter(item => item.id === payload.old.id));
+          setFaqs(prev => prev.filter(item => item.id !== payload.old.id));
         }
       })
       .subscribe();
