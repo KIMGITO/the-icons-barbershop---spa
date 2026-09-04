@@ -35,19 +35,16 @@ function buildPaymentConfirmationMessage(booking: any, amount: number, mpesaRece
   const remaining = Number(booking.remaining_balance_ksh || 0).toLocaleString();
   const lines = [
     `THE ICONS Barber & Spa`,
-    `Hi ${booking.customer_name}, payment of KSh ${Number(amount || 0).toLocaleString()} received!`,
-    ``,
-    `Your appointment is CONFIRMED.`,
-    `Receipt Code: ${booking.receipt_code}`,
+    `Hi ${booking.customer_name}, deposit of KSh ${Number(amount || 0).toLocaleString()} received!`,
+    `Ticket: ${booking.receipt_code}`,
+    `Date: ${booking.date}`,
+    `Time: ${booking.time_slot}`,
     `Services: ${services}`,
     `Barber: ${booking.provider_name}`,
-    `Date: ${booking.date} @ ${booking.time_slot}`,
+    `Balance: KSh ${remaining}`,
+    ``,
+    `Your appointment is CONFIRMED. Show this ticket at the chair. See you soon!`,
   ];
-  if (mpesaReceipt) lines.push(`M-Pesa Ref: ${mpesaReceipt}`);
-  if (Number(booking.remaining_balance_ksh || 0) > 0) {
-    lines.push(``, `Balance at the chair: KSh ${remaining}`);
-  }
-  lines.push(``, `Show the Receipt Code at the chair to begin. See you soon!`);
   return lines.join('\n');
 }
 
@@ -144,72 +141,60 @@ Deno.serve(async (req) => {
     // Determine status
     const status = resultCode === 0 ? 'completed' : 'failed';
 
-    // Use the database function — it updates the payment row AND, on a
-    // completed deposit, confirms a previously-pending booking
-    // (booking only "succeeds" once the M-Pesa payment is confirmed).
-    const { error: fnErr } = await admin.rpc('update_mpesa_payment_status', {
-      p_checkout_request_id: checkoutRequestId,
-      p_status: status,
-      p_receipt_number: receiptNumber,
-      p_result_code: resultCode,
-      p_result_desc: resultDesc,
-      p_raw_callback: body
-    });
-
-    if (fnErr) {
-      console.error('update_mpesa_payment_status failed, falling back to row update:', fnErr.message);
-      // Fallback: update payment row directly
-      await admin.from('mpesa_payments')
-        .update({
-          status,
-          receipt_number: receiptNumber,
-          transaction_date: transactionDate,
-          result_code: resultCode,
-          result_desc: resultDesc,
-          raw_callback: body,
-          updated_at: new Date().toISOString()
-        })
-        .eq('checkout_request_id', checkoutRequestId)
-        .select('booking_id')
-        .single()
-        .catch(err => console.error('mpesa_payments fallback update failed:', err.message));
-    }
-
-    // Resolve the booking linked to this payment (for confirm + SMS)
-    const { data: paymentRecord } = await admin.from('mpesa_payments')
-      .select('booking_id')
+    // Update the payment record
+    const { data: paymentRecord, error: updateErr } = await admin.from('mpesa_payments')
+      .update({
+        status,
+        receipt_number: receiptNumber,
+        transaction_date: transactionDate,
+        result_code: resultCode,
+        result_desc: resultDesc,
+        raw_callback: body,
+        updated_at: new Date().toISOString()
+      })
       .eq('checkout_request_id', checkoutRequestId)
+      .select('booking_id')
       .maybeSingle();
 
-    let bookingRow: any = null;
-    if (paymentRecord?.booking_id) {
-      const { data } = await admin.from('bookings')
+    if (updateErr) {
+      console.error('Failed to update mpesa_payments:', updateErr.message);
+    }
+
+    const bookingId = paymentRecord?.booking_id;
+    if (!bookingId) {
+      console.error('No booking linked to checkoutRequestId:', checkoutRequestId);
+      return darajaSuccess;
+    }
+
+    if (status === 'completed') {
+      // 1. Confirm the booking
+      const { data: bookingRow, error: confirmErr } = await admin.from('bookings')
+        .update({
+          status: 'confirmed',
+          payment_status: 'deposit-paid',
+          payment_method: 'mpesa',
+          mpesa_receipt_number: receiptNumber,
+          deposit_paid_ksh: Number(amount || 0),
+          // We don't zero out balance here because it's only a 50% deposit
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', bookingId)
         .select('*')
-        .eq('id', paymentRecord.booking_id)
         .maybeSingle();
-      bookingRow = data || null;
-    }
 
-    // If the database function wasn't available, apply the confirm-on-complete
-    // logic directly as a fallback so pending bookings still get confirmed.
-    if (fnErr && status === 'completed' && bookingRow) {
-      await admin.from('bookings').update({
-        status: 'confirmed',
-        payment_status: 'deposit-paid',
-        payment_method: 'mpesa',
-        mpesa_receipt_number: receiptNumber,
-        deposit_paid_ksh: Number(amount || 0),
-        remaining_balance_ksh: 0,
-        updated_at: new Date().toISOString()
-      }).eq('id', bookingRow.id).catch(err => console.error('booking confirm fallback failed:', err.message));
-      // Refresh the row so the SMS reflects confirmed state
-      const { data: refreshed } = await admin.from('bookings').select('*').eq('id', bookingRow.id).maybeSingle();
-      bookingRow = refreshed || bookingRow;
-    }
-
-    // On successful payment: send the customer an SMS with their 6-char receipt code
-    if (status === 'completed' && bookingRow) {
-      await sendReceiptSms(bookingRow, amount, receiptNumber);
+      if (confirmErr) {
+        console.error('Failed to confirm booking:', confirmErr.message);
+      } else if (bookingRow) {
+        // 2. Send detailed SMS
+        await sendReceiptSms(bookingRow, amount, receiptNumber);
+      }
+    } else {
+      // Payment failed — remove the pending booking record to free up the slot
+      console.log(`Payment failed for booking ${bookingId}, removing booking record.`);
+      const { error: deleteErr } = await admin.from('bookings').delete().eq('id', bookingId);
+      if (deleteErr) {
+        console.error('Failed to delete booking after payment failure:', deleteErr.message);
+      }
     }
 
     return darajaSuccess;

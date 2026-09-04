@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { MessageSquare, Search, RefreshCw, CheckCircle2, XCircle, Clock, Phone, User, ReceiptText } from 'lucide-react';
+import { MessageSquare, Search, RefreshCw, CheckCircle2, XCircle, Clock, Phone, User, ReceiptText, Send } from 'lucide-react';
 import { smsService, SmsMessageRecord } from '../../../services/smsService';
 import { Badge } from '../../ui/Badge';
 import { Input } from '../../ui/Input';
@@ -7,6 +7,7 @@ import { Input } from '../../ui/Input';
 export const MessagesDashboard: React.FC = () => {
   const [messages, setMessages] = useState<SmsMessageRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [resendingId, setResendingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -43,6 +44,18 @@ export const MessagesDashboard: React.FC = () => {
     if (!d) return '—';
     const dt = new Date(d);
     return dt.toLocaleString('en-KE', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+  };
+
+  const handleResend = async (msgId: string) => {
+    setResendingId(msgId);
+    try {
+      await smsService.resendSms(msgId);
+      await loadMessages();
+    } catch (err: any) {
+      setError(err.message || 'Failed to resend message');
+    } finally {
+      setResendingId(null);
+    }
   };
 
   const statusBadge = (status: string) => (
@@ -156,12 +169,26 @@ export const MessagesDashboard: React.FC = () => {
                 {msg.message_body}
               </p>
 
-              {(msg.error_message || msg.provider_message_id) && (
-                <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+              <div className="flex items-center justify-between gap-3 text-[10px] text-muted-foreground">
+                <div className="flex items-center gap-3">
                   {msg.provider_message_id && <span className="font-mono">ID: {msg.provider_message_id}</span>}
                   {msg.error_message && <span className="text-destructive">{msg.error_message}</span>}
                 </div>
-              )}
+                {msg.status === 'failed' && (
+                  <button
+                    onClick={() => handleResend(msg.id)}
+                    disabled={resendingId === msg.id}
+                    className="flex items-center gap-1 text-primary hover:text-primary/80 font-bold uppercase transition-colors disabled:opacity-50"
+                  >
+                    {resendingId === msg.id ? (
+                      <RefreshCw className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Send className="w-3 h-3" />
+                    )}
+                    Resend
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>

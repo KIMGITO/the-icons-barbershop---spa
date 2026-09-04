@@ -50,6 +50,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'M-Pesa STK Push requires a Safaricom number (07XX or 2547XX)' }, { status: 400, headers: corsHeaders });
     }
 
+    const roundedAmount = Math.round(amountKsh);
     const res = await fetch(`${config.env === 'sandbox' ? 'https://sandbox.safaricom.co.ke' : 'https://api.safaricom.co.ke'}/mpesa/stkpush/v1/processrequest`, {
       method: 'POST',
       headers: {
@@ -61,7 +62,7 @@ Deno.serve(async (req) => {
         Password: password,
         Timestamp: timestamp,
         TransactionType: 'CustomerPayBillOnline',
-        Amount: String(Math.round(amountKsh)),
+        Amount: String(roundedAmount),
         PartyA: formattedPhone,
         PartyB: config.shortcode,
         PhoneNumber: formattedPhone,
@@ -95,7 +96,7 @@ Deno.serve(async (req) => {
     const { data: payment, error: insertErr } = await admin.from('mpesa_payments').insert({
       booking_id: bookingId,
       phone_number: formattedPhone,
-      amount_ksh: amountKsh,
+      amount_ksh: roundedAmount,
       checkout_request_id: data.CheckoutRequestID || null,
       merchant_request_id: data.MerchantRequestID || null,
       status: 'pending'

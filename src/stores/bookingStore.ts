@@ -81,9 +81,16 @@ export const useBookingStore = create<BookingState>((set, get) => ({
         (get() as any)._subscribed = true;
         supabase
           .channel('booking-realtime')
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, async () => {
-            const fresh = await bookingService.getBookings();
-            set({ bookings: fresh });
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, async (payload) => {
+            if (payload.eventType === 'DELETE') {
+              set(state => ({
+                bookings: state.bookings.filter(b => b.id !== payload.old.id),
+                selectedBooking: state.selectedBooking?.id === payload.old.id ? null : state.selectedBooking
+              }));
+            } else {
+              const fresh = await bookingService.getBookings();
+              set({ bookings: fresh });
+            }
           })
           .subscribe();
       }

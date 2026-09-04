@@ -65,5 +65,22 @@ export const smsService = {
 
   async sendReceiptByBooking(bookingId: string): Promise<{ success: boolean; status: string; messageId?: string; message?: string; error?: string }> {
     return this.sendSms({ bookingId, smsType: 'receipt' });
+  },
+
+  async resendSms(messageId: string): Promise<{ success: boolean; status: string; messageId?: string; error?: string }> {
+    if (!isSupabaseConfigured) throw new Error('Supabase not configured');
+    const session = await supabase.auth.getSession();
+    const url = String(import.meta.env.VITE_SUPABASE_URL) + '/functions/v1/send-sms';
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.data.session?.access_token || ''}`
+      },
+      body: JSON.stringify({ retryMessageId: messageId })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to resend SMS.');
+    return data;
   }
 };

@@ -56,10 +56,7 @@ Deno.serve(async (req) => {
     const { data: profile } = await admin.from('staff_profiles').select('role').eq('id', user.id).single();
     if (!profile) return Response.json({ error: 'Staff access only' }, { status: 403, headers: corsHeaders });
 
-    const { bookingId, receiptCode, phoneNumber, customerName, message, smsType } = await req.json();
-    if (!phoneNumber && !bookingId) {
-      return Response.json({ error: 'phoneNumber or bookingId is required' }, { status: 400, headers: corsHeaders });
-    }
+    const { bookingId, receiptCode, phoneNumber, customerName, message, smsType, retryMessageId } = await req.json();
 
     let toPhone = phoneNumber;
     let msg = message;
@@ -67,13 +64,25 @@ Deno.serve(async (req) => {
     let bookingUuid = bookingId || null;
     let customer = customerName || null;
 
-    if (bookingId && !msg) {
+    if (retryMessageId) {
+      const { data: oldMsg } = await admin.from('sms_messages').select('*').eq('id', retryMessageId).single();
+      if (!oldMsg) return Response.json({ error: 'Original message not found' }, { status: 404, headers: corsHeaders });
+      toPhone = oldMsg.to_phone;
+      msg = oldMsg.message_body;
+      rc = oldMsg.receipt_code;
+      bookingUuid = oldMsg.booking_id;
+      customer = oldMsg.customer_name;
+    } else if (bookingId && !msg) {
       const { data: booking } = await admin.from('bookings').select('*').eq('id', bookingId).maybeSingle();
       if (!booking) return Response.json({ error: 'Booking not found' }, { status: 404, headers: corsHeaders });
       toPhone = booking.customer_phone;
       rc = booking.receipt_code;
       customer = booking.customer_name;
       msg = buildReceiptMessage(booking);
+    }
+
+    if (!toPhone || !msg) {
+      return Response.json({ error: 'phoneNumber, message, bookingId, or retryMessageId is required' }, { status: 400, headers: corsHeaders });
     }
 
     if (!toPhone || !msg) {
@@ -119,12 +128,21 @@ Deno.serve(async (req) => {
     const delivered = atRes.ok && (!responseCode || responseCode === '101') ? 'sent' : 'failed';
     const errorMsg = delivered === 'failed' ? (atData?.SMSMessageData?.Message || `HTTP ${atRes.status}`) : null;
 
-    await admin.rpc('log_sms_message', {
-      p_booking_id: bookingUuid, p_receipt_code: rc, p_to_phone: formattedPhone,
-      p_customer_name: customer, p_message_body: msg, p_sms_type: smsType || 'receipt',
-      p_status: delivered, p_provider: 'africastalking',
-      p_provider_message_id: messageId, p_error_message: errorMsg
-    }).catch((e) => console.error('Failed to log SMS:', e.message));
+    if (retryMessageId && delivered === 'sent') {
+      await admin.from('sms_messages').update({
+        status: 'sent',
+        sent_at: new Date().toISOString(),
+        provider_message_id: messageId,
+        error_message: null
+      }).eq('id', retryMessageId);
+    } else {
+      await admin.rpc('log_sms_message', {
+        p_booking_id: bookingUuid, p_receipt_code: rc, p_to_phone: formattedPhone,
+        p_customer_name: customer, p_message_body: msg, p_sms_type: smsType || 'receipt',
+        p_status: delivered, p_provider: 'africastalking',
+        p_provider_message_id: messageId, p_error_message: errorMsg
+      }).catch((e) => console.error('Failed to log SMS:', e.message));
+    }
 
     return Response.json({
       success: delivered === 'sent', status: delivered, messageId, error: errorMsg,

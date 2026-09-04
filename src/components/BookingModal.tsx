@@ -596,83 +596,60 @@ export const BookingModal: React.FC = () => {
     }
   };
 
-  /** Poll payment status until confirmed. Only then is the booking successful. */
+  /** Real-time subscription for payment status updates. Only then is the booking successful. */
   useEffect(() => {
     if (
       !isBookingModalOpen ||
       paymentStatus !== 'awaiting_pin' ||
-      !checkoutRequestId
+      !pendingBooking?.bookingId
     )
       return;
-    let cancelled = false;
 
-    const poll = async () => {
-      try {
-        const status =
-          await paymentService.checkPaymentStatus(checkoutRequestId);
-        if (cancelled) return;
-        if (status.completed) {
-          setPaymentStatus('confirmed');
-          setPaymentReceipt(status.receiptNumber);
-          // Refresh the booking so the reference card shows payment state
-          if (pendingBooking?.referenceNumber) {
-            const fresh = await bookingService
-              .getBookingByReference(pendingBooking.referenceNumber)
-              .catch(() => null);
-            if (fresh)
-              setConfirmedBooking({
-                ...pendingBooking,
-                ...fresh,
-                depositPaidKsh: Number(
-                  fresh.deposit_paid_ksh || pendingBooking.depositKsh,
-                ),
-                totalPriceKsh: Number(
-                  fresh.total_price_ksh || pendingBooking.totalKsh,
-                ),
-                remainingBalanceKsh: Number(
-                  fresh.remaining_balance_ksh || pendingBooking.remainingKsh,
-                ),
-                mpesaReceiptNumber:
-                  fresh.mpesa_receipt_number || status.receiptNumber,
-                paymentStatus: fresh.payment_status,
-                customerName,
-                serviceNames: selectedServices.map((s) => s.name),
-                barberName: barberDisplayName,
-                timeSlot: formatTimeDisplay(selectedTimeSlot),
-              });
-          } else {
+    // Subscribe to the specific booking record to detect when the callback confirms it
+    const channel = supabase
+      .channel(`payment-status-${pendingBooking.bookingId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'bookings',
+          filter: `id=eq.${pendingBooking.bookingId}`,
+        },
+        async (payload) => {
+          if (payload.eventType === 'DELETE') {
+            // Callback deleted the booking due to payment failure
+            setPaymentStatus('failed');
+            setPaymentError('M-Pesa payment failed or was cancelled. Please try again.');
+            return;
+          }
+
+          const fresh = payload.new as any;
+          if (fresh.status === 'confirmed' && fresh.payment_status === 'deposit-paid') {
+            setPaymentStatus('confirmed');
+            setPaymentReceipt(fresh.mpesa_receipt_number);
             setConfirmedBooking({
               ...pendingBooking,
-              mpesaReceiptNumber: status.receiptNumber,
-              paymentStatus: 'deposit-paid',
+              ...fresh,
+              depositPaidKsh: Number(fresh.deposit_paid_ksh),
+              totalPriceKsh: Number(fresh.total_price_ksh),
+              remainingBalanceKsh: Number(fresh.remaining_balance_ksh),
+              mpesaReceiptNumber: fresh.mpesa_receipt_number,
+              paymentStatus: fresh.payment_status,
               customerName,
               serviceNames: selectedServices.map((s) => s.name),
               barberName: barberDisplayName,
               timeSlot: formatTimeDisplay(selectedTimeSlot),
-              date: selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '',
             });
           }
-          return;
         }
-        if (status.status === 'failed') {
-          setPaymentStatus('failed');
-          setPaymentError(
-            'M-Pesa payment was not completed. Please try again.',
-          );
-          return;
-        }
-        setTimeout(poll, 3000);
-      } catch {
-        setTimeout(poll, 3000);
-      }
-    };
+      )
+      .subscribe();
 
-    const timer = setTimeout(poll, 2000);
     return () => {
-      cancelled = true;
-      clearTimeout(timer);
+      supabase.removeChannel(channel);
     };
-  }, [paymentStatus, checkoutRequestId, isBookingModalOpen, pendingBooking]);
+  }, [paymentStatus, pendingBooking?.bookingId, isBookingModalOpen]);
 
   const generateGoogleCalendarUrl = () => {
     if (!confirmedBooking) return '#';
