@@ -309,7 +309,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
           />
         </div>
 
-        {/* Duration Adjuster */}
+        {/* Duration */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs">
             <span className="font-semibold text-muted-foreground uppercase tracking-wider">
@@ -320,22 +320,37 @@ export const BookingForm: React.FC<BookingFormProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-5 gap-1.5">
-            {[30, 45, 60, 90, 120].map(mins => (
-              <button
-                key={mins}
-                type="button"
-                onClick={() => setDurationMinutes(mins)}
-                className={`py-1.5 text-xs font-mono rounded-lg border transition-all cursor-pointer ${
-                  durationMinutes === mins
-                    ? 'bg-primary text-black font-extrabold border-primary shadow-xs'
-                    : 'bg-input text-foreground border-border hover:border-primary/40'
-                }`}
-              >
-                {mins}m
-              </button>
-            ))}
-          </div>
+          {mode === 'create' ? (
+            // Duration is fully determined by the selected service — no manual
+            // override here. A separate duration control let staff set a value
+            // that never actually reached the backend (create_booking always
+            // recomputes duration server-side from the service), so the two
+            // controls could silently disagree with what actually got booked.
+            <p className="text-[11px] text-muted-foreground">
+              Set automatically from the selected service.
+            </p>
+          ) : (
+            // Editing an existing booking is different: this does write
+            // duration_minutes directly via updateBooking, so a manual
+            // correction here (e.g. the appointment actually ran long) is
+            // meaningful and safe to keep.
+            <div className="grid grid-cols-5 gap-1.5">
+              {[30, 45, 60, 90, 120].map(mins => (
+                <button
+                  key={mins}
+                  type="button"
+                  onClick={() => setDurationMinutes(mins)}
+                  className={`py-1.5 text-xs font-mono rounded-lg border transition-all cursor-pointer ${
+                    durationMinutes === mins
+                      ? 'bg-primary text-black font-extrabold border-primary shadow-xs'
+                      : 'bg-input text-foreground border-border hover:border-primary/40'
+                  }`}
+                >
+                  {mins}m
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Real-time Conflict Alert Box */}
@@ -360,7 +375,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
                 Jump to Next Available ({conflict.conflictingBooking?.endTime || 'Open'})
               </button>
 
-              <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground cursor-pointer">
+              {/* <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground cursor-pointer">
                 <input
                   type="checkbox"
                   checked={allowConflictOverride}
@@ -368,7 +383,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
                   className="rounded border-border text-primary focus:ring-primary/40"
                 />
                 <span>Override & double-book</span>
-              </label>
+              </label> */}
             </div>
           </div>
         )}
