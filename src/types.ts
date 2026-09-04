@@ -168,6 +168,7 @@ export interface FAQItem {
   category: 'Appointments' | 'Payments' | 'Services' | 'Barbers' | 'Products' | 'Policies' | string;
   order?: number;
   isFeaturedOnHome?: boolean;
+  isActive?: boolean;
   internalLink?: {
     text: string;
     url: string;

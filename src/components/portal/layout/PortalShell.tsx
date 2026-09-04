@@ -3,10 +3,9 @@ import {
   LayoutDashboard, Calendar, Scissors, Users, Building2, 
   User, Clock, LogOut, ExternalLink, Menu, X, Sparkles, 
   ChevronRight, ArrowLeftRight, MessageSquare, Package, ReceiptText,
-  Image
+  Image, HelpCircle
 } from 'lucide-react';
 import { useAuthStore } from '../../../stores/authStore';
-// import { SEEDED_STAFF_ACCOUNTS } from '../../../services/authService';
 import { Badge } from '../../ui/Badge';
 import { ToastContainer } from '../notifications/ToastContainer';
 import logo from '../../../assets/images/logo.png';
@@ -26,7 +25,6 @@ export const PortalShell: React.FC<PortalShellProps> = ({
 }) => {
   const { user, role, logout } = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [roleSwitcherOpen, setRoleSwitcherOpen] = useState(false);
 
   // Navigation Items per Role
   const adminNav = [
@@ -40,6 +38,7 @@ export const PortalShell: React.FC<PortalShellProps> = ({
     { id: 'receipts', label: 'Receipts & Schedules', icon: ReceiptText },
     { id: 'messages', label: 'SMS Messages', icon: MessageSquare },
     { id: 'business', label: 'Business Profile', icon: Building2 },
+    { id: 'faqs', label: 'FAQ Management', icon: HelpCircle },
     { id: 'gallery', label: 'Style Gallery', icon: Image },
   ];
 
@@ -57,11 +56,6 @@ export const PortalShell: React.FC<PortalShellProps> = ({
   const handleNavClick = (tabId: string) => {
     onSelectTab(tabId);
     setMobileMenuOpen(false);
-  };
-
-  const handleSwitchAccount = async (email: string) => {
-    await switchAccount(email);
-    setRoleSwitcherOpen(false);
   };
 
   return (
@@ -84,8 +78,6 @@ export const PortalShell: React.FC<PortalShellProps> = ({
         </div>
 
         <div className="flex items-center gap-2.5 sm:gap-3">
-         
-
           {/* User profile capsule */}
           <div className="flex items-center gap-2 pl-2 border-l border-border">
             {user?.avatarUrl ? (

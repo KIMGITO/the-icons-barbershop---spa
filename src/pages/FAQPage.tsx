@@ -21,7 +21,7 @@ export const FAQPage: React.FC = () => {
       customSchema: {
         "@context": "https://schema.org",
         "@type": "FAQPage",
-        "mainEntity": faqs.map(faq => ({
+        "mainEntity": faqs.filter(f => f.isActive !== false).map(faq => ({
           "@type": "Question",
           "name": faq.question,
           "acceptedAnswer": {
@@ -41,7 +41,8 @@ export const FAQPage: React.FC = () => {
 
   // Filtered FAQs based on search and category
   const filteredFaqs = useMemo(() => {
-    let list = faqs;
+    // Filter for active FAQs only
+    let list = faqs.filter(f => f.isActive !== false);
 
     if (activeCategoryFilter !== 'All') {
       list = list.filter(f => f.category.toLowerCase() === activeCategoryFilter.toLowerCase());
@@ -145,10 +146,10 @@ export const FAQPage: React.FC = () => {
             onClick={() => setActiveCategoryFilter('All')}
             className={`tab-base ${activeCategoryFilter === 'All' ? 'tab-active shadow-sm' : 'tab-inactive'}`}
           >
-            All Questions ({faqs.length})
+            All Questions ({faqs.filter(f => f.isActive !== false).length})
           </button>
           {categories.map(cat => {
-            const count = faqs.filter(f => f.category.toLowerCase() === cat.toLowerCase()).length;
+            const count = faqs.filter(f => f.isActive !== false && f.category.toLowerCase() === cat.toLowerCase()).length;
             if (count === 0) return null;
             return (
               <button

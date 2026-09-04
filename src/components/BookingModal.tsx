@@ -265,6 +265,9 @@ export const BookingModal: React.FC = () => {
 
   // Same-day bookings require at least 1 hour advance notice
   const MIN_ADVANCE_MINUTES = 60;
+  // Last booking must start at least 30 minutes before closing
+  const CLOSING_BUFFER_MINUTES = 30;
+
   const selectedDayStr = selectedDate
     ? format(selectedDate, 'yyyy-MM-dd')
     : '';
@@ -273,6 +276,8 @@ export const BookingModal: React.FC = () => {
   const earliestBookableMin = isSameDay
     ? Math.max(openMin, nowMinOfDay + MIN_ADVANCE_MINUTES)
     : openMin;
+
+  const latestBookableMin = Math.max(openMin, closeMin - CLOSING_BUFFER_MINUTES);
 
   // Occupied ranges for the read-only busy timeline
   const busyRanges = useMemo(
@@ -330,7 +335,13 @@ export const BookingModal: React.FC = () => {
         message: `Same-day bookings need at least 1 hour notice — try ${formatTimeDisplay(minutesToHHMM(earliestBookableMin))} or later.`,
       };
     }
-    if (selectedStartMin < openMin || selectedStartMin >= closeMin) {
+    if (selectedStartMin < openMin || selectedStartMin > latestBookableMin) {
+      if (selectedStartMin > latestBookableMin && selectedStartMin < closeMin) {
+        return {
+          status: 'error' as const,
+          message: `Last booking must start by ${formatTimeDisplay(minutesToHHMM(latestBookableMin))} (${CLOSING_BUFFER_MINUTES} min before closing).`,
+        };
+      }
       return {
         status: 'error' as const,
         message: `That time is outside opening hours (${openDisplay} – ${closeDisplay}).`,
@@ -371,6 +382,12 @@ export const BookingModal: React.FC = () => {
   const timelineSpan = Math.max(1, closeMin - openMin);
   const selectedInRange =
     selectedStartMin >= openMin && selectedStartMin <= closeMin;
+
+  const sliderPercentage = useMemo(() => {
+    if (latestBookableMin === earliestBookableMin) return 0;
+    const current = selectedStartMin >= 0 ? selectedStartMin : earliestBookableMin;
+    return ((current - earliestBookableMin) / (latestBookableMin - earliestBookableMin)) * 100;
+  }, [selectedStartMin, earliestBookableMin, latestBookableMin]);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCustomerPhone(e.target.value);
@@ -431,8 +448,8 @@ export const BookingModal: React.FC = () => {
         };
       if (isSameDay && selectedStartMin < earliestBookableMin)
         return { ok: false, message: timeValidation.message };
-      if (selectedStartMin < openMin || selectedStartMin >= closeMin)
-        return { ok: false, message: timeValidation.message };
+    if (selectedStartMin < openMin || selectedStartMin > latestBookableMin)
+      return { ok: false, message: timeValidation.message };
       if (selectedConflict)
         return { ok: false, message: timeValidation.message };
       return { ok: true, message: '' };
@@ -1102,96 +1119,58 @@ export const BookingModal: React.FC = () => {
                 )}
               </div>
 
-              {/* Time Input — native picker constrained to opening hours */}
+              {/* Time Selection — Interactive Slider */}
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-                    3. Enter Start Time
+                    3. Select Start Time
                   </h3>
-                  <span className="text-[10px] text-muted-foreground">
-                    {openDisplay} – {closeDisplay}
+                  <span className="text-[10px] text-muted-foreground font-mono">
+                    {selectedTimeSlot ? formatTimeDisplay(selectedTimeSlot) : '--:--'}
                   </span>
                 </div>
 
-                <div className="space-y-3">
-                  {/* Custom masked time input — type digits directly, steppers ±15 minutes */}
-                  <div className="flex items-stretch gap-2">
-                    <div className="relative flex-1">
-                      <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary pointer-events-none" />
+                <div className="space-y-6">
+                  {/* The Slider Component */}
+                  <div className="px-2 pt-4 pb-2">
+                    <div className="relative h-6 flex items-center">
                       <input
-                        type="text"
-                        inputMode="numeric"
-                        placeholder="HH:MM"
-                        value={selectedTimeSlot}
+                        type="range"
+                        min={earliestBookableMin}
+                        max={latestBookableMin}
+                        step={SLOT_INTERVAL_MINUTES}
+                        value={selectedStartMin >= 0 ? selectedStartMin : earliestBookableMin}
                         onChange={(e) => {
+                          const val = parseInt(e.target.value);
                           setScheduleError(null);
-                          const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
-                          let formatted = digits;
-                          if (digits.length >= 3) {
-                            formatted = `${digits.slice(0, 2)}:${digits.slice(2)}`;
-                          } else if (digits.length === 2) {
-                            formatted = `${digits}:`;
-                          }
-                          setSelectedTimeSlot(formatted);
+                          setSelectedTimeSlot(minutesToHHMM(val));
                         }}
-                        onBlur={() => {
-                          if (!selectedTimeSlot) return;
-                          if (selectedStartMin >= 0) {
-                            setSelectedTimeSlot(minutesToHHMM(selectedStartMin));
-                          }
-                        }}
-                        className={`w-full pl-10 pr-3 py-3 rounded-sm bg-background border text-white text-sm font-mono tracking-widest focus:outline-none focus:border-primary placeholder:text-muted-foreground [color-scheme:dark] ${
-                          timeValidation.status === 'success'
-                            ? 'border-success/70'
-                            : timeValidation.status === 'error'
-                              ? 'border-destructive/70'
-                              : 'border-border-strong'
-                        }`}
+                        className="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary hover:accent-primary-hover transition-all"
                       />
-                    </div>
+                      
+                      {/* Slider Min/Max Labels */}
+                      <div className="absolute -bottom-5 left-0 right-0 flex justify-between text-[9px] text-muted-foreground font-mono uppercase tracking-tighter">
+                        <span>{formatTimeDisplay(minutesToHHMM(earliestBookableMin))}</span>
+                        <span>{formatTimeDisplay(minutesToHHMM(latestBookableMin))}</span>
+                      </div>
 
-                    <div className="flex flex-col rounded-sm border border-border-strong overflow-hidden">
-                      <button
-                        type="button"
-                        aria-label="Increase time by 15 minutes"
-                        onClick={() => {
-                          setScheduleError(null);
-                          const base = selectedStartMin >= 0 ? selectedStartMin : earliestBookableMin;
-                          const next = Math.min(closeMin, base + SLOT_INTERVAL_MINUTES);
-                          setSelectedTimeSlot(minutesToHHMM(next));
-                        }}
-                        className="flex-1 px-3 py-1 bg-secondary hover:bg-secondary-hover text-muted-foreground-light hover:text-white transition-colors cursor-pointer"
-                      >
-                        <ChevronUp className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label="Decrease time by 15 minutes"
-                        onClick={() => {
-                          setScheduleError(null);
-                          const base = selectedStartMin >= 0 ? selectedStartMin : earliestBookableMin;
-                          const prev = Math.max(earliestBookableMin, base - SLOT_INTERVAL_MINUTES);
-                          setSelectedTimeSlot(minutesToHHMM(prev));
-                        }}
-                        className="flex-1 px-3 py-1 bg-secondary hover:bg-secondary-hover text-muted-foreground-light hover:text-white transition-colors cursor-pointer border-t border-border-subtle"
-                      >
-                        <ChevronDown className="w-4 h-4" />
-                      </button>
+                      {/* Current Selection Tooltip above slider */}
+                      {selectedStartMin >= 0 && (
+                        <div 
+                          className="absolute -top-7 px-2 py-1 bg-primary text-primary-foreground text-[10px] font-bold rounded-sm shadow-lg transform -translate-x-1/2 pointer-events-none after:content-[''] after:absolute after:top-full after:left-1/2 after:-translate-x-1/2 after:border-4 after:border-transparent after:border-t-primary"
+                          style={{
+                            left: `${sliderPercentage}%`
+                          }}
+                        >
+                          {formatTimeDisplay(selectedTimeSlot)}
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   {!slotsLoading && (
                     <p className="text-[10px] text-muted-foreground">
-                      Type a time in 24-hour format (e.g.{' '}
-                      <span className="font-mono text-primary">
-                        {minutesToHHMM(openMin)}
-                      </span>{' '}
-                      –{' '}
-                      <span className="font-mono text-primary">
-                        {minutesToHHMM(closeMin)}
-                      </span>
-                      ) or use the arrows. Only the start time must be within
-                      business hours — the service may run past closing.
+                      Slide to pick your preferred start time. Bookings must start at least {CLOSING_BUFFER_MINUTES} minutes before closing ({closeDisplay}).
                     </p>
                   )}
 

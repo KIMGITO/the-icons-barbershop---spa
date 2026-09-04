@@ -6,14 +6,19 @@ import { useScrollReveal } from '../hooks/useScrollReveal';
 import { Button } from './ui/Button';
 
 export const ProductsSection: React.FC = () => {
-  const { products, navigateTo, wishlistSlugs, toggleWishlist, openPurchaseModal } = useApp();
+  const { products, navigateTo, wishlistSlugs, toggleWishlist, openPurchaseModal, isSupabaseConfigured } = useApp();
   const { ref: sectionRef, isVisible } = useScrollReveal();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
   // Take the primary curated products for the showcase
-  const featuredProducts = products.slice(0, 4);
+  const featuredProducts = products
+    .filter(p => {
+      if (isSupabaseConfigured && (p.status !== 'active')) return false;
+      return true;
+    })
+    .slice(0, 4);
 
   const formatKsh = (amount: number) => {
     return `KSh ${amount.toLocaleString()}`;

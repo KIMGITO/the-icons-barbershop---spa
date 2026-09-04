@@ -18,7 +18,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
   showCategoryFilter = true,
   isStandalonePage = false
 }) => {
-  const { services, openBookingModal, navigateTo, barbers } = useApp();
+  const { services, openBookingModal, navigateTo, barbers, isSupabaseConfigured } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory>('all');
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -31,8 +31,24 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
   const { ref: sectionRef, isVisible } = useScrollReveal();
 
   const filteredServices = services.filter(service => {
+    // Hide inactive or suspended services from public UI
+    if (isSupabaseConfigured && (service.status === 'inactive' || service.status === 'archived')) return false;
+    
+    // Safety check for category slug normalization
+    const serviceCategory = service.category.toLowerCase();
+    
     if (selectedCategory === 'all') return true;
-    return service.category === selectedCategory;
+    
+    // Map of display categories to DB categories
+    const categoryMap: Record<string, string[]> = {
+      'haircut': ['haircuts'],
+      'beard': ['beard', 'shave'],
+      'spa': ['spa'],
+      'packages': ['packages', 'vip']
+    };
+
+    const allowedDbCategories = categoryMap[selectedCategory as string] || [selectedCategory];
+    return allowedDbCategories.includes(serviceCategory);
   });
 
   const displayServices = limit ? filteredServices.slice(0, limit) : filteredServices;
@@ -168,7 +184,9 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
           {/* Full Grid: 3-Col Desktop, 2-Col Tablet, 1-Col Mobile */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {displayServices.map((service) => {
-              const qualifiedBarbers = barbers.filter(b => b.servicesOfferedIds.includes(service.id));
+              const qualifiedBarbers = barbers.filter(b => 
+                b.status === 'active' && b.servicesOfferedIds.includes(service.id)
+              );
               
               return (
                 <article 

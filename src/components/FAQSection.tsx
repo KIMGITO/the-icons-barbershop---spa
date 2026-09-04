@@ -11,11 +11,13 @@ export const FAQSection: React.FC = () => {
 
   // Get the 3 preview questions (prioritizing isFeaturedOnHome or first 3 by order)
   const homeFaqs = React.useMemo(() => {
-    const featured = faqs.filter(f => f.isFeaturedOnHome);
+    // Filter for active FAQs only
+    const activeFaqs = faqs.filter(f => f.isActive !== false);
+    const featured = activeFaqs.filter(f => f.isFeaturedOnHome);
     if (featured.length >= 3) {
       return featured.slice(0, 3);
     }
-    return faqs.slice(0, 3);
+    return activeFaqs.slice(0, 3);
   }, [faqs]);
 
   const toggleFaq = (id: string) => {

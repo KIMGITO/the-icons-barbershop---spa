@@ -9,6 +9,7 @@ import { ProvidersPage } from '../components/portal/providers/ProvidersPage';
 import { ServicesManagementPage } from '../components/portal/services/ServicesManagementPage';
 import { ProductsManagementPage } from '../components/portal/products/ProductsManagementPage';
 import { BusinessManagementPage } from '../components/portal/business/BusinessManagementPage';
+import { FAQManagementPage } from '../components/portal/business/FAQManagementPage';
 import { GalleryManagementPage } from '../components/portal/gallery/GalleryManagementPage';
 import { ReceiptLookup } from '../components/portal/receipts/ReceiptLookup';
 import { StaffProfileView } from '../components/portal/staff/StaffProfileView';
@@ -27,9 +28,12 @@ export const StaffPortalPage: React.FC<StaffPortalPageProps> = ({ onExitToPublic
     init();
   }, [init]);
 
+  // Define restricted tabs for non-admin staff
+  const adminOnlyTabs = ['providers', 'services', 'products', 'business', 'messages', 'gallery', 'faqs'];
+
   // If role changes, ensure current tab is valid for that role
   useEffect(() => {
-    if (role === 'provider' && (currentTab === 'providers' || currentTab === 'services' || currentTab === 'products' || currentTab === 'business' || currentTab === 'messages' || currentTab === 'gallery')) {
+    if (role === 'provider' && adminOnlyTabs.includes(currentTab)) {
       setCurrentTab('overview');
     }
   }, [role, currentTab]);
@@ -46,6 +50,11 @@ export const StaffPortalPage: React.FC<StaffPortalPageProps> = ({ onExitToPublic
 
   // Render view corresponding to selected navigation tab
   const renderTabContent = () => {
+    // RBAC check: if trying to access admin tab as provider, redirect to overview
+    if (role === 'provider' && adminOnlyTabs.includes(currentTab)) {
+      return <PortalOverview onNavigateTab={(tab) => setCurrentTab(tab)} />;
+    }
+
     switch (currentTab) {
       case 'overview':
         return <PortalOverview onNavigateTab={(tab) => setCurrentTab(tab)} />;
@@ -58,21 +67,21 @@ export const StaffPortalPage: React.FC<StaffPortalPageProps> = ({ onExitToPublic
       case 'profile':
         return <StaffProfileView />;
       case 'services':
-        return role === 'admin' ? <ServicesManagementPage /> : <PortalOverview onNavigateTab={(t) => setCurrentTab(t)} />;
+        return <ServicesManagementPage />;
       case 'products':
-        return role === 'admin' ? <ProductsManagementPage /> : <PortalOverview onNavigateTab={(t) => setCurrentTab(t)} />;
+        return <ProductsManagementPage />;
       case 'messages':
-        return role === 'admin' ? <MessagesDashboard /> : <PortalOverview onNavigateTab={(t) => setCurrentTab(t)} />;
+        return <MessagesDashboard />;
       case 'business':
-        return role === 'admin' ? <BusinessManagementPage /> : <PortalOverview onNavigateTab={(t) => setCurrentTab(t)} />;
+        return <BusinessManagementPage />;
+      case 'faqs':
+        return <FAQManagementPage />;
       case 'gallery':
-        return role === 'admin' ? <GalleryManagementPage /> : <PortalOverview onNavigateTab={(t) => setCurrentTab(t)} />;
+        return <GalleryManagementPage />;
       case 'schedule':
         return <StaffScheduleView />;
       case 'receipts':
         return <ReceiptLookup />;
-      case 'profile':
-        return <StaffProfileView />;
       default:
         return <PortalOverview onNavigateTab={(tab) => setCurrentTab(tab)} />;
     }

@@ -30,6 +30,7 @@ export const ProductsCatalogPage: React.FC = () => {
     wishlistSlugs,
     toggleWishlist,
     openPurchaseModal,
+    isSupabaseConfigured
   } = useApp();
   const [selectedCategory, setSelectedCategory] =
     useState<ProductCategory>('all');
@@ -62,6 +63,9 @@ export const ProductsCatalogPage: React.FC = () => {
   const filteredProducts = useMemo(() => {
     return products
       .filter((p) => {
+        // Hide inactive or archived products
+        if (isSupabaseConfigured && (p.status === 'inactive' || p.status === 'archived')) return false;
+
         const matchesCat =
           selectedCategory === 'all' || p.category === selectedCategory;
         const matchesSearch =
@@ -78,7 +82,7 @@ export const ProductsCatalogPage: React.FC = () => {
         if (sortBy === 'rating') return b.rating - a.rating;
         return 0; // default featured
       });
-  }, [products, selectedCategory, searchQuery, sortBy]);
+  }, [products, selectedCategory, searchQuery, sortBy, isSupabaseConfigured]);
 
   const formatKsh = (amount: number) => `KSh ${amount.toLocaleString()}`;
 
