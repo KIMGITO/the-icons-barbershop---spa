@@ -127,6 +127,8 @@ Deno.serve(async (req) => {
     const resultDesc = stkCallback.ResultDesc;
     const callbackMetadata = stkCallback.CallbackMetadata || { Item: [] };
 
+    console.log(`Processing callback for CheckoutRequestID: ${checkoutRequestId}, ResultCode: ${resultCode}, Desc: ${resultDesc}`);
+
     // Extract metadata items
     const metaItems: Record<string, string> = {};
     for (const item of callbackMetadata.Item || []) {
@@ -162,11 +164,12 @@ Deno.serve(async (req) => {
 
     const bookingId = paymentRecord?.booking_id;
     if (!bookingId) {
-      console.error('No booking linked to checkoutRequestId:', checkoutRequestId);
+      console.error(`CRITICAL: No booking linked to checkoutRequestId: ${checkoutRequestId}. MerchantRequestID: ${merchantRequestId}`);
       return darajaSuccess;
     }
 
     if (status === 'completed') {
+      console.log(`Payment successful for booking ${bookingId}. Updating status and sending SMS...`);
       // 1. Confirm the booking
       const { data: bookingRow, error: confirmErr } = await admin.from('bookings')
         .update({

@@ -123,6 +123,11 @@ export const paymentService = {
     } else if (/^\+2547\d{8}$/.test(cleaned) || /^\+2541\d{8}$/.test(cleaned)) {
       normalized = cleaned.substring(1);
     } else {
+      normalized = cleaned;
+    }
+
+    // Safaricom check (7XX or 1XX after 254)
+    if (!/^(254)(7|1)\d{8}$/.test(normalized)) {
       return { valid: false, formatted: phone };
     }
 
