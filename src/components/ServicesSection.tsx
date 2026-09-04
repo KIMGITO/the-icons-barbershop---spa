@@ -1,5 +1,5 @@
 import { SafeImage } from './ui/SafeImage';
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { ServiceCategory, ServiceItem } from '../types';
 import { Clock, Scissors, Sparkles, Check, ArrowRight, ArrowLeft, Shield, ChevronLeft, ChevronRight, User } from 'lucide-react';
@@ -18,7 +18,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
   showCategoryFilter = true,
   isStandalonePage = false
 }) => {
-  const { services, openBookingModal, navigateTo, barbers, isSupabaseConfigured } = useApp();
+  const { services, openBookingModal, navigateTo, barbers, isSupabaseConfigured, serviceCategories } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory>('all');
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -30,36 +30,53 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
 
   const { ref: sectionRef, isVisible } = useScrollReveal();
 
-  const filteredServices = services.filter(service => {
-    // Hide inactive or suspended services from public UI
-    if (isSupabaseConfigured && (service.status === 'inactive' || service.status === 'archived')) return false;
-    
-    // Safety check for category slug normalization
-    const serviceCategory = service.category.toLowerCase();
-    
-    if (selectedCategory === 'all') return true;
-    
-    // Map of display categories to DB categories
-    const categoryMap: Record<string, string[]> = {
-      'haircut': ['haircuts'],
-      'beard': ['beard', 'shave'],
-      'spa': ['spa'],
-      'packages': ['packages', 'vip']
-    };
+  const categories = React.useMemo(() => {
+    if (serviceCategories && serviceCategories.length > 0) {
+      return [
+        { id: 'all' as ServiceCategory, label: 'All Services' },
+        ...serviceCategories.map(cat => ({
+          id: cat.slug as ServiceCategory,
+          label: cat.name
+        }))
+      ];
+    }
+    return [
+      { id: 'all' as ServiceCategory, label: 'All Services' },
+      { id: 'haircut' as ServiceCategory, label: 'Precision Haircuts' },
+      { id: 'beard' as ServiceCategory, label: 'Beard & Shaves' },
+      { id: 'spa' as ServiceCategory, label: 'Scalp & Facial Spa' },
+      { id: 'packages' as ServiceCategory, label: 'Signature Packages' }
+    ];
+  }, [serviceCategories]);
 
-    const allowedDbCategories = categoryMap[selectedCategory as string] || [selectedCategory];
-    return allowedDbCategories.includes(serviceCategory);
-  });
+  const filteredServices = useMemo(() => {
+    return services.filter(service => {
+      // Hide inactive or suspended services from public UI
+      if (isSupabaseConfigured && (service.status === 'inactive' || service.status === 'archived')) return false;
+      
+      if (selectedCategory === 'all') return true;
+      
+      const serviceCategory = service.category.toLowerCase();
+      
+      // If we have dynamic categories, match exactly by slug
+      if (serviceCategories && serviceCategories.length > 0) {
+        return serviceCategory === (selectedCategory as string).toLowerCase();
+      }
+
+      // Fallback Map of display categories to DB categories
+      const categoryMap: Record<string, string[]> = {
+        'haircut': ['haircuts', 'haircut'],
+        'beard': ['beard', 'shave'],
+        'spa': ['spa'],
+        'packages': ['packages', 'vip']
+      };
+
+      const allowedDbCategories = categoryMap[selectedCategory as string] || [selectedCategory];
+      return allowedDbCategories.includes(serviceCategory);
+    });
+  }, [services, selectedCategory, isSupabaseConfigured, serviceCategories]);
 
   const displayServices = limit ? filteredServices.slice(0, limit) : filteredServices;
-
-  const categories: { id: ServiceCategory; label: string }[] = [
-    { id: 'all', label: 'All Services' },
-    { id: 'haircut', label: 'Precision Haircuts' },
-    { id: 'beard', label: 'Beard & Shaves' },
-    { id: 'spa', label: 'Scalp & Facial Spa' },
-    { id: 'packages', label: 'Signature Packages' }
-  ];
 
   // Update scroll bounds and active index based on scroll position
   const handleScroll = useCallback(() => {
@@ -127,6 +144,11 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
       scrollNext();
     }
   };
+
+  // If no services, don't display the section
+  if (services.length === 0) {
+    return null;
+  }
 
   // -------------------------------------------------------------
   // VIEW 1: STANDALONE SERVICES DIRECTORY PAGE (/services)

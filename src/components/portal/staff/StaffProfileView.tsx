@@ -14,6 +14,7 @@ export const StaffProfileView: React.FC = () => {
   const { user } = useAuthStore();
   const { providers, loadProviders, updateProvider } = useProviderStore();
   const { services, loadServices } = useServiceStore();
+  const { productCategories, serviceCategories } = useApp();
   const { addToast } = useUIStore();
 
   useEffect(() => {

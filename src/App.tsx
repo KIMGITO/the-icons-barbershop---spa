@@ -29,7 +29,7 @@ import { PrivacyPage } from './pages/PrivacyPage';
 import { updatePageSEO } from './utils/seo';
 
 const MainContent: React.FC = () => {
-  const { currentRoute, navigateTo, openBookingModal } = useApp();
+  const { currentRoute, navigateTo, openBookingModal, refreshData, services, faqs, products, barbers, gallery, serviceCategories } = useApp();
   const subscribeToServices = useServiceStore(state => state.subscribeToServices);
   const subscribeToProducts = useProductAdminStore(state => state.subscribeToProducts);
   const subscribeToProviders = useProviderStore(state => state.subscribeToProviders);
@@ -39,6 +39,10 @@ const MainContent: React.FC = () => {
     const unsubServices = subscribeToServices();
     const unsubProducts = subscribeToProducts();
     const unsubProviders = subscribeToProviders();
+
+    // Re-fetch category and business data when related tables change
+    // AppContext already has some subscriptions, but ensuring we have a global hook here if needed
+    // Actually AppContext.tsx handles most of it now.
 
     return () => {
       unsubServices();
@@ -120,6 +124,10 @@ const MainContent: React.FC = () => {
     }
 
     if (currentRoute === '/services') {
+      if (!services || services.length === 0) {
+        navigateTo('/');
+        return null;
+      }
       return (
         <div>
           <ServicesSection isStandalonePage={true} />
@@ -128,6 +136,10 @@ const MainContent: React.FC = () => {
     }
 
     if (currentRoute === '/barbers') {
+      if (!barbers || barbers.length === 0) {
+        navigateTo('/');
+        return null;
+      }
       return (
         <div>
           <BarbersSection isStandalonePage={true} />
@@ -144,6 +156,10 @@ const MainContent: React.FC = () => {
     }
 
     if (currentRoute === '/gallery') {
+      if (!gallery || gallery.length === 0) {
+        navigateTo('/');
+        return null;
+      }
       return (
         <div>
           <GallerySection isStandalonePage={true} />
@@ -152,6 +168,10 @@ const MainContent: React.FC = () => {
     }
 
     if (currentRoute === '/faq') {
+      if (!faqs || !faqs.some(f => f.isActive !== false)) {
+        navigateTo('/');
+        return null;
+      }
       return (
         <div>
           <FAQPage />
@@ -175,17 +195,23 @@ const MainContent: React.FC = () => {
       );
     }
 
+    const hasServices = services && services.length > 0;
+    const hasProducts = products && products.length > 0;
+    const hasBarbers = barbers && barbers.length > 0;
+    const hasGallery = gallery && gallery.length > 0;
+    const hasFaqs = faqs && faqs.some(f => f.isActive !== false);
+
     return (
       <main id="homepage-main">
         <Hero />
-        <ServicesSection limit={8} />
-        <ProductsSection />
-        <BarbersSection />
+        {hasServices && <ServicesSection limit={8} />}
+        {hasProducts && <ProductsSection />}
+        {hasBarbers && <BarbersSection />}
         <TestimonialsSection />
         <AboutSection />
-        <GallerySection />
+        {hasGallery && <GallerySection />}
         <LocationContactSection />
-        <FAQSection />
+        {hasFaqs && <FAQSection />}
       </main>
     );
   };
@@ -202,7 +228,15 @@ const MainContent: React.FC = () => {
       <div className="flex-1">
         {renderCurrentView()}
       </div>
-      {!isPortalRoute && <Footer />}
+      {!isPortalRoute && (
+        <Footer 
+          hideServices={!services || services.length === 0}
+          hideProducts={!products || products.length === 0}
+          hideBarbers={!barbers || barbers.length === 0}
+          hideFaqs={!faqs || !faqs.some(f => f.isActive !== false)}
+          hideGallery={!gallery || gallery.length === 0}
+        />
+      )}
       <BookingModal />
       <ProductPurchaseModal />
     </div>

@@ -11,6 +11,7 @@ import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 import { Badge } from '../../ui/Badge';
 import { ThemeSelect } from '../../ui/ThemeSelect';
+import { useApp } from '@/context/AppContext';
 
 export const ServicesManagementPage: React.FC = () => {
   const { 
@@ -22,6 +23,7 @@ export const ServicesManagementPage: React.FC = () => {
     serviceProvidersMap 
   } = useServiceStore();
   const { providers, loadProviders } = useProviderStore();
+  const { serviceCategories } = useApp();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -30,7 +32,7 @@ export const ServicesManagementPage: React.FC = () => {
 
   // Form states
   const [name, setName] = useState('');
-  const [category, setCategory] = useState<'haircuts' | 'beard' | 'shave' | 'spa' | 'packages' | 'vip'>('haircuts');
+  const [category, setCategory] = useState<string>('haircuts');
   const [priceKsh, setPriceKsh] = useState<number>(1500);
   const [durationMinutes, setDurationMinutes] = useState<number>(45);
   const [description, setDescription] = useState('');
@@ -46,9 +48,13 @@ export const ServicesManagementPage: React.FC = () => {
   }, [loadServices, loadProviders]);
 
   const categories = useMemo(() => {
-    const cats = Array.from(new Set(services.map(s => s.category)));
+    if (serviceCategories && serviceCategories.length > 0) {
+      return ['all', ...serviceCategories.map(c => c.slug)];
+    }
+    // Only use distinct categories that actually have services if no manual categories defined
+    const cats = Array.from(new Set(services.map(s => s.category))).filter(Boolean);
     return ['all', ...cats];
-  }, [services]);
+  }, [services, serviceCategories]);
 
   const filteredServices = useMemo(() => {
     return services.filter(s => {
@@ -64,7 +70,8 @@ export const ServicesManagementPage: React.FC = () => {
   const handleOpenAdd = () => {
     setEditingService(null);
     setName('');
-    setCategory('haircuts');
+    const firstCat = serviceCategories && serviceCategories.length > 0 ? serviceCategories[0].slug : 'haircuts';
+    setCategory(firstCat);
     setPriceKsh(1500);
     setDurationMinutes(45);
     setDescription('');
@@ -340,15 +347,23 @@ export const ServicesManagementPage: React.FC = () => {
                   </label>
                   <ThemeSelect
                     value={category}
-                    onChange={(e) => setCategory(e.target.value as any)}
+                    onChange={(e) => setCategory(e.target.value)}
                     className="w-full bg-input border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary capitalize"
                   >
-                    <option value="haircuts">Haircuts</option>
-                    <option value="beard">Beard</option>
-                    <option value="shave">Shave</option>
-                    <option value="spa">Spa</option>
-                    <option value="packages">Packages</option>
-                    <option value="vip">VIP</option>
+                    {serviceCategories && serviceCategories.length > 0 ? (
+                      serviceCategories.map(cat => (
+                        <option key={cat.id} value={cat.slug}>{cat.name}</option>
+                      ))
+                    ) : (
+                      <>
+                        <option value="haircuts">Haircuts</option>
+                        <option value="beard">Beard</option>
+                        <option value="shave">Shave</option>
+                        <option value="spa">Spa</option>
+                        <option value="packages">Packages</option>
+                        <option value="vip">VIP</option>
+                      </>
+                    )}
                   </ThemeSelect>
                 </div>
 

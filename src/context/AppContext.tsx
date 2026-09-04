@@ -79,6 +79,9 @@ interface AppContextType {
   cancelBooking: (id: string) => void;
   completeBooking: (id: string) => void;
 
+  serviceCategories: any[];
+  productCategories: any[];
+
   // Product Purchase / Reservation modal
   isPurchaseModalOpen: boolean;
   selectedProductForPurchase?: ProductItem;
@@ -105,7 +108,9 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [services, setServices] = useState<ServiceItem[]>([]);
+  const [serviceCategories, setServiceCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<ProductItem[]>([]);
+  const [productCategories, setProductCategories] = useState<any[]>([]);
   const [barbers, setBarbers] = useState<BarberProfile[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [faqs, setFaqs] = useState<FAQItem[]>([]);
@@ -243,7 +248,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setLoading(true);
     setError(null);
     try {
-      const [serviceList, providerList, productList, galleryList, faqList, business, bookingList, customerList] = await Promise.all([
+      const [
+        serviceList, 
+        providerList, 
+        productList, 
+        galleryList, 
+        faqList, 
+        business, 
+        bookingList, 
+        customerList,
+        sCats,
+        pCats
+      ] = await Promise.all([
         serviceService.getServices(),
         providerService.getProviders(),
         productService.getProducts(true),
@@ -251,10 +267,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         fetchFaqs(),
         businessService.getBusinessProfile(),
         fetchBookings(),
-        fetchCustomers()
+        fetchCustomers(),
+        categoryService.getCategories(),
+        supabase.from('product_categories').select('*').order('sort_order').then(({ data }) => data || [])
       ]);
 
       setServices(serviceList);
+      setServiceCategories(sCats);
+      setProductCategories(pCats);
       setBarbers(providerList.map(p => ({
         id: p.id,
         slug: p.slug,
@@ -324,6 +344,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const channel = supabase
       .channel('app-context-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'service_categories' }, async () => {
+        const cats = await categoryService.getCategories();
+        setServiceCategories(cats);
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'product_categories' }, async () => {
+        const { data } = await supabase.from('product_categories').select('*').order('sort_order');
+        setProductCategories(data || []);
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'businesses' }, async () => {
+        const business = await businessService.getBusinessProfile();
+        if (business) {
+          setBusinessInfo(prev => ({
+            ...prev,
+            name: business.name,
+            tagline: business.description,
+            phone: business.phone,
+            phoneDisplay: business.phone,
+            email: business.email,
+            hours: {
+              weekdays: business.openingHours?.weekdays || prev.hours.weekdays,
+              saturday: business.openingHours?.saturday || prev.hours.saturday,
+              sunday: business.openingHours?.sunday || prev.hours.sunday
+            },
+            address: {
+              ...prev.address,
+              street: business.address || prev.address.street,
+              city: business.city || prev.address.city
+            }
+          }));
+        }
+      })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'gallery_items' }, (payload) => {
         if (payload.eventType === 'INSERT') {
           const row = payload.new;
@@ -661,7 +712,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addGalleryItem,
         updateGalleryItem,
         deleteGalleryItem,
-        reorderGallery
+        reorderGallery,
+        serviceCategories,
+        productCategories
       }}
     >
       {children}

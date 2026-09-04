@@ -10,17 +10,22 @@ interface GallerySectionProps {
 
 export const GallerySection: React.FC<GallerySectionProps> = ({ isStandalonePage = false }) => {
   const { gallery, navigateTo } = useApp();
+
+  // If no gallery items, don't display the section
+  if (!gallery || gallery.length === 0) {
+    return null;
+  }
+
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [activeLightboxIndex, setActiveLightboxIndex] = useState<number | null>(null);
   const { ref, isVisible } = useScrollReveal();
 
   const categories = [
     { id: 'all', label: 'All Photos' },
-    { id: 'haircut', label: 'Haircuts & Fades' },
-    { id: 'beard', label: 'Beard Artistry' },
-    { id: 'spa', label: 'Spa Treatments' },
-    { id: 'interior', label: 'Studio & Suites' },
-    { id: 'team', label: 'The Masters' }
+    ...Array.from(new Set(gallery.map(item => item.category))).filter(Boolean).map(cat => ({
+      id: cat,
+      label: cat.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+    }))
   ];
 
   const filteredGallery = gallery.filter(item => {

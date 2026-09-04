@@ -1,9 +1,9 @@
 -- Enable Realtime for all relevant tables
 -- This allows the UI to update instantly when any data changes in the database
+-- Idempotent: safe to run on databases where tables are already in the publication
+-- or where replica identity is already set.
 
 -- 1. Create the publication if it doesn't exist (Supabase usually has 'supabase_realtime')
--- But we want to ensure our tables are added to it.
-
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
@@ -11,29 +11,73 @@ BEGIN
     END IF;
 END $$;
 
--- 2. Add tables to the publication
-ALTER PUBLICATION supabase_realtime ADD TABLE services;
-ALTER PUBLICATION supabase_realtime ADD TABLE providers;
-ALTER PUBLICATION supabase_realtime ADD TABLE provider_services;
-ALTER PUBLICATION supabase_realtime ADD TABLE products;
-ALTER PUBLICATION supabase_realtime ADD TABLE gallery_items;
-ALTER PUBLICATION supabase_realtime ADD TABLE faqs;
-ALTER PUBLICATION supabase_realtime ADD TABLE bookings;
-ALTER PUBLICATION supabase_realtime ADD TABLE customers;
-ALTER PUBLICATION supabase_realtime ADD TABLE product_reviews;
-ALTER PUBLICATION supabase_realtime ADD TABLE service_reviews;
-ALTER PUBLICATION supabase_realtime ADD TABLE business_profile;
+-- 2. Add tables to the publication (only if not already a member)
+DO $$
+DECLARE
+    t text;
+BEGIN
+    FOREACH t IN ARRAY ARRAY[
+        'services',
+        'providers',
+        'provider_services',
+        'products',
+        'gallery_items',
+        'faqs',
+        'bookings',
+        'customers',
+        'product_reviews',
+        'service_reviews',
+        'business_profile'
+    ]
+    LOOP
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = t)
+           AND NOT EXISTS (
+             SELECT 1
+             FROM pg_publication_tables
+             WHERE pubname = 'supabase_realtime'
+               AND schemaname = 'public'
+               AND tablename = t
+           ) THEN
+            EXECUTE format('ALTER PUBLICATION supabase_realtime ADD TABLE public.%I', t);
+        END IF;
+    END LOOP;
+END $$;
 
 -- 3. Set REPLICA IDENTITY to FULL for tables where we need the old row data on DELETE
--- or for specific update logic, though DEFAULT is often enough for simple IDs.
--- We'll set it to FULL for important ones to be safe.
-ALTER TABLE services REPLICA IDENTITY FULL;
-ALTER TABLE providers REPLICA IDENTITY FULL;
-ALTER TABLE provider_services REPLICA IDENTITY FULL;
-ALTER TABLE products REPLICA IDENTITY FULL;
-ALTER TABLE gallery_items REPLICA IDENTITY FULL;
-ALTER TABLE faqs REPLICA IDENTITY FULL;
-ALTER TABLE bookings REPLICA IDENTITY FULL;
-ALTER TABLE customers REPLICA IDENTITY FULL;
-ALTER TABLE product_reviews REPLICA IDENTITY FULL;
-ALTER TABLE service_reviews REPLICA IDENTITY FULL;
+-- (skip if already FULL to avoid unnecessary locks)
+DO $$
+DECLARE
+    t text;
+    rel_id regclass;
+    current_replident "char";
+BEGIN
+    FOREACH t IN ARRAY ARRAY[
+        'services',
+        'providers',
+        'provider_services',
+        'products',
+        'gallery_items',
+        'faqs',
+        'bookings',
+        'customers',
+        'product_reviews',
+        'service_reviews'
+    ]
+    LOOP
+        IF EXISTS (
+            SELECT 1 FROM information_schema.tables
+            WHERE table_schema = 'public' AND table_name = t
+        ) THEN
+            -- Only now is it safe to cast to regclass
+            rel_id := format('public.%I', t)::regclass;
+
+            SELECT relreplident INTO current_replident
+            FROM pg_class
+            WHERE oid = rel_id;
+
+            IF current_replident <> 'f' THEN
+                EXECUTE format('ALTER TABLE public.%I REPLICA IDENTITY FULL', t);
+            END IF;
+        END IF;
+    END LOOP;
+END $$;

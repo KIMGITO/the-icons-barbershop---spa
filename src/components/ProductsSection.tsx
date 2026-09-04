@@ -7,6 +7,12 @@ import { Button } from './ui/Button';
 
 export const ProductsSection: React.FC = () => {
   const { products, navigateTo, wishlistSlugs, toggleWishlist, openPurchaseModal, isSupabaseConfigured } = useApp();
+
+  // If no products, don't display the section
+  if (!products || products.length === 0) {
+    return null;
+  }
+
   const { ref: sectionRef, isVisible } = useScrollReveal();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);

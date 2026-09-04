@@ -6,19 +6,28 @@ import { Button } from './ui/Button';
 
 export const FAQSection: React.FC = () => {
   const { faqs, navigateTo } = useApp();
+
+  // Filter for active FAQs only
+  const activeFaqs = React.useMemo(() => {
+    return faqs.filter(f => f.isActive !== false);
+  }, [faqs]);
+
+  // If no active faqs, don't display the section
+  if (!activeFaqs || activeFaqs.length === 0) {
+    return null;
+  }
+
   const [openFaqId, setOpenFaqId] = useState<string | null>(null);
   const { ref, isVisible } = useScrollReveal<HTMLElement>({ threshold: 0.1 });
 
   // Get the 3 preview questions (prioritizing isFeaturedOnHome or first 3 by order)
   const homeFaqs = React.useMemo(() => {
-    // Filter for active FAQs only
-    const activeFaqs = faqs.filter(f => f.isActive !== false);
     const featured = activeFaqs.filter(f => f.isFeaturedOnHome);
-    if (featured.length >= 3) {
-      return featured.slice(0, 3);
+    if (featured.length > 0) {
+      return featured;
     }
-    return activeFaqs.slice(0, 3);
-  }, [faqs]);
+    return activeFaqs;
+  }, [activeFaqs]);
 
   const toggleFaq = (id: string) => {
     setOpenFaqId(prevId => (prevId === id ? null : id));

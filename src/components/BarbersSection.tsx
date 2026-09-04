@@ -12,6 +12,12 @@ interface BarbersSectionProps {
 
 export const BarbersSection: React.FC<BarbersSectionProps> = ({ isStandalonePage = false }) => {
   const { barbers, openBookingModal, navigateTo, services } = useApp();
+
+  // If no barbers, don't display the section
+  if (!barbers || barbers.length === 0) {
+    return null;
+  }
+
   const { ref, isVisible } = useScrollReveal();
   const [selectedBarber, setSelectedBarber] = useState<BarberProfile | null>(null);
 

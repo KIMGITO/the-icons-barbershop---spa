@@ -39,7 +39,7 @@ import { ThemeSelect } from '../../ui/ThemeSelect';
 type ProductFormState = {
   name: string;
   slug: string;
-  category: 'scalp-care' | 'beard-grooming' | 'hair-styling' | 'follicle-health' | 'kits';
+  category: string;
   shortDescription: string;
   detailedDescription: string;
   priceKsh: number;
@@ -70,7 +70,7 @@ type ProductFormState = {
 const EMPTY_FORM: ProductFormState = {
   name: '',
   slug: '',
-  category: 'scalp-care',
+  category: '',
   shortDescription: '',
   detailedDescription: '',
   priceKsh: 0,
@@ -183,7 +183,7 @@ const formToProductData = (form: ProductFormState): Omit<ProductItem, 'id'> => (
 });
 
 export const ProductsManagementPage: React.FC = () => {
-  const { services } = useApp();
+  const { services, productCategories } = useApp();
   const {
     products,
     reviews,
@@ -494,9 +494,15 @@ export const ProductsManagementPage: React.FC = () => {
               className="w-full bg-input border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary capitalize"
             >
               <option value="all">All Categories</option>
-              {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
-              ))}
+              {productCategories && productCategories.length > 0 ? (
+                productCategories.map(cat => (
+                  <option key={cat.id} value={cat.slug}>{cat.name}</option>
+                ))
+              ) : (
+                Object.entries(CATEGORY_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>{label}</option>
+                ))
+              )}
             </ThemeSelect>
 
             <ThemeSelect
@@ -1024,15 +1030,21 @@ export const ProductsManagementPage: React.FC = () => {
                   <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                     Category *
                   </label>
-                  <ThemeSelect
-                    value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value as any })}
-                    className="w-full bg-input border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary capitalize"
-                  >
-                    {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
-                      <option key={value} value={value}>{label}</option>
-                    ))}
-                  </ThemeSelect>
+                    <ThemeSelect
+                      value={form.category}
+                      onChange={(e) => setForm({ ...form, category: e.target.value })}
+                      className="w-full bg-input border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary capitalize"
+                    >
+                      {productCategories && productCategories.length > 0 ? (
+                        productCategories.map(cat => (
+                          <option key={cat.id} value={cat.slug}>{cat.name}</option>
+                        ))
+                      ) : (
+                        Object.entries(CATEGORY_LABELS).map(([value, label]) => (
+                          <option key={value} value={value}>{label}</option>
+                        ))
+                      )}
+                    </ThemeSelect>
                 </div>
 
                 <div className="space-y-1">

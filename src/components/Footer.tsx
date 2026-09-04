@@ -18,7 +18,21 @@ import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import Logo from './bland/logo';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  hideServices?: boolean;
+  hideProducts?: boolean;
+  hideBarbers?: boolean;
+  hideFaqs?: boolean;
+  hideGallery?: boolean;
+}
+
+export const Footer: React.FC<FooterProps> = ({
+  hideServices,
+  hideProducts,
+  hideBarbers,
+  hideFaqs,
+  hideGallery
+}) => {
   const { businessInfo, navigateTo } = useApp();
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -91,30 +105,36 @@ export const Footer: React.FC = () => {
                   Home
                 </button>
               </li>
-              <li>
-                <button
-                  onClick={() => navigateTo('/services')}
-                  className="hover:text-primary hover:translate-x-1 sm:hover:translate-x-1 transition-all duration-200 cursor-pointer block mx-auto sm:mx-0"
-                >
-                  Services
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => navigateTo('/products')}
-                  className="hover:text-primary hover:translate-x-1 sm:hover:translate-x-1 transition-all duration-200 cursor-pointer block mx-auto sm:mx-0"
-                >
-                  Products
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => navigateTo('/barbers')}
-                  className="hover:text-primary hover:translate-x-1 sm:hover:translate-x-1 transition-all duration-200 cursor-pointer block mx-auto sm:mx-0"
-                >
-                  Team
-                </button>
-              </li>
+              {!hideServices && (
+                <li>
+                  <button
+                    onClick={() => navigateTo('/services')}
+                    className="hover:text-primary hover:translate-x-1 sm:hover:translate-x-1 transition-all duration-200 cursor-pointer block mx-auto sm:mx-0"
+                  >
+                    Services
+                  </button>
+                </li>
+              )}
+              {!hideProducts && (
+                <li>
+                  <button
+                    onClick={() => navigateTo('/products')}
+                    className="hover:text-primary hover:translate-x-1 sm:hover:translate-x-1 transition-all duration-200 cursor-pointer block mx-auto sm:mx-0"
+                  >
+                    Products
+                  </button>
+                </li>
+              )}
+              {!hideBarbers && (
+                <li>
+                  <button
+                    onClick={() => navigateTo('/barbers')}
+                    className="hover:text-primary hover:translate-x-1 sm:hover:translate-x-1 transition-all duration-200 cursor-pointer block mx-auto sm:mx-0"
+                  >
+                    Team
+                  </button>
+                </li>
+              )}
               <li>
                 <button
                   onClick={() => navigateTo('/about')}
@@ -123,22 +143,26 @@ export const Footer: React.FC = () => {
                   Testimonials
                 </button>
               </li>
-              <li>
-                <button
-                  onClick={() => navigateTo('/faq')}
-                  className="hover:text-primary hover:translate-x-1 sm:hover:translate-x-1 transition-all duration-200 cursor-pointer block mx-auto sm:mx-0"
-                >
-                  FAQ
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => navigateTo('/gallery')}
-                  className="hover:text-primary hover:translate-x-1 sm:hover:translate-x-1 transition-all duration-200 cursor-pointer block mx-auto sm:mx-0"
-                >
-                  Gallery
-                </button>
-              </li>
+              {!hideFaqs && (
+                <li>
+                  <button
+                    onClick={() => navigateTo('/faq')}
+                    className="hover:text-primary hover:translate-x-1 sm:hover:translate-x-1 transition-all duration-200 cursor-pointer block mx-auto sm:mx-0"
+                  >
+                    FAQ
+                  </button>
+                </li>
+              )}
+              {!hideGallery && (
+                <li>
+                  <button
+                    onClick={() => navigateTo('/gallery')}
+                    className="hover:text-primary hover:translate-x-1 sm:hover:translate-x-1 transition-all duration-200 cursor-pointer block mx-auto sm:mx-0"
+                  >
+                    Gallery
+                  </button>
+                </li>
+              )}
             </ul>
           </div>
 

@@ -74,6 +74,26 @@ Deno.serve(async (req) => {
         must_change_password: true,
         phone: phone || null
       }).eq('id', created.user.id);
+
+      // Send Invitation Email
+      const { data: invRes, error: invErr } = await admin.functions.invoke('send-email', {
+        body: {
+          to: email,
+          subject: 'Welcome to The Icons Barber & Spa',
+          emailType: 'invitation',
+          content: `
+            <p>Hi ${fullName},</p>
+            <p>You have been added as a <strong>${role || 'provider'}</strong> at The Icons Barber & Spa.</p>
+            <p>You can now log in to the staff portal using your email and the temporary password provided by your administrator.</p>
+            <p>For security, you will be required to change your password upon your first login.</p>
+          `,
+          cta: {
+            text: 'Login to Portal',
+            url: `${req.headers.get('origin') || 'https://theicons.co.ke'}/portal/login`
+          }
+        }
+      });
+      if (invErr) console.error('Failed to send invitation email:', invErr);
     }
 
     return Response.json({
