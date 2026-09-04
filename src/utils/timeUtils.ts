@@ -1,7 +1,7 @@
 import { StaffBooking } from '../types/staff';
 
 export const NAIROBI_TIMEZONE = 'Africa/Nairobi';
-export const SLOT_INTERVAL_MINUTES = 15;
+export const SLOT_INTERVAL_MINUTES = 5;
 
 export function parseTimeToMinutes(timeStr: string): number {
   if (!timeStr) return 0;

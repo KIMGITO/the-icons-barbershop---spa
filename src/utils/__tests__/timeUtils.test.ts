@@ -138,11 +138,11 @@ describe('timeUtils', () => {
   });
 
   describe('generateTimeSlots', () => {
-    it('generates 15-minute slots between opening hours', () => {
-      const slots = generateTimeSlots(8, 10, 15);
-      expect(slots.length).toBe(8);
+    it('generates 5-minute slots between opening hours', () => {
+      const slots = generateTimeSlots(8, 10, 5);
+      expect(slots.length).toBe(24);
       expect(slots[0]).toBe('08:00 AM');
-      expect(slots[slots.length - 1]).toBe('09:45 AM');
+      expect(slots[slots.length - 1]).toBe('09:55 AM');
     });
 
     it('generates empty slots for invalid range', () => {

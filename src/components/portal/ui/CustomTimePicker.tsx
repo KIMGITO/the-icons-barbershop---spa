@@ -8,7 +8,7 @@ export interface CustomTimePickerProps {
   label?: string;
   value: string; // e.g. "10:30 AM"
   onChange: (time: string) => void;
-  intervalMinutes?: number; // default 15
+  intervalMinutes?: number; // default 5
   startHour?: number; // default 8 (08:00 AM)
   endHour?: number; // default 20 (08:00 PM)
   disabled?: boolean;
@@ -22,7 +22,7 @@ export const CustomTimePicker: React.FC<CustomTimePickerProps> = ({
   label,
   value,
   onChange,
-  intervalMinutes = 15,
+  intervalMinutes = 5,
   startHour = 8,
   endHour = 20,
   disabled = false,
