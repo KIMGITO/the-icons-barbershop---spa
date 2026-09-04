@@ -1,8 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { StaffBooking } from '../../../types/staff';
 import { computePositionedBookings } from '../../../utils/calendarLayout';
 import { BookingBlock } from './BookingBlock';
 import { minutesToTimeString } from '../../../utils/timeUtils';
+import { MobileAgendaDay } from './MobileAgendaDay';
 
 export interface WeekPlannerViewProps {
   currentDate: Date;
@@ -62,8 +63,59 @@ export const WeekPlannerView: React.FC<WeekPlannerViewProps> = ({
 
   const totalHeight = (END_HOUR - START_HOUR) * ROW_HEIGHT;
 
+  // Mobile: which day of the week is currently selected in the agenda view.
+  const [mobileSelectedDate, setMobileSelectedDate] = useState<string>(
+    weekDays.find(d => d.isToday)?.dateString || weekDays[0]?.dateString
+  );
+  useEffect(() => {
+    // Keep selection valid when the week changes (e.g. after Prev/Next).
+    if (!weekDays.some(d => d.dateString === mobileSelectedDate)) {
+      setMobileSelectedDate(weekDays.find(d => d.isToday)?.dateString || weekDays[0]?.dateString);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [weekDays]);
+
+  const mobileDayBookings = useMemo(
+    () => bookings.filter(b => b.date === mobileSelectedDate),
+    [bookings, mobileSelectedDate]
+  );
+
   return (
-    <div className="bg-card border border-border rounded-2xl overflow-x-auto shadow-sm">
+    <>
+      {/* ============ MOBILE: day-picker strip + vertical agenda ============ */}
+      <div className="sm:hidden space-y-3">
+        <div className="bg-card border border-border rounded-2xl p-2 flex gap-1.5 overflow-x-auto">
+          {weekDays.map(day => (
+            <button
+              key={day.dateString}
+              type="button"
+              onClick={() => setMobileSelectedDate(day.dateString)}
+              className={`shrink-0 flex flex-col items-center justify-center w-12 py-2 rounded-xl transition-colors cursor-pointer ${
+                mobileSelectedDate === day.dateString
+                  ? 'bg-primary text-black font-extrabold shadow-xs'
+                  : day.isToday
+                  ? 'bg-primary/10 text-primary font-bold'
+                  : 'text-muted-foreground hover:bg-muted'
+              }`}
+            >
+              <span className="text-[9px] uppercase tracking-wider">{day.dayLabel}</span>
+              <span className="text-sm mt-0.5">{day.dayNumber}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="bg-card border border-border rounded-2xl p-3">
+          <MobileAgendaDay
+            bookings={mobileDayBookings}
+            onBookingClick={onBookingClick}
+            onAddClick={() => onSlotClick(mobileSelectedDate, '09:00 AM')}
+            showProviderName
+          />
+        </div>
+      </div>
+
+      {/* ============ DESKTOP/TABLET: full 7-day time grid ============ */}
+      <div className="hidden sm:block bg-card border border-border rounded-2xl overflow-x-auto shadow-sm">
       <div className="min-w-[760px] sm:min-w-[860px]">
         {/* Days Header */}
         <div className="grid grid-cols-[70px_repeat(7,1fr)] border-b border-border bg-muted/40 text-center sticky top-0 z-20">
@@ -168,6 +220,7 @@ export const WeekPlannerView: React.FC<WeekPlannerViewProps> = ({
           })}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };

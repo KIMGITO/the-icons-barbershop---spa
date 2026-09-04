@@ -3,6 +3,7 @@ import { StaffBooking, ServiceProvider } from '../../../types/staff';
 import { computePositionedBookings } from '../../../utils/calendarLayout';
 import { BookingBlock } from './BookingBlock';
 import { minutesToTimeString } from '../../../utils/timeUtils';
+import { MobileAgendaDay } from './MobileAgendaDay';
 
 export interface DayPlannerViewProps {
   currentDate: Date;
@@ -56,7 +57,19 @@ export const DayPlannerView: React.FC<DayPlannerViewProps> = ({
   const isMultiProvider = activeProviders.length > 1;
 
   return (
-    <div className="bg-card border border-border rounded-2xl overflow-x-auto shadow-sm">
+    <>
+      {/* ============ MOBILE: vertical agenda (all active providers merged) ============ */}
+      <div className="sm:hidden bg-card border border-border rounded-2xl p-3">
+        <MobileAgendaDay
+          bookings={dayBookings}
+          onBookingClick={onBookingClick}
+          onAddClick={() => onSlotClick(dateString, '09:00 AM', selectedProviderId !== 'all' ? selectedProviderId : undefined)}
+          showProviderName={isMultiProvider}
+        />
+      </div>
+
+      {/* ============ DESKTOP/TABLET: time grid, columns per provider ============ */}
+      <div className="hidden sm:block bg-card border border-border rounded-2xl overflow-x-auto shadow-sm">
       <div className={isMultiProvider ? 'min-w-[760px] sm:min-w-[880px]' : 'min-w-[400px]'}>
         {/* Header with Provider Columns */}
         <div 
@@ -177,6 +190,7 @@ export const DayPlannerView: React.FC<DayPlannerViewProps> = ({
           })}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
