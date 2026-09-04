@@ -1,4 +1,40 @@
 -- ============================================================
+-- 43.1 Seed default barber-shop service categories
+-- ============================================================
+
+INSERT INTO public.service_categories (slug, name, is_active)
+VALUES
+  ('haircuts', 'Haircuts', true),
+  ('beard', 'Beard', true),
+  ('hair-styling', 'Hair Styling', true),
+  ('shaving', 'Shaving', true),
+  ('therapies', 'Therapy Treatment', true)
+ON CONFLICT (slug) DO UPDATE
+SET
+  name = EXCLUDED.name,
+  is_active = true;
+
+
+-- ============================================================
+-- 43.2 Backfill existing services
+-- ============================================================
+
+UPDATE public.services s
+SET category_id = c.id
+FROM public.service_categories c
+WHERE s.category_id IS NULL
+  AND s.category = c.slug;
+
+
+-- ============================================================
+-- 43.3 Keep category label synchronized
+-- ============================================================
+
+UPDATE public.services s
+SET category = c.slug
+FROM public.service_categories c
+WHERE s.category_id = c.id
+  AND s.category IS DISTINCT FROM c.slug;-- ============================================================
 -- 47. PRODUCT CATEGORIES
 -- ============================================================
 create table if not exists public.product_categories (
