@@ -14,7 +14,6 @@ export const StaffProfileView: React.FC = () => {
   const { user } = useAuthStore();
   const { providers, loadProviders, updateProvider } = useProviderStore();
   const { services, loadServices } = useServiceStore();
-  const { productCategories, serviceCategories } = useApp();
   const { addToast } = useUIStore();
 
   useEffect(() => {
@@ -129,7 +128,7 @@ export const StaffProfileView: React.FC = () => {
             {currentProvider ? (
               <Badge variant="primary">{PROVIDER_TYPE_LABELS[currentProvider.providerType] || currentProvider.providerType}</Badge>
             ) : (
-              <Badge variant="secondary">Administrator</Badge>
+              <Badge variant="success">Administrator</Badge>
             )}
             {currentProvider?.rating && (
               <span className="text-xs text-primary font-semibold flex items-center gap-1">

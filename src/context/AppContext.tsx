@@ -50,6 +50,9 @@ const DEFAULT_EMPTY_BUSINESS_INFO: BusinessInfo = {
 };
 
 interface AppContextType {
+  //Config
+  isSupabaseConfigured: boolean;
+  // Data
   services: ServiceItem[];
   barbers: BarberProfile[];
   gallery: GalleryItem[];
@@ -714,7 +717,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deleteGalleryItem,
         reorderGallery,
         serviceCategories,
-        productCategories
+        productCategories,
+        isSupabaseConfigured
       }}
     >
       {children}

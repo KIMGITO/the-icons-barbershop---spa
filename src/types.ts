@@ -66,7 +66,7 @@ export interface ProductItem {
   id: string;
   slug: string;
   name: string;
-  category: 'scalp-care' | 'beard-grooming' | 'hair-styling' | 'follicle-health' | 'kits';
+  category: string;
   shortDescription: string;
   detailedDescription: string;
   priceKsh: number;
@@ -83,6 +83,8 @@ export interface ProductItem {
   suitableFor: string;
   relatedServiceSlugs: string[];
   relatedProductSlugs?: string[];
+  description?:string;
+  features?: string[];
   // Management additions
   stockQuantity?: number;
   sku?: string;

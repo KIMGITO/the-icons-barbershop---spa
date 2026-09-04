@@ -6,7 +6,7 @@ import { useScrollReveal } from '../hooks/useScrollReveal';
 import { Button } from './ui/Button';
 
 export const ProductsSection: React.FC = () => {
-  const { products, navigateTo, wishlistSlugs, toggleWishlist, openPurchaseModal, isSupabaseConfigured } = useApp();
+  const { products, navigateTo, wishlistSlugs, toggleWishlist, openPurchaseModal } = useApp();
 
   // If no products, don't display the section
   if (!products || products.length === 0) {
@@ -21,7 +21,7 @@ export const ProductsSection: React.FC = () => {
   // Take the primary curated products for the showcase
   const featuredProducts = products
     .filter(p => {
-      if (isSupabaseConfigured && (p.status !== 'active')) return false;
+      
       return true;
     })
     .slice(0, 4);

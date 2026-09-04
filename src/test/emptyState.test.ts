@@ -10,7 +10,7 @@ import path from 'path';
 // ============================================================
 
 describe('Empty Database States', () => {
-  it('SafeImage DEFAULT_IMAGE is a neutral placeholder (no fake business photo)', () => {
+  it('SafeImage DEFAULT_IMAGE is a neutral placeholder (no fake business photo)', async () => {
     const { DEFAULT_IMAGE } = await import('@/components/ui/SafeImage');
     expect(DEFAULT_IMAGE.startsWith('data:image/svg+xml')).toBe(true);
     expect(DEFAULT_IMAGE).not.toContain('images.unsplash.com');
@@ -21,20 +21,20 @@ describe('Empty Database States', () => {
     expect(fs.existsSync(filePath)).toBe(false);
   });
 
-  it('No SEEDED_STAFF_ACCOUNTS remain in authService', () => {
+  it('No SEEDED_STAFF_ACCOUNTS remain in authService', async () => {
     const mod = await import('@/services/authService');
     expect(mod.authService).toBeDefined();
     expect(mod.SEEDED_STAFF_ACCOUNTS).toBeUndefined();
     expect(mod.DEMO_CREDENTIALS).toBeUndefined();
   });
 
-  it('bookingService does not export createInitialStaffBookings', () => {
+  it('bookingService does not export createInitialStaffBookings',async () => {
     const mod = await import('@/services/bookingService');
     expect(mod.createInitialStaffBookings).toBeUndefined();
     expect(mod.BOOKINGS_STORAGE_KEY).toBeUndefined();
   });
 
-  it('productService does not reference localStorage fallback', () => {
+  it('productService does not reference localStorage fallback',async () => {
     const mod = await import('@/services/productService');
     expect(mod.PRODUCTS_STORAGE_KEY).toBeUndefined();
   });

@@ -64,7 +64,7 @@ export const ProductsCatalogPage: React.FC = () => {
     return products
       .filter((p) => {
         // Hide inactive or archived products
-        if (isSupabaseConfigured && (p.status === 'inactive' || p.status === 'archived')) return false;
+        if (isSupabaseConfigured && (p.status === 'draft' || p.status === 'archived')) return false;
 
         const matchesCat =
           selectedCategory === 'all' || p.category === selectedCategory;
