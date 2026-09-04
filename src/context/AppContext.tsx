@@ -242,6 +242,200 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     refreshData();
   }, [refreshData]);
 
+  // Real-time Subscriptions
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+
+    const channel = supabase
+      .channel('app-context-realtime')
+      // Gallery Items
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'gallery_items' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          const row = payload.new;
+          setGallery(prev => [...prev, {
+            id: row.id,
+            title: row.title,
+            alt: row.alt || row.title,
+            category: row.category,
+            imageUrl: row.image_url,
+            caption: row.caption,
+            sortOrder: row.sort_order,
+            isActive: row.is_active
+          }].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)));
+        } else if (payload.eventType === 'UPDATE') {
+          const row = payload.new;
+          setGallery(prev => prev.map(item => item.id === row.id ? {
+            id: row.id,
+            title: row.title,
+            alt: row.alt || row.title,
+            category: row.category,
+            imageUrl: row.image_url,
+            caption: row.caption,
+            sortOrder: row.sort_order,
+            isActive: row.is_active
+          } : item).sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)));
+        } else if (payload.eventType === 'DELETE') {
+          setGallery(prev => prev.filter(item => item.id === payload.old.id));
+        }
+      })
+      // FAQs
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'faqs' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          const row = payload.new;
+          setFaqs(prev => [...prev, {
+            id: row.id,
+            question: row.question,
+            answer: row.answer,
+            category: row.category,
+            order: row.sort_order,
+            isFeaturedOnHome: row.is_featured_on_home,
+            internalLink: row.internal_link_url ? { text: row.internal_link_label || 'Learn more', url: row.internal_link_url } : undefined
+          }].sort((a, b) => (a.order || 0) - (b.order || 0)));
+        } else if (payload.eventType === 'UPDATE') {
+          const row = payload.new;
+          setFaqs(prev => prev.map(item => item.id === row.id ? {
+            id: row.id,
+            question: row.question,
+            answer: row.answer,
+            category: row.category,
+            order: row.sort_order,
+            isFeaturedOnHome: row.is_featured_on_home,
+            internalLink: row.internal_link_url ? { text: row.internal_link_label || 'Learn more', url: row.internal_link_url } : undefined
+          } : item).sort((a, b) => (a.order || 0) - (b.order || 0)));
+        } else if (payload.eventType === 'DELETE') {
+          setFaqs(prev => prev.filter(item => item.id === payload.old.id));
+        }
+      })
+      // Bookings
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          const row = payload.new;
+          setBookings(prev => [{
+            id: row.id,
+            referenceNumber: row.reference_number,
+            serviceIds: row.service_ids || [],
+            serviceNames: row.service_names || [],
+            barberId: row.provider_id,
+            barberName: row.provider_name,
+            date: row.date,
+            timeSlot: row.time_slot,
+            customerName: row.customer_name,
+            customerPhone: row.customer_phone || '',
+            customerEmail: row.customer_email || '',
+            specialRequests: row.special_requests,
+            totalPriceKsh: Number(row.total_price_ksh || 0),
+            totalDurationMinutes: row.duration_minutes || 0,
+            status: row.status,
+            paymentStatus: row.payment_status,
+            paymentMethod: row.payment_method,
+            staffNotes: row.staff_notes,
+            createdAt: row.created_at
+          }, ...prev]);
+        } else if (payload.eventType === 'UPDATE') {
+          const row = payload.new;
+          setBookings(prev => prev.map(item => item.id === row.id ? {
+            id: row.id,
+            referenceNumber: row.reference_number,
+            serviceIds: row.service_ids || [],
+            serviceNames: row.service_names || [],
+            barberId: row.provider_id,
+            barberName: row.provider_name,
+            date: row.date,
+            timeSlot: row.time_slot,
+            customerName: row.customer_name,
+            customerPhone: row.customer_phone || '',
+            customerEmail: row.customer_email || '',
+            specialRequests: row.special_requests,
+            totalPriceKsh: Number(row.total_price_ksh || 0),
+            totalDurationMinutes: row.duration_minutes || 0,
+            status: row.status,
+            paymentStatus: row.payment_status,
+            paymentMethod: row.payment_method,
+            staffNotes: row.staff_notes,
+            createdAt: row.created_at
+          } : item));
+        } else if (payload.eventType === 'DELETE') {
+          setBookings(prev => prev.filter(item => item.id === payload.old.id));
+        }
+      })
+      // Customers
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'customers' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          const row = payload.new;
+          setCustomers(prev => [{
+            id: row.id,
+            name: row.name,
+            email: row.email || '',
+            phone: row.phone || '',
+            avatarUrl: row.avatar_url || '',
+            preferredBarberId: row.preferred_provider_id || undefined,
+            frequentlyBookedServiceNames: row.frequently_booked_services || [],
+            totalVisits: row.total_visits || 0,
+            totalSpendKsh: Number(row.total_spend_ksh || 0),
+            lastVisitDate: row.last_visit_date || undefined,
+            notes: row.notes,
+            tags: row.tags || [],
+            vipStatus: row.vip_status || false,
+            createdAt: row.created_at
+          }, ...prev]);
+        } else if (payload.eventType === 'UPDATE') {
+          const row = payload.new;
+          setCustomers(prev => prev.map(item => item.id === row.id ? {
+            id: row.id,
+            name: row.name,
+            email: row.email || '',
+            phone: row.phone || '',
+            avatarUrl: row.avatar_url || '',
+            preferredBarberId: row.preferred_provider_id || undefined,
+            frequentlyBookedServiceNames: row.frequently_booked_services || [],
+            totalVisits: row.total_visits || 0,
+            totalSpendKsh: Number(row.total_spend_ksh || 0),
+            lastVisitDate: row.last_visit_date || undefined,
+            notes: row.notes,
+            tags: row.tags || [],
+            vipStatus: row.vip_status || false,
+            createdAt: row.created_at
+          } : item));
+        } else if (payload.eventType === 'DELETE') {
+          setCustomers(prev => prev.filter(item => item.id === payload.old.id));
+        }
+      })
+      // Business Profile
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'business_profile' }, (payload) => {
+        const business = payload.new;
+        setBusinessInfo(prev => ({
+          ...prev,
+          name: business.name,
+          tagline: business.description,
+          phone: business.phone,
+          phoneDisplay: business.phone,
+          email: business.email,
+          locationDetails: business.location_details || prev.locationDetails,
+          hours: {
+            weekdays: business.opening_hours?.weekdays || prev.hours.weekdays,
+            saturday: business.opening_hours?.saturday || prev.hours.saturday,
+            sunday: business.opening_hours?.sunday || prev.hours.sunday
+          },
+          address: {
+            ...prev.address,
+            street: business.address || prev.address.street,
+            suite: business.neighborhood || prev.address.suite,
+            neighborhood: business.neighborhood || prev.address.neighborhood,
+            city: business.city || prev.address.city,
+            mapsEmbedUrl: business.maps_embed_url || prev.address.mapsEmbedUrl,
+            directionsUrl: business.directions_url || prev.address.directionsUrl
+          },
+          whatsapp: business.social_links?.whatsapp || prev.whatsapp,
+          whatsappUrl: `https://wa.me/${(business.social_links?.whatsapp || prev.whatsapp || '').replace(/[+\s]/g, '')}`
+        }));
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isSupabaseConfigured]);
+
   const fetchGallery = async (): Promise<GalleryItem[]> => {
     const { data, error } = await supabase.from('gallery_items').select('*').order('sort_order');
     if (error) throw new Error(error.message);
@@ -430,20 +624,57 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setServices(prev => prev.filter(s => s.id !== id));
   };
 
-  const updateFAQ = (updated: FAQItem) => {
+  const updateFAQ = async (updated: FAQItem) => {
     setFaqs(prev => prev.map(f => f.id === updated.id ? updated : f));
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.from('faqs').update({
+          question: updated.question,
+          answer: updated.answer,
+          category: updated.category,
+          sort_order: updated.order,
+          is_featured_on_home: updated.isFeaturedOnHome,
+          internal_link_label: updated.internalLink?.text,
+          internal_link_url: updated.internalLink?.url
+        }).eq('id', updated.id);
+      } catch (e) { console.error(e); }
+    }
   };
 
-  const addFAQ = (newFaq: Omit<FAQItem, 'id'>) => {
-    const item: FAQItem = {
-      ...newFaq,
-      id: `faq-${Date.now()}`
-    };
-    setFaqs(prev => [...prev, item]);
+  const addFAQ = async (newFaq: Omit<FAQItem, 'id'>) => {
+    if (isSupabaseConfigured) {
+      try {
+        const { data } = await supabase.from('faqs').insert({
+          question: newFaq.question,
+          answer: newFaq.answer,
+          category: newFaq.category,
+          sort_order: newFaq.order,
+          is_featured_on_home: newFaq.isFeaturedOnHome,
+          internal_link_label: newFaq.internalLink?.text,
+          internal_link_url: newFaq.internalLink?.url
+        }).select().single();
+        if (data) {
+          const item: FAQItem = {
+            ...newFaq,
+            id: data.id
+          };
+          setFaqs(prev => [...prev, item].sort((a, b) => (a.order || 0) - (b.order || 0)));
+        }
+      } catch (e) { console.error(e); }
+    } else {
+      const item: FAQItem = {
+        ...newFaq,
+        id: `faq-${Date.now()}`
+      };
+      setFaqs(prev => [...prev, item]);
+    }
   };
 
-  const deleteFAQ = (id: string) => {
+  const deleteFAQ = async (id: string) => {
     setFaqs(prev => prev.filter(f => f.id !== id));
+    if (isSupabaseConfigured) {
+      try { await supabase.from('faqs').delete().eq('id', id); } catch (e) { console.error(e); }
+    }
   };
 
   const updateBarber = (updated: BarberProfile) => {

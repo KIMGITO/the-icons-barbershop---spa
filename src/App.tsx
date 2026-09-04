@@ -13,6 +13,9 @@ import { FAQSection } from './components/FAQSection';
 import { Footer } from './components/Footer';
 import { BookingModal } from './components/BookingModal';
 import { ProductPurchaseModal } from './components/ProductPurchaseModal';
+import { useServiceStore } from './stores/serviceStore';
+import { useProductAdminStore } from './stores/productAdminStore';
+import { useProviderStore } from './stores/providerStore';
 import { ServiceDetailPage } from './pages/ServiceDetailPage';
 import { BarberDetailPage } from './pages/BarberDetailPage';
 import { ProductsCatalogPage } from './pages/ProductsCatalogPage';
@@ -27,6 +30,22 @@ import { updatePageSEO } from './utils/seo';
 
 const MainContent: React.FC = () => {
   const { currentRoute, navigateTo, openBookingModal } = useApp();
+  const subscribeToServices = useServiceStore(state => state.subscribeToServices);
+  const subscribeToProducts = useProductAdminStore(state => state.subscribeToProducts);
+  const subscribeToProviders = useProviderStore(state => state.subscribeToProviders);
+
+  // Initialize Global Real-time Subscriptions
+  useEffect(() => {
+    const unsubServices = subscribeToServices();
+    const unsubProducts = subscribeToProducts();
+    const unsubProviders = subscribeToProviders();
+
+    return () => {
+      unsubServices();
+      unsubProducts();
+      unsubProviders();
+    };
+  }, [subscribeToServices, subscribeToProducts, subscribeToProviders]);
 
   // Root SEO initialization on route change
   useEffect(() => {
@@ -68,34 +87,29 @@ const MainContent: React.FC = () => {
     } else if (currentRoute === '/book') {
       openBookingModal();
     }
-  }, [currentRoute]);
+  }, [currentRoute, openBookingModal]);
 
   // Route Dispatcher
   const renderCurrentView = () => {
-    // Product Detail Route: /products/:slug
     if (currentRoute.startsWith('/products/')) {
       const slug = currentRoute.replace('/products/', '');
       return <ProductDetailPage slug={slug} />;
     }
 
-    // Standalone Products Catalog Page: /products
     if (currentRoute === '/products') {
       return <ProductsCatalogPage />;
     }
 
-    // Service Detail Route: /services/:slug
     if (currentRoute.startsWith('/services/')) {
       const slug = currentRoute.replace('/services/', '');
       return <ServiceDetailPage slug={slug} />;
     }
 
-    // Barber Detail Route: /barbers/:slug
     if (currentRoute.startsWith('/barbers/')) {
       const slug = currentRoute.replace('/barbers/', '');
       return <BarberDetailPage slug={slug} />;
     }
 
-    // Staff Portal & Management Routes: /portal, /staff, /admin, /barber
     if (
       (currentRoute === '/portal' || currentRoute.startsWith('/portal/')) ||
       (currentRoute === '/staff' || currentRoute.startsWith('/staff/')) ||
@@ -105,7 +119,6 @@ const MainContent: React.FC = () => {
       return <StaffPortalPage onExitToPublicWebsite={() => navigateTo('/')} />;
     }
 
-    // Standalone Services Page
     if (currentRoute === '/services') {
       return (
         <div>
@@ -114,7 +127,6 @@ const MainContent: React.FC = () => {
       );
     }
 
-    // Standalone Barbers Page
     if (currentRoute === '/barbers') {
       return (
         <div>
@@ -123,7 +135,6 @@ const MainContent: React.FC = () => {
       );
     }
 
-    // Standalone About Page
     if (currentRoute === '/about') {
       return (
         <div>
@@ -132,7 +143,6 @@ const MainContent: React.FC = () => {
       );
     }
 
-    // Standalone Gallery Page
     if (currentRoute === '/gallery') {
       return (
         <div>
@@ -141,7 +151,6 @@ const MainContent: React.FC = () => {
       );
     }
 
-    // Standalone FAQ Page
     if (currentRoute === '/faq') {
       return (
         <div>
@@ -150,17 +159,14 @@ const MainContent: React.FC = () => {
       );
     }
 
-    // Terms & Conditions Page
     if (currentRoute === '/terms') {
       return <TermsPage />;
     }
 
-    // Privacy Policy Page
     if (currentRoute === '/privacy') {
       return <PrivacyPage />;
     }
 
-    // Standalone Contact Page
     if (currentRoute === '/contact') {
       return (
         <div>
@@ -169,34 +175,16 @@ const MainContent: React.FC = () => {
       );
     }
 
-    // Default: Full Homepage Landing Experience:
     return (
       <main id="homepage-main">
-        {/* 1. Hero */}
         <Hero />
-
-        {/* 2. Services (Immediately after Hero) */}
         <ServicesSection limit={8} />
-
-        {/* 3. Products Showcase (Curated Must Have Items) */}
         <ProductsSection />
-
-        {/* 4. Featured Barbers */}
         <BarbersSection />
-
-        {/* 5. What Our Customers Say (Real DB reviews, biased to services) */}
         <TestimonialsSection />
-
-        {/* 6. About */}
         <AboutSection />
-
-        {/* 7. Gallery */}
         <GallerySection />
-
-        {/* 8. Location / Contact */}
         <LocationContactSection />
-
-        {/* 9. FAQ Section */}
         <FAQSection />
       </main>
     );
@@ -210,21 +198,12 @@ const MainContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col justify-between selection:bg-primary selection:text-primary-foreground">
-      {/* Global Navigation - hidden in staff portal */}
       {!isPortalRoute && <Navigation />}
-
-      {/* Main Routed View */}
       <div className="flex-1">
         {renderCurrentView()}
       </div>
-
-      {/* Global Footer */}
       {!isPortalRoute && <Footer />}
-
-      {/* Global Interactive Booking Engine Modal */}
       <BookingModal />
-
-      {/* Global Product Purchase & Studio Reservation Modal */}
       <ProductPurchaseModal />
     </div>
   );

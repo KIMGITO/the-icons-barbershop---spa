@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { ProductItem, ProductReview, ServiceReview } from '../types';
 import { productService } from '../services/productService';
 import { reviewService } from '../services/reviewService';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 interface ProductAdminState {
   products: ProductItem[];
@@ -22,6 +23,7 @@ interface ProductAdminState {
   deleteReview: (reviewId: string) => Promise<void>;
   setServiceReviewStatus: (reviewId: string, status: 'pending' | 'approved' | 'rejected' | 'archived') => Promise<void>;
   deleteServiceReview: (reviewId: string) => Promise<void>;
+  subscribeToProducts: () => () => void;
 }
 
 export const useProductAdminStore = create<ProductAdminState>((set, get) => ({
@@ -180,5 +182,139 @@ export const useProductAdminStore = create<ProductAdminState>((set, get) => ({
       set({ loading: false, error: err.message });
       throw err;
     }
+  },
+
+  subscribeToProducts: () => {
+    if (!isSupabaseConfigured) return () => {};
+
+    const channel = supabase
+      .channel('products-realtime')
+      // Products
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          const row = payload.new as any;
+          const newItem: ProductItem = {
+            id: row.id,
+            slug: row.slug,
+            name: row.name,
+            category: row.category,
+            priceKsh: row.price_ksh,
+            stockQuantity: row.stock_quantity,
+            imageUrl: row.image_url,
+            status: row.status,
+            description: row.description,
+            shortDescription: row.short_description,
+            features: row.features || []
+          };
+          set(state => ({ 
+            products: state.products.some(p => p.id === newItem.id) 
+              ? state.products 
+              : [newItem, ...state.products] 
+          }));
+        } else if (payload.eventType === 'UPDATE') {
+          const row = payload.new as any;
+          const updated: ProductItem = {
+            id: row.id,
+            slug: row.slug,
+            name: row.name,
+            category: row.category,
+            priceKsh: row.price_ksh,
+            stockQuantity: row.stock_quantity,
+            imageUrl: row.image_url,
+            status: row.status,
+            description: row.description,
+            shortDescription: row.short_description,
+            features: row.features || []
+          };
+          set(state => ({
+            products: state.products.map(p => p.id === updated.id ? updated : p)
+          }));
+        } else if (payload.eventType === 'DELETE') {
+          set(state => ({
+            products: state.products.filter(p => p.id !== payload.old.id)
+          }));
+        }
+      })
+      // Product Reviews
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'product_reviews' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          const row = payload.new as any;
+          const newItem: ProductReview = {
+            id: row.id,
+            productId: row.product_id,
+            authorName: row.author_name,
+            rating: row.rating,
+            comment: row.comment,
+            reviewStatus: row.review_status,
+            createdAt: row.created_at
+          };
+          set(state => ({ 
+            reviews: state.reviews.some(r => r.id === newItem.id) 
+              ? state.reviews 
+              : [newItem, ...state.reviews] 
+          }));
+        } else if (payload.eventType === 'UPDATE') {
+          const row = payload.new as any;
+          const updated: ProductReview = {
+            id: row.id,
+            productId: row.product_id,
+            authorName: row.author_name,
+            rating: row.rating,
+            comment: row.comment,
+            reviewStatus: row.review_status,
+            createdAt: row.created_at
+          };
+          set(state => ({
+            reviews: state.reviews.map(r => r.id === updated.id ? updated : r)
+          }));
+        } else if (payload.eventType === 'DELETE') {
+          set(state => ({
+            reviews: state.reviews.filter(r => r.id !== payload.old.id)
+          }));
+        }
+      })
+      // Service Reviews
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'service_reviews' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          const row = payload.new as any;
+          const newItem: ServiceReview = {
+            id: row.id,
+            serviceId: row.service_id,
+            authorName: row.author_name,
+            rating: row.rating,
+            comment: row.comment,
+            reviewStatus: row.review_status,
+            createdAt: row.created_at
+          };
+          set(state => ({ 
+            serviceReviews: state.serviceReviews.some(r => r.id === newItem.id) 
+              ? state.serviceReviews 
+              : [newItem, ...state.serviceReviews] 
+          }));
+        } else if (payload.eventType === 'UPDATE') {
+          const row = payload.new as any;
+          const updated: ServiceReview = {
+            id: row.id,
+            serviceId: row.service_id,
+            authorName: row.author_name,
+            rating: row.rating,
+            comment: row.comment,
+            reviewStatus: row.review_status,
+            createdAt: row.created_at
+          };
+          set(state => ({
+            serviceReviews: state.serviceReviews.map(r => r.id === updated.id ? updated : r)
+          }));
+        } else if (payload.eventType === 'DELETE') {
+          set(state => ({
+            serviceReviews: state.serviceReviews.filter(r => r.id !== payload.old.id)
+          }));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }
 }));

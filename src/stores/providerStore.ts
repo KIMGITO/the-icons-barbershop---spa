@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { ServiceProvider, ServiceProviderType, DaySchedule } from '../types/staff';
 import { providerService } from '../services/providerService';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 interface ProviderState {
   providers: ServiceProvider[];
@@ -21,6 +22,7 @@ interface ProviderState {
   toggleStatus: (id: string) => Promise<void>;
   updateSchedule: (id: string, schedule: DaySchedule[]) => Promise<void>;
   deleteProvider: (id: string) => Promise<void>;
+  subscribeToProviders: () => () => void;
 }
 
 export const useProviderStore = create<ProviderState>((set) => ({
@@ -108,5 +110,71 @@ export const useProviderStore = create<ProviderState>((set) => ({
     } catch (err: any) {
       set({ error: err.message });
     }
+  },
+
+  subscribeToProviders: () => {
+    if (!isSupabaseConfigured) return () => {};
+
+    const channel = supabase
+      .channel('providers-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'providers' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          const row = payload.new as any;
+          const newItem: ServiceProvider = {
+            id: row.id,
+            fullName: row.full_name,
+            slug: row.slug,
+            email: row.email,
+            phone: row.phone,
+            avatarUrl: row.avatar_url,
+            bio: row.bio,
+            providerType: row.provider_type,
+            yearsExperience: row.years_experience,
+            instagramHandle: row.instagram_handle,
+            status: row.status,
+            createdAt: row.created_at,
+            servicesOfferedIds: row.services_offered_ids || [],
+            openingHours: row.opening_hours || []
+          };
+          set(state => ({ 
+            providers: state.providers.some(p => p.id === newItem.id) 
+              ? state.providers 
+              : [...state.providers, newItem] 
+          }));
+        } else if (payload.eventType === 'UPDATE') {
+          const row = payload.new as any;
+          const updated: ServiceProvider = {
+            id: row.id,
+            fullName: row.full_name,
+            slug: row.slug,
+            email: row.email,
+            phone: row.phone,
+            avatarUrl: row.avatar_url,
+            bio: row.bio,
+            providerType: row.provider_type,
+            yearsExperience: row.years_experience,
+            instagramHandle: row.instagram_handle,
+            status: row.status,
+            createdAt: row.created_at,
+            servicesOfferedIds: row.services_offered_ids || [],
+            openingHours: row.opening_hours || []
+          };
+          set(state => ({
+            providers: state.providers.map(p => p.id === updated.id ? updated : p),
+            selectedProvider: state.selectedProvider?.id === updated.id ? updated : state.selectedProvider
+          }));
+        } else if (payload.eventType === 'DELETE') {
+          const id = payload.old.id;
+          set(state => ({
+            providers: state.providers.filter(p => p.id !== id),
+            selectedProvider: state.selectedProvider?.id === id ? null : state.selectedProvider
+          }));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }
 }));

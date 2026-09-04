@@ -48,6 +48,7 @@ import {
   SLOT_INTERVAL_MINUTES,
   NAIROBI_TIMEZONE,
 } from '../utils/timeUtils';
+import supabase from '@/lib/supabase';
 
 interface BookedSlotInfo {
   time_slot: string;

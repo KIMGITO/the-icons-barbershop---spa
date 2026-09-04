@@ -49,7 +49,6 @@ export const StaffProfileView: React.FC = () => {
     .map(id => services.find(s => s.id === id))
     .filter(Boolean);
 
-  const handleSubmit = async (e: React.FormEvent) => {
   const { changePassword } = useAuthStore();
 
   const handlePasswordChange = async (e: React.FormEvent) => {
@@ -163,8 +162,8 @@ export const StaffProfileView: React.FC = () => {
 
       {currentProvider && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 items-start bg-card p-5 rounded-2xl border border-border">
-        <div className="sm:col-span-1">
-          <ImageUploader
+          <div className="sm:col-span-1">
+            <ImageUploader
             currentImageUrl={avatarUrl}
             onImageUploaded={(url) => setAvatarUrl(url)}
             onImageRemoved={() => setAvatarUrl('')}
@@ -218,6 +217,7 @@ export const StaffProfileView: React.FC = () => {
           </div>
         </div>
       </div>
+    )}
 
       {/* Services Assigned by Management */}
       {currentProvider && assignedServices.length > 0 && (
