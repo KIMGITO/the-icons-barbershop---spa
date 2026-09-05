@@ -62,7 +62,7 @@ export const LocationContactSection: React.FC<LocationContactSectionProps> = ({
           <div className="lg:col-span-5 flex flex-col space-y-3 sm:space-y-4 w-full">
             
             {/* Address & Direct Direction Buttons */}
-            <div className="p-3.5 sm:p-5 bg-card border border-border rounded-xl space-y-3">
+            <div className="p-3.5 sm:p-5  rounded-xl space-y-3">
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-secondary border border-border flex items-center justify-center text-primary shrink-0 mt-0.5">
                   <MapPin className="w-4 h-4" />
@@ -100,7 +100,7 @@ export const LocationContactSection: React.FC<LocationContactSectionProps> = ({
             
 
             {/* Operating Hours - Redesigned for Minimum Height with 3-Column Compact Grid */}
-            <div className="p-3 sm:p-3.5 bg-card border border-border rounded-xl space-y-2">
+            <div className="p-3 sm:p-3.5  space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-1.5 font-semibold text-primary text-[11px] uppercase tracking-wider">
                   <Clock className="w-3 h-3" />

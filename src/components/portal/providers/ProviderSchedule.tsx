@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Sparkles } from 'lucide-react';
+import { businessService } from '../../../services/businessService';
 import { Clock, Plus, Trash2, CheckCircle2, Coffee } from 'lucide-react';
 import { DaySchedule, DAYS_OF_WEEK, DayOfWeek } from '../../../types/staff';
 import { Button } from '../../ui/Button';
@@ -23,7 +25,7 @@ export const ProviderSchedule: React.FC<ProviderScheduleProps> = ({
   onChange,
   editable = true
 }) => {
-  // Ensure all 7 days exist
+  const [loadingBusinessHours, setLoadingBusinessHours] = useState(false);
   const normalizedSchedule: DaySchedule[] = DAYS_OF_WEEK.map(d => {
     const existing = schedule.find(s => s.day === d.key);
     return existing || {
@@ -98,44 +100,84 @@ export const ProviderSchedule: React.FC<ProviderScheduleProps> = ({
     onChange(updated);
   };
 
-  const handleApplyStandardWeekdays = () => {
+  const handleApplyBusinessHours = async () => {
     if (!editable || !onChange) return;
-    const updated = normalizedSchedule.map(s => {
-      if (s.day === 'sunday') {
-        return { ...s, isWorking: false };
-      }
-      return {
-        ...s,
-        isWorking: true,
-        startTime: '08:30',
-        endTime: '18:30',
-        breaks: [{ start: '13:00', end: '14:00' }]
-      };
-    });
-    onChange(updated);
+    try {
+      setLoadingBusinessHours(true);
+      const hours = await businessService.getBusinessHours();
+      const updated = DAYS_OF_WEEK.map(day => {
+        const weekday = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'].indexOf(day.key);
+        const entry = hours?.raw.find(h => h.weekday === weekday);
+        if (entry) {
+          return {
+            day: day.key,
+            isWorking: entry.is_open,
+            startTime: entry.open_time.slice(0, 5),
+            endTime: entry.close_time.slice(0, 5),
+            breaks: entry.is_open ? [{ start: '13:00', end: '14:00' }] : []
+          };
+        }
+        const range =
+          day.key === 'sunday' ? hours?.sunday :
+          day.key === 'saturday' ? hours?.saturday :
+          hours?.weekdays;
+        const isSun = day.key === 'sunday';
+        return {
+          day: day.key,
+          isWorking: !isSun,
+          startTime: range?.start || '08:30',
+          endTime: range?.end || '18:30',
+          breaks: !isSun ? [{ start: '13:00', end: '14:00' }] : []
+        };
+      });
+      onChange(updated);
+    } catch (err) {
+      const updated = normalizedSchedule.map(s => {
+        if (s.day === 'sunday') {
+          return { ...s, isWorking: false, breaks: [] };
+        }
+        return {
+          ...s,
+          isWorking: true,
+          startTime: '08:30',
+          endTime: '18:30',
+          breaks: [{ start: '13:00', end: '14:00' }]
+        };
+      });
+      onChange(updated);
+    } finally {
+      setLoadingBusinessHours(false);
+    }
   };
 
   return (
     <div className="space-y-4">
       {editable && (
-        <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-border">
-          <div className="text-xs text-muted-foreground">
-            Configure working hours, rest days, and scheduled meal/rest breaks.
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-muted/40 rounded-xl border border-border/65 shadow-2xs">
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-primary" /> Schedule Presets
+            </h4>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              Quickly sync working shifts, availability, and meal/rest breaks with shop business hours.
+            </p>
           </div>
           <Button
             type="button"
             variant="outline"
             size="sm"
-            onClick={handleApplyStandardWeekdays}
-            className="text-xs"
+            onClick={handleApplyBusinessHours}
+            disabled={loadingBusinessHours}
+            className="text-xs font-semibold shrink-0 bg-card hover:bg-primary/10 hover:text-primary transition-colors border-border"
           >
-            Apply Standard (Mon-Sat 8:30am-6:30pm)
+            {loadingBusinessHours ? 'Syncing...' : 'Apply Business Hours'}
           </Button>
         </div>
       )}
 
       <div className="space-y-2.5">
         {normalizedSchedule.map((dayItem) => {
+
           const dayMeta = DAYS_OF_WEEK.find(d => d.key === dayItem.day)!;
           const isWorking = dayItem.isWorking;
 
@@ -280,7 +322,9 @@ export const ProviderSchedule: React.FC<ProviderScheduleProps> = ({
                         <span className="text-[11px] font-mono">{b.start} - {b.end}</span>
                       )}
                     </div>
+
                   ))}
+
                 </div>
               )}
             </div>

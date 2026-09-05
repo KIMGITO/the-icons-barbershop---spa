@@ -36,37 +36,37 @@ export const Navigation: React.FC = () => {
   }, []);
 
   const navLinks = [
-    { label: 'Home', path: '/', desc: 'Welcome & Signature Atmosphere' },
+    { label: 'Home', path: '/', desc: '' },
     {
       label: 'Services & Pricing',
       path: '/services',
-      desc: 'Precision Fades, Hot Shaves & Spa',
+      desc: '',
     },
     {
       label: 'Grooming Products',
       path: '/products',
-      desc: 'Must-Have Tonics, Shampoos & Oils',
+      desc: '',
     },
     {
       label: 'Master Barbers',
       path: '/barbers',
-      desc: 'Certified Grooming Artisans',
+      desc: '',
     },
     {
       label: 'About The Sanctuary',
       path: '/about',
-      desc: 'Our Philosophy & Standards',
+      desc: '',
     },
     {
       label: 'Grooming Gallery',
       path: '/gallery',
-      desc: 'Executive Portfolio & Showcase',
+      desc: '',
     },
-    { label: 'FAQ', path: '/faq', desc: 'Appointments, Policies & Questions' },
+    { label: 'FAQ', path: '/faq', desc: ' ' },
     {
       label: 'Location & Contact',
       path: '/contact',
-      desc: 'Visit our penthouse studio in Nairobi',
+      desc:   '',
     },
   ];
 
@@ -146,16 +146,9 @@ export const Navigation: React.FC = () => {
             <div>
               <div className="flex items-center justify-between pb-6 border-b border-border">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-sm bg-secondary border border-primary/40 flex items-center justify-center text-primary">
-                    <Scissors className="w-4 h-4" />
-                  </div>
+               
                   <div>
-                    <h2 className="text-white font-heading text-sm font-bold tracking-wider">
-                      THE ICONS
-                    </h2>
-                    <p className="text-[10px] text-primary tracking-widest uppercase">
-                      Barber & Spa • Nairobi
-                    </p>
+                    <Logo/>
                   </div>
                 </div>
 
@@ -219,7 +212,7 @@ export const Navigation: React.FC = () => {
                 className="w-full py-3.5 text-xs uppercase tracking-wider shadow-lg"
               >
                 <Calendar className="w-4 h-4" />
-                <span>Book Appointment Online</span>
+                <span>Book Appointment </span>
               </Button>
 
               <div className="space-y-2 text-xs text-muted-foreground-light">
@@ -229,7 +222,7 @@ export const Navigation: React.FC = () => {
                 >
                   <Phone className="w-3.5 h-3.5 text-primary" />
                   <span>
-                    Call Concierge:{' '}
+                    Call Us:{' '}
                     <strong className="text-white">
                       {businessInfo.phoneDisplay}
                     </strong>
@@ -261,15 +254,7 @@ export const Navigation: React.FC = () => {
                 >
                   Staff Portal
                 </button>
-                <button
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    navigateTo('/admin');
-                  }}
-                  className="hover:text-primary underline"
-                >
-                  Management Dashboard
-                </button>
+               
               </div>
             </div>
           </div>

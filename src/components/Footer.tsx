@@ -224,7 +224,7 @@ export const Footer: React.FC<FooterProps> = ({
               onSubmit={handleSubscribe}
               className="space-y-2.5 w-full max-w-sm mx-auto sm:mx-0"
             >
-              <div className="flex items-center bg-white/95 backdrop-blur-md rounded-xl p-1 shadow-lg border border-white/30 focus-within:border-primary transition-all">
+              <div className="flex items-center bg-white/95 backdrop-blur-md rounded-xl gap-2  p-1 shadow-lg border border-white/30 focus-within:border-primary transition-all">
                 <Input
                   type="email"
                   value={email}
@@ -236,8 +236,8 @@ export const Footer: React.FC<FooterProps> = ({
                 <Button
                   type="submit"
                   variant="primary"
-                  size="sm"
-                  className="shrink-0 text-[10px] sm:text-xs uppercase tracking-wider rounded-lg shadow-md"
+                  size="md"
+                  className=" text-[10px]  sm:text-xs uppercase tracking-wider   rounded-lg shadow-md"
                 >
                   {isSubscribed ? 'DONE' : 'SUBSCRIBE'}
                 </Button>

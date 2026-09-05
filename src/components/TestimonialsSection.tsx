@@ -70,15 +70,12 @@ export const TestimonialsSection: React.FC = () => {
 
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
-          <span className="text-xs font-bold uppercase tracking-widest text-primary">
-            Testimonials
-          </span>
+         
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold text-white tracking-tight leading-tight mt-2 mb-3">
-            What Our <span className="text-primary">Customers Say</span>
+            Hear  from other  <span className="text-primary">Icons </span>.
           </h2>
           <p className="text-xs sm:text-sm text-muted-foreground-light font-light leading-relaxed">
-            Genuine reviews from verified clients who have experienced our master treatments
-            and curated grooming apothecary — straight from our database, never scripted.
+           Reviews from clients who have experienced <span className='text-primary font-script'>The Icons Barbershop</span> .
           </p>
         </div>
 
@@ -102,21 +99,7 @@ export const TestimonialsSection: React.FC = () => {
               </div>
             ))}
           </div>
-        ) : testimonials.length === 0 ? (
-          <div className="p-10 text-center bg-card border border-white/10 rounded-2xl max-w-xl mx-auto">
-            <p className="text-sm text-muted-foreground mb-4">
-              No customer reviews published yet. Be the first to share your experience!
-            </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigateTo('/services')}
-              className="text-xs uppercase tracking-wider"
-            >
-              Explore Services
-            </Button>
-          </div>
-        ) : (
+        ) : testimonials.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {testimonials.map((review) => {
               const itemType = getItemType(review);
@@ -189,7 +172,7 @@ export const TestimonialsSection: React.FC = () => {
             size="md"
             pill
             onClick={() => navigateTo('/services')}
-            className="uppercase tracking-wider text-xs shadow-lg group"
+            className="uppercase tracking-wider text-xs shadow-lg group "
           >
             <span>Experience It Yourself</span>
             <ArrowRight className="w-3.5 h-3.5 text-primary transition-transform group-hover:translate-x-1" />
