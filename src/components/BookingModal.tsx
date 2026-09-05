@@ -759,15 +759,13 @@ export const BookingModal: React.FC = () => {
         {/* Modal Header */}
         <div className="p-4 sm:p-6 bg-card-elevated border-b border-border-subtle flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-sm bg-secondary border border-primary/50 flex items-center justify-center text-primary">
-              <Scissors className="w-4 h-4" />
-            </div>
+            
             <div>
-              <h2 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2">
-                Book Your Experience
+              <h2 className="text-base   sm:text-lg font-bold text-white tracking-tight flex items-center justify-between w-full gap-2">
+                <span>Book Your Experience</span>
                 {step < 5 && (
                   <span className="text-xs font-mono text-primary font-normal">
-                    (Step {step} of 4)
+                  step {step}/4
                   </span>
                 )}
               </h2>
