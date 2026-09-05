@@ -9,9 +9,10 @@ export const OperationsHub: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Tab Header */}
-      <div className="flex items-center gap-2 border-b border-border mb-4 overflow-x-auto no-scrollbar pb-1">
+      <div className="flex items-center gap-2 border-b  justify-between lg:justify-start border-border mb-4 overflow-x-auto no-scrollbar pb-1">
         <button
           onClick={() => setActiveSubTab('list')}
+          
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold transition-all border-b-2 ${
             activeSubTab === 'list'
               ? 'border-primary text-primary'
@@ -30,7 +31,7 @@ export const OperationsHub: React.FC = () => {
           }`}
         >
           <CalendarIcon className="w-4 h-4" />
-          <span>Calendar View</span>
+          <span>Calendar & Planning</span>
         </button>
       </div>
 

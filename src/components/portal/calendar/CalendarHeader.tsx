@@ -1,12 +1,18 @@
 import React from 'react';
-import { 
-  ChevronLeft, ChevronRight, Calendar as CalendarIcon, 
-  Plus, Users, Filter, Clock 
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar as CalendarIcon,
+  Plus,
+  Users,
+  Filter,
+  Clock,
 } from 'lucide-react';
 import { ServiceProvider } from '../../../types/staff';
 import { CalendarViewMode } from '../../../stores/bookingStore';
 import { CustomSelect, SelectOption } from '../ui/CustomSelect';
 import { Button } from '../../ui/Button';
+import { CalendarNav } from './CalendarNav';
 
 export interface CalendarHeaderProps {
   currentDate: Date;
@@ -35,16 +41,15 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   onProviderChange,
   onNewBookingClick,
   userRole,
-  userProviderName
+  userProviderName,
 }) => {
-  // Compute formatted label depending on view
   const formattedTitle = React.useMemo(() => {
     if (viewMode === 'day') {
       return currentDate.toLocaleDateString('en-US', {
         weekday: 'short',
         month: 'short',
         day: 'numeric',
-        year: 'numeric'
+        year: 'numeric',
       });
     } else if (viewMode === 'week') {
       const startOfWeek = new Date(currentDate);
@@ -68,87 +73,27 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
     }
   }, [currentDate, viewMode]);
 
-  // Provider options for custom select
   const providerOptions: SelectOption<string>[] = [
     {
       value: 'all',
       label: 'All Stations & Providers',
       sublabel: 'Entire floor schedule',
-      badge: `${providers.length} Staff`
+      badge: `${providers.length} Staff`,
     },
-    ...providers.map(p => ({
+    ...providers.map((p) => ({
       value: p.id,
       label: p.fullName,
       sublabel: p.id === 'provider-admin' ? 'Admin & Master Stylist' : p.providerType.replace('-', ' '),
-      badge: p.id === 'provider-admin' ? 'Admin' : undefined
-    }))
+      badge: p.id === 'provider-admin' ? 'Admin' : undefined,
+    })),
   ];
 
   return (
-    <div className="bg-card border border-border p-3 sm:p-4 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs">
-      {/* Left: Navigation & Date Title */}
-      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-        {/* Prev / Today / Next */}
-        <div className="flex items-center gap-1 bg-input rounded-xl p-1 border border-border">
-          <button
-            type="button"
-            onClick={onPrev}
-            aria-label="Previous date"
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            onClick={onToday}
-            className="px-2.5 py-1 text-xs font-bold text-foreground hover:bg-muted rounded-lg transition-colors cursor-pointer"
-          >
-            Today
-          </button>
-          <button
-            type="button"
-            onClick={onNext}
-            aria-label="Next date"
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Date Display */}
-        <div className="flex items-center gap-2">
-          <CalendarIcon className="w-4 h-4 text-primary shrink-0" />
-          <h2 className="text-sm sm:text-base font-bold text-foreground tracking-tight">
-            {formattedTitle}
-          </h2>
-        </div>
-      </div>
-
-      {/* Right: Provider Filter, View Toggle, New Booking */}
-      <div className="flex flex-wrap items-center gap-2">
-        {/* Provider Selector (Admin: All or specific; Provider: locked to self with badge) */}
-        {userRole === 'admin' ? (
-          <div className="w-48 sm:w-56">
-            <CustomSelect
-              options={providerOptions}
-              value={selectedProviderId}
-              onChange={onProviderChange}
-              placeholder="Filter Provider..."
-              className="text-xs"
-            />
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 bg-input px-3 py-2 rounded-xl border border-border text-xs">
-            <Users className="w-3.5 h-3.5 text-primary" />
-            <span className="font-semibold text-foreground truncate max-w-[140px]">
-              {userProviderName || 'My Station'}
-            </span>
-          </div>
-        )}
-
-        {/* View Toggle */}
+    <div className="p-2 sm:p-4 rounded-2xl flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-3 shadow-xs">
+      {/* Top row on mobile: view toggle + new booking. Left side on desktop. */}
+      <div className="flex items-center justify-between gap-2 md:justify-start md:gap-4">
         <div className="flex items-center bg-input p-1 rounded-xl border border-border text-xs">
-          {(['day', 'week', 'month'] as CalendarViewMode[]).map(mode => (
+          {(['day', 'week', 'month'] as CalendarViewMode[]).map((mode) => (
             <button
               key={mode}
               type="button"
@@ -164,18 +109,30 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           ))}
         </div>
 
-        {/* New Booking CTA */}
+        {/* New Booking sits next to the toggle on mobile so it doesn't get its own row */}
         <Button
           type="button"
           variant="primary"
           size="sm"
           onClick={onNewBookingClick}
-          className="text-xs font-bold shrink-0"
+          className="text-xs font-bold shrink-0 gap-2 md:hidden"
         >
-          <Plus className="w-3.5 h-3.5 mr-1" />
-          <span>New Booking</span>
+          <Plus className="w-3.5 h-3.5" />
+          <span className="hidden sm:block">New Booking</span>
         </Button>
       </div>
+
+      {/* Nav row: tight gap on mobile, no forced full-width fight with siblings */}
+      <div className="flex items-center justify-center md:justify-start">
+        <CalendarNav
+          formattedTitle={formattedTitle}
+          onPrev={onPrev}
+          onNext={onNext}
+          onToday={onToday}
+        />
+      </div>
+
+     
     </div>
   );
 };

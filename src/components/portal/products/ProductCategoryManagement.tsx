@@ -169,15 +169,7 @@ export const ProductCategoryManagement: React.FC = () => {
             icon={<Search className="w-3.5 h-3.5" />}
           />
         </div>
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={handleOpenAdd}
-          className="text-xs font-bold"
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Add Product Category
-        </Button>
+      
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

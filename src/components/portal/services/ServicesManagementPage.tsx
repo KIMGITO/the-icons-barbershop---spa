@@ -164,26 +164,24 @@ export const ServicesManagementPage: React.FC = () => {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card p-4 sm:p-5 rounded-2xl border border-border">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 ">
+        <div className='flex w-full  justify-between'>
           <h1 className="text-lg sm:text-xl font-bold text-foreground">
-            Service Menu & Pricing
+            Service & Pricing
           </h1>
-          <p className="text-xs text-muted-foreground">
-            Manage services, price schedules, chair duration, and artisan allocations
-          </p>
-        </div>
-
-        <Button
+          <Button
           type="button"
-          variant="primary"
+          variant="outline"
           size="sm"
           onClick={handleOpenAdd}
-          className="text-xs font-bold"
+          className="text-xs font-bold gp-2"
         >
-          <Plus className="w-4 h-4 mr-1" />
-          <span>Add New Service</span>
+          <Plus className="w-4 h-4" />
+          <span className='hidden  lg:block'>Add New Service</span>
         </Button>
+        </div>
+
+        
       </div>
 
       {/* Tabs */}
@@ -340,11 +338,9 @@ export const ServicesManagementPage: React.FC = () => {
       ) : (
         <div className="bg-card p-5 rounded-2xl border border-border space-y-4">
           <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-primary" /> Service Categories
+           Service Categories
           </h2>
-          <p className="text-[10px] text-muted-foreground -mt-2">
-            Manage service categories used for organization and public menu filtering.
-          </p>
+       
           <ServiceCategoryManagement />
         </div>
       )}

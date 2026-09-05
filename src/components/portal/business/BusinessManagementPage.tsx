@@ -99,7 +99,7 @@ export const BusinessManagementPage: React.FC = () => {
   return (
     <div className="space-y-6 max-w-4xl">
       {/* Tab Header */}
-      <div className="flex items-center gap-2 border-b border-border mb-4 overflow-x-auto no-scrollbar pb-1">
+      <div className="flex  justify-between lg:justify-start items-center gap-2 border-b border-border mb-4 overflow-x-auto no-scrollbar pb-1">
         <button
           onClick={() => setActiveSubTab('profile')}
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold transition-all border-b-2 ${
@@ -109,7 +109,7 @@ export const BusinessManagementPage: React.FC = () => {
           }`}
         >
           <Building2 className="w-4 h-4" />
-          <span>Profile & Location</span>
+          <span>Profile</span>
         </button>
         <button
           onClick={() => setActiveSubTab('faqs')}
@@ -138,14 +138,22 @@ export const BusinessManagementPage: React.FC = () => {
       {activeSubTab === 'profile' && (
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card p-4 sm:p-5 rounded-2xl border border-border">
-            <div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-2">
+            <div className='flex items-center gap-2 justify-between w-full '>
               <h1 className="text-lg sm:text-xl font-bold text-foreground">
-                Business Profile & Location
+                 Profile & Location
               </h1>
-              <p className="text-xs text-muted-foreground">
-                Official shop branding, contact channels, operating hours, and location info
-              </p>
+              <Button
+                type="submit"
+                variant="outline"
+                size="sm"
+                disabled={isSaving}
+                className="text-xs font-bold gap-2"
+              >
+                <Save className="w-3.5 h-3.5 " />
+                <span className=''>{isSaving ? 'Saving...' : 'Save '}</span>
+              </Button>
+              
             </div>
 
             <div className="flex items-center gap-2">
@@ -155,39 +163,30 @@ export const BusinessManagementPage: React.FC = () => {
                   Saved
                 </span>
               )}
-              <Button
-                type="submit"
-                variant="primary"
-                size="sm"
-                disabled={isSaving}
-                className="text-xs font-bold"
-              >
-                <Save className="w-3.5 h-3.5 mr-1" />
-                <span>{isSaving ? 'Saving...' : 'Save Profile'}</span>
-              </Button>
+              
             </div>
           </div>
 
           {/* Brand Imagery (Logo & Cover) */}
       <div className="bg-card p-5 rounded-2xl border border-border space-y-4">
         <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-primary" /> Brand Imagery
+       Imagery
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
-          <div className="md:col-span-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+          <div className="md:col-span-1 justify-center flex">
             <ImageUploader
               currentImageUrl={formData.logoUrl}
               onImageUploaded={(url) => handleChange('logoUrl', url)}
               onImageRemoved={() => handleChange('logoUrl', '')}
               bucket="business"
               aspectRatio="square"
-              label="Business Logo / Emblem"
+              label="Business Logo "
               helperText="Square transparent or solid PNG/JPG"
             />
           </div>
 
-          <div className="md:col-span-2">
+          <div className="md:col-span-1">
             <ImageUploader
               currentImageUrl={formData.coverImageUrl}
               onImageUploaded={(url) => handleChange('coverImageUrl', url)}
@@ -312,17 +311,7 @@ export const BusinessManagementPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Service Categories Section */}
-      <div className="bg-card p-5 rounded-2xl border border-border space-y-4">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-primary" /> Service Categories
-        </h2>
-        <p className="text-[10px] text-muted-foreground -mt-2">
-          Manage service categories used for organization and public menu filtering.
-        </p>
-        <CategoryManagement />
-      </div>
-
+     
       {/* Operating Hours */}
       <div className="bg-card p-5 rounded-2xl border border-border space-y-4">
         <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">

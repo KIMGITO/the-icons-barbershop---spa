@@ -21,7 +21,7 @@ export const TeamHub: React.FC = () => {
           }`}
         >
           <Users className="w-4 h-4" />
-          <span>Providers Management</span>
+          <span>Providers</span>
         </button>
         <button
           onClick={() => setActiveSubTab('profile')}
@@ -32,7 +32,7 @@ export const TeamHub: React.FC = () => {
           }`}
         >
           <User className="w-4 h-4" />
-          <span>My Profile</span>
+          <span> Profile</span>
         </button>
         <button
           onClick={() => setActiveSubTab('schedule')}
@@ -43,7 +43,7 @@ export const TeamHub: React.FC = () => {
           }`}
         >
           <CalendarIcon className="w-4 h-4" />
-          <span>My Schedule</span>
+          <span> Schedule</span>
         </button>
         <button
           onClick={() => setActiveSubTab('receipts')}
@@ -54,7 +54,7 @@ export const TeamHub: React.FC = () => {
           }`}
         >
           <ReceiptText className="w-4 h-4" />
-          <span>Receipt Lookup</span>
+          <span> Lookup</span>
         </button>
       </div>
 

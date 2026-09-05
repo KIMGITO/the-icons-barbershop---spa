@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { Search, Plus, Minus, ArrowRight, MessageSquare, HelpCircle, Scissors, PhoneCall, Sparkles } from 'lucide-react';
-import { updatePageSEO } from '../utils/seo';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 
@@ -11,28 +10,9 @@ export const FAQPage: React.FC = () => {
   const [openFaqIds, setOpenFaqIds] = useState<Record<string, boolean>>({});
   const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>('All');
 
-  // Update SEO Title, Meta Description & JSON-LD Structured Data
   useEffect(() => {
-    updatePageSEO({
-      title: "Frequently Asked Questions",
-      description: "Find answers about appointments, barber selection, services, deposits, payments, cancellations, and executive grooming services at The Icons Barber & Spa in Nairobi.",
-      canonicalUrl: "https://theiconsbarber.co.ke/faq",
-      schemaType: "FAQPage",
-      customSchema: {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": faqs.filter(f => f.isActive !== false).map(faq => ({
-          "@type": "Question",
-          "name": faq.question,
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": faq.answer
-          }
-        }))
-      }
-    });
     window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [faqs]);
+  }, []);
 
   // Categories list in required order
   const categories = useMemo(() => {

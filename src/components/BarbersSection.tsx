@@ -302,13 +302,17 @@ export const BarbersSection: React.FC<BarbersSectionProps> = ({ isStandalonePage
                 
                 {/* Barber Info on Banner */}
                 <div className="absolute bottom-4 inset-x-4 sm:inset-x-6 z-10">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-primary/40 text-primary text-[10px] sm:text-xs font-semibold mb-2 shadow-md">
+                  <Badge 
+                    variant="glass" 
+                    pill 
+                    className="bg-black/60 border-primary/40 text-primary mb-2 shadow-md gap-1.5 py-1 px-3"
+                  >
                     <Award className="w-3 h-3 text-primary" />
                     <span>{selectedBarber.yearsExperience}+ Years Experience</span>
                     {selectedBarber.instagramHandle && (
                       <span className="text-white/60 ml-1">· {selectedBarber.instagramHandle}</span>
                     )}
-                  </div>
+                  </Badge>
                   
                   <h3 className="text-xl sm:text-2xl md:text-3xl font-heading font-bold text-white tracking-tight">
                     {selectedBarber.name}

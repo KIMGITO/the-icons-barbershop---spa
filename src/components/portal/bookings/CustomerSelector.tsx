@@ -8,7 +8,7 @@ export interface CustomerSelectorProps {
   customerName: string;
   customerPhone: string;
   customerEmail: string;
-  onSelectCustomer: (customer: { name: string; phone: string; email: string }) => void;
+  onSelectCustomer: (customer: { name: string; phone: string; email: string; vipStatus?: boolean }) => void;
   onNameChange: (name: string) => void;
   onPhoneChange: (phone: string) => void;
   onEmailChange?: (email: string) => void;
@@ -56,7 +56,8 @@ export const CustomerSelector: React.FC<CustomerSelectorProps> = ({
     onSelectCustomer({
       name: c.name,
       phone: c.phone,
-      email: c.email
+      email: c.email,
+      vipStatus: c.vipStatus
     });
     setIsOpen(false);
     setSearchQuery('');
@@ -80,9 +81,9 @@ export const CustomerSelector: React.FC<CustomerSelectorProps> = ({
 
       {/* Existing Client Search Popover */}
       {isOpen && (
-        <div className="rounded-xl border border-primary/40 bg-card p-2.5 shadow-xl space-y-2 animate-in fade-in-50 duration-150">
-          <div className="flex items-center gap-2 bg-input px-2.5 py-1.5 rounded-lg border border-border">
-            <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+        <div className="rounded-xl  p-2.5 shadow-xl space-y-2 animate-in fade-in-50 duration-150">
+          <div className="flex items-center gap-2 bg-input px-2.5 py-1.5 ">
+            {/* <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" /> */}
             <Input
               type="text"
               value={searchQuery}

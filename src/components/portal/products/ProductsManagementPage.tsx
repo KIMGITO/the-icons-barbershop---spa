@@ -31,9 +31,7 @@ import { ProductItem, ProductReview, ServiceReview } from '../../../types';
 import { useProductAdminStore } from '../../../stores/productAdminStore';
 import { useApp } from '../../../context/AppContext';
 import { ImageUploader } from '../ui/ImageUploader';
-import { Button } from '../../ui/Button';
-import { Input } from '../../ui/Input';
-import { Badge } from '../../ui/Badge';
+import { Badge, Button, Input, Price } from '../../ui';
 import { ThemeSelect } from '../../ui/ThemeSelect';
 import { ProductCategoryManagement } from './ProductCategoryManagement';
 
@@ -383,25 +381,23 @@ export const ProductsManagementPage: React.FC = () => {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card p-4 sm:p-5 rounded-2xl border border-border">
+      <div className="flex  justify-between gap-4 p-2 ">
         <div>
           <h1 className="text-lg sm:text-xl font-bold text-foreground">
             Product Management
           </h1>
-          <p className="text-xs text-muted-foreground">
-            Manage the apothecary catalog, stock levels, and customer review approvals
-          </p>
+          
         </div>
 
         <Button
           type="button"
-          variant="primary"
+          variant="outline"
           size="sm"
           onClick={handleOpenAdd}
-          className="text-xs font-bold"
+          className="text-xs font-bold gap-2"
         >
           <Plus className="w-4 h-4 mr-1" />
-          <span>Add New Product</span>
+          <span className='hidden lg:block'>Add New Product</span>
         </Button>
       </div>
 
@@ -499,45 +495,7 @@ export const ProductsManagementPage: React.FC = () => {
       {/* ============ PRODUCTS TAB ============ */}
       {activeTab === 'products' && (
         <div className="space-y-4">
-          {/* Filter Bar */}
-          <div className="bg-card p-3.5 rounded-xl border border-border grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-            <Input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search products by name, SKU, or slug..."
-              className="rounded-lg py-1.5 text-xs"
-              icon={<Search className="w-3.5 h-3.5" />}
-            />
-
-            <ThemeSelect
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="w-full bg-input border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary capitalize"
-            >
-              <option value="all">All Categories</option>
-              {productCategories && productCategories.length > 0 ? (
-                productCategories.map(cat => (
-                  <option key={cat.id} value={cat.slug}>{cat.name}</option>
-                ))
-              ) : (
-                Object.entries(CATEGORY_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
-                ))
-              )}
-            </ThemeSelect>
-
-            <ThemeSelect
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full bg-input border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary capitalize"
-            >
-              <option value="all">All Statuses</option>
-              <option value="active">Active</option>
-              <option value="draft">Draft</option>
-              <option value="archived">Archived</option>
-            </ThemeSelect>
-          </div>
+          
 
           {/* Loading state */}
           {loading && products.length === 0 ? (
@@ -548,7 +506,7 @@ export const ProductsManagementPage: React.FC = () => {
           ) : filteredProducts.length === 0 ? (
             <div className="p-10 text-center bg-card rounded-xl border border-border">
               <p className="text-xs text-muted-foreground mb-3">No products found matching your filters.</p>
-              <Button
+              {/* <Button
                 type="button"
                 variant="outline"
                 size="sm"
@@ -560,7 +518,7 @@ export const ProductsManagementPage: React.FC = () => {
                 className="text-xs"
               >
                 Reset Filters
-              </Button>
+              </Button> */}
             </div>
           ) : (
             <div className="space-y-3">
@@ -594,14 +552,14 @@ export const ProductsManagementPage: React.FC = () => {
                         <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="text-sm font-bold text-foreground truncate">{product.name}</h3>
                           {product.badge && (
-                            <span className="px-1.5 py-0.5 bg-primary/10 text-primary text-[9px] font-bold uppercase tracking-wider rounded border border-primary/30">
+                            <Badge variant="secondary" className="text-[9px]">
                               {product.badge}
-                            </span>
+                            </Badge>
                           )}
                           {product.isFeatured && (
-                            <span className="px-1.5 py-0.5 bg-gold/10 text-gold text-[9px] font-bold uppercase tracking-wider rounded border border-gold/30">
+                            <Badge variant="gold" className="text-[9px]">
                               ★ Featured
-                            </span>
+                            </Badge>
                           )}
                         </div>
                         <div className="flex items-center gap-2 text-[11px] text-muted-foreground mt-0.5 flex-wrap">
@@ -609,9 +567,9 @@ export const ProductsManagementPage: React.FC = () => {
                           <span>•</span>
                           <span className="capitalize">{CATEGORY_LABELS[product.category] || product.category}</span>
                           <span>•</span>
-                          <span className="font-mono">KSh {product.priceKsh.toLocaleString()}</span>
+                          <Price amount={product.priceKsh} />
                           {product.originalPriceKsh && (
-                            <span className="line-through opacity-60">KSh {product.originalPriceKsh.toLocaleString()}</span>
+                            <Price amount={product.originalPriceKsh} className="line-through opacity-60" />
                           )}
                         </div>
                         <div className="flex items-center gap-2 mt-1">
@@ -633,15 +591,17 @@ export const ProductsManagementPage: React.FC = () => {
                           >
                             <Minus className="w-3 h-3" />
                           </button>
-                          <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded ${
-                            product.availability === 'out-of-stock'
-                              ? 'bg-destructive/10 text-destructive'
-                              : product.availability === 'low-stock'
-                              ? 'bg-warning/10 text-warning'
-                              : 'bg-success/10 text-success'
-                          }`}>
+                          <Badge 
+                            variant={
+                              product.availability === 'out-of-stock'
+                                ? 'destructive'
+                                : product.availability === 'low-stock'
+                                ? 'warning'
+                                : 'success'
+                            }
+                          >
                             {product.stockQuantity ?? 0} in stock
-                          </span>
+                          </Badge>
                           <button
                             type="button"
                             onClick={() => handleAdjustStock(product, 1)}
@@ -758,7 +718,7 @@ export const ProductsManagementPage: React.FC = () => {
         <div className="space-y-4">
           {/* Review Type + Filter */}
           <div className="bg-card p-3.5 rounded-xl border border-border flex flex-col sm:flex-row items-start sm:items-center gap-2.5">
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center justify-between lg:justify-start w-full   gap-1.5 shrink-0">
               <button
                 type="button"
                 onClick={() => setReviewType('product')}
@@ -782,18 +742,7 @@ export const ProductsManagementPage: React.FC = () => {
                 Service Reviews ({serviceReviews.length})
               </button>
             </div>
-            <MessageSquare className="w-4 h-4 text-primary shrink-0 hidden sm:block" />
-            <ThemeSelect
-              value={reviewFilter}
-              onChange={(e) => setReviewFilter(e.target.value)}
-              className="w-full sm:w-64 bg-input border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary"
-            >
-              <option value="all">All Statuses</option>
-              <option value="pending">Pending Approval</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
-              <option value="archived">Archived</option>
-            </ThemeSelect>
+
           </div>
 
           {loading && reviews.length === 0 && serviceReviews.length === 0 ? (

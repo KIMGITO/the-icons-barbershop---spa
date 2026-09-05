@@ -214,7 +214,7 @@ export const PortalShell: React.FC<PortalShellProps> = ({
                   className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-muted-foreground hover:text-foreground hover:bg-muted"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
-                  <span>Public Website</span>
+                
                 </button>
                 <button
                   type="button"

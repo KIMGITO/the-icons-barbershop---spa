@@ -117,7 +117,7 @@ export const BookingDetailsDrawer: React.FC<BookingDetailsDrawerProps> = ({
           <div className="p-4 sm:p-5 space-y-5 flex-1">
             {/* Customer Details */}
             <div className="p-3.5 rounded-xl bg-muted/40 border border-border space-y-2.5">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              <div className="text-[10px]  uppercase tracking-wider text-muted-foreground">
                 Client Information
               </div>
               <div className="flex items-center justify-between">

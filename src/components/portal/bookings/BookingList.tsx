@@ -1,8 +1,18 @@
 import React, { useState, useMemo } from 'react';
-import { 
-  Search, Filter, Plus, Calendar, Clock, User, Phone, 
-  CheckCircle2, AlertCircle, ChevronRight, Smartphone, Scissors,
-  LayoutGrid, List 
+import {
+  Search,
+  Filter,
+  Plus,
+  Clock,
+  User,
+  Phone,
+  CheckCircle2,
+  AlertCircle,
+  ChevronRight,
+  Smartphone,
+  Scissors,
+  List,
+  Calendar,
 } from 'lucide-react';
 import { StaffBooking, StaffBookingStatus } from '../../../types/staff';
 import { useAuthStore } from '../../../stores/authStore';
@@ -12,34 +22,34 @@ import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 import { Badge } from '../../ui/Badge';
 import { CustomSelect, SelectOption } from '../ui/CustomSelect';
-import { BookingCalendar } from '../calendar/BookingCalendar';
 import { BookingDrawer } from './BookingDrawer';
 import { MpesaPaymentModal } from '../payments/MpesaPaymentModal';
 
 export const BookingList: React.FC = () => {
   const { role, user } = useAuthStore();
-  const { 
-    bookings, 
-    loadBookings, 
+  const {
+    bookings,
+    loadBookings,
     recordPayment,
     openCreateDrawer,
-    openViewDrawer
+    openViewDrawer,
   } = useBookingStore();
-  
+
   const { providers, loadProviders } = useProviderStore();
 
-  // For providers, default to planner; for admin, can switch between planner & table
-  const [displayMode, setDisplayMode] = useState<'planner' | 'table'>(
-    role === 'provider' ? 'planner' : 'planner'
-  );
-  
-  const [activeTab, setActiveTab] = useState<'today' | 'upcoming' | 'past' | 'all'>('today');
+  const [activeTab, setActiveTab] = useState<
+    'today' | 'upcoming' | 'past' | 'all'
+  >('today');
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<StaffBookingStatus | 'all'>('all');
-  const [providerFilter, setProviderFilter] = useState<string>(
-    role === 'provider' && user?.providerId ? user.providerId : 'all'
+  const [statusFilter, setStatusFilter] = useState<StaffBookingStatus | 'all'>(
+    'all',
   );
-  const [paymentBooking, setPaymentBooking] = useState<StaffBooking | null>(null);
+  const [providerFilter, setProviderFilter] = useState<string>(
+    role === 'provider' && user?.providerId ? user.providerId : 'all',
+  );
+  const [paymentBooking, setPaymentBooking] = useState<StaffBooking | null>(
+    null,
+  );
 
   React.useEffect(() => {
     loadBookings();
@@ -50,9 +60,13 @@ export const BookingList: React.FC = () => {
 
   // Filter bookings
   const filteredBookings = useMemo(() => {
-    return bookings.filter(b => {
+    return bookings.filter((b) => {
       // Role scope (providers only see their own appointments)
-      if (role === 'provider' && user?.providerId && b.providerId !== user.providerId) {
+      if (
+        role === 'provider' &&
+        user?.providerId &&
+        b.providerId !== user.providerId
+      ) {
         return false;
       }
 
@@ -83,7 +97,9 @@ export const BookingList: React.FC = () => {
         const matchesName = b.customerName.toLowerCase().includes(q);
         const matchesPhone = b.customerPhone.includes(q);
         const matchesRef = b.referenceNumber.toLowerCase().includes(q);
-        const matchesService = b.serviceNames.some(s => s.toLowerCase().includes(q));
+        const matchesService = b.serviceNames.some((s) =>
+          s.toLowerCase().includes(q),
+        );
         if (!matchesName && !matchesPhone && !matchesRef && !matchesService) {
           return false;
         }
@@ -91,7 +107,16 @@ export const BookingList: React.FC = () => {
 
       return true;
     });
-  }, [bookings, role, user, providerFilter, statusFilter, activeTab, todayStr, searchQuery]);
+  }, [
+    bookings,
+    role,
+    user,
+    providerFilter,
+    statusFilter,
+    activeTab,
+    todayStr,
+    searchQuery,
+  ]);
 
   const getStatusBadge = (status: StaffBookingStatus) => {
     switch (status) {
@@ -110,10 +135,16 @@ export const BookingList: React.FC = () => {
 
   const getPaymentBadge = (b: StaffBooking) => {
     if (b.paymentStatus === 'paid') {
-      return <span className="text-[11px] font-bold text-success">Paid Full</span>;
+      return (
+        <span className="text-[11px] font-bold text-success">Paid Full</span>
+      );
     }
     if (b.depositPaidKsh && b.depositPaidKsh > 0) {
-      return <span className="text-[11px] font-bold text-primary">50% Deposit Paid</span>;
+      return (
+        <span className="text-[11px] font-bold text-primary">
+          50% Deposit Paid
+        </span>
+      );
     }
     return <span className="text-[11px] font-bold text-warning">Unpaid</span>;
   };
@@ -121,12 +152,15 @@ export const BookingList: React.FC = () => {
   // Provider Options for CustomSelect
   const providerOptions: SelectOption<string>[] = [
     { value: 'all', label: 'All Providers' },
-    ...providers.map(p => ({
+    ...providers.map((p) => ({
       value: p.id,
       label: p.fullName,
-      sublabel: p.id === 'provider-admin' ? 'Admin & Stylist' : p.providerType.replace('-', ' '),
-      badge: p.id === 'provider-admin' ? 'Admin' : undefined
-    }))
+      sublabel:
+        p.id === 'provider-admin'
+          ? 'Admin & Stylist'
+          : p.providerType.replace('-', ' '),
+      badge: p.id === 'provider-admin' ? 'Admin' : undefined,
+    })),
   ];
 
   // Status Options for CustomSelect
@@ -135,119 +169,72 @@ export const BookingList: React.FC = () => {
     { value: 'confirmed', label: 'Confirmed' },
     { value: 'pending', label: 'Pending Deposit' },
     { value: 'completed', label: 'Completed' },
-    { value: 'cancelled', label: 'Cancelled' }
+    { value: 'cancelled', label: 'Cancelled' },
   ];
-
-  // If in Planner display mode, show the calendar planner
-  if (displayMode === 'planner') {
-    return (
-      <div className="space-y-3">
-        {/* Toggle switch between Planner Calendar and Table View */}
-        <div className="flex items-center justify-between px-1">
-          <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-            {role === 'provider' ? 'My Schedule Planner' : 'Booking Schedule Planner'}
-          </div>
-          <div className="flex items-center bg-input p-1 rounded-xl border border-border text-xs">
-            <button
-              type="button"
-              onClick={() => setDisplayMode('planner')}
-              className="px-3 py-1 rounded-lg font-bold bg-primary text-black flex items-center gap-1.5 shadow-xs cursor-pointer"
-            >
-              <Calendar className="w-3.5 h-3.5" />
-              <span>Planner</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setDisplayMode('table')}
-              className="px-3 py-1 rounded-lg font-bold text-muted-foreground hover:text-foreground flex items-center gap-1.5 cursor-pointer"
-            >
-              <List className="w-3.5 h-3.5" />
-              <span>List View</span>
-            </button>
-          </div>
-        </div>
-
-        <BookingCalendar />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-4">
       {/* Top Controls Bar */}
-      <div className="bg-card p-4 rounded-2xl border border-border space-y-3 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          {/* Tabs: Today, Upcoming, Past, All */}
-          <div className="flex items-center bg-input p-1 rounded-xl border border-border text-xs overflow-x-auto">
-            <button
-              type="button"
-              onClick={() => setActiveTab('today')}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
-                activeTab === 'today' ? 'bg-primary text-black' : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Today's Schedule
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('upcoming')}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
-                activeTab === 'upcoming' ? 'bg-primary text-black' : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Upcoming
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('past')}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
-                activeTab === 'past' ? 'bg-primary text-black' : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Past
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('all')}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
-                activeTab === 'all' ? 'bg-primary text-black' : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              All
-            </button>
-          </div>
-
-          {/* View mode toggle & New Booking CTA */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center bg-input p-1 rounded-xl border border-border text-xs">
+      <div className="space-y-3 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center   gap-3">
+          <div className="flex gap-2 w-full justify-between items-center bg-input p-1 rounded-xl border border-border text-xs overflow-x-auto">
+            <div className="flex items-center bg-input p-1 rounded-xl border border-border text-xs overflow-x-auto justify-between">
               <button
                 type="button"
-                onClick={() => setDisplayMode('planner')}
-                className="px-2.5 py-1 rounded-lg font-bold text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer"
+                onClick={() => setActiveTab('today')}
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                  activeTab === 'today'
+                    ? 'bg-primary text-black'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
               >
-                <Calendar className="w-3.5 h-3.5" />
-                <span>Planner</span>
+                Today
               </button>
               <button
                 type="button"
-                onClick={() => setDisplayMode('table')}
-                className="px-2.5 py-1 rounded-lg font-bold bg-primary text-black flex items-center gap-1 shadow-xs cursor-pointer"
+                onClick={() => setActiveTab('upcoming')}
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                  activeTab === 'upcoming'
+                    ? 'bg-primary text-black'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
               >
-                <List className="w-3.5 h-3.5" />
-                <span>List</span>
+                Upcoming
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('past')}
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                  activeTab === 'past'
+                    ? 'bg-primary text-black'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Past
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('all')}
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                  activeTab === 'all'
+                    ? 'bg-primary text-black'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                All
               </button>
             </div>
 
-            <Button
-              type="button"
-              variant="primary"
-              size="sm"
-              onClick={() => openCreateDrawer()}
-              className="text-xs font-bold shrink-0"
-            >
-              <Plus className="w-4 h-4 mr-1" />
-              <span>New Booking</span>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                onClick={() => openCreateDrawer()}
+                className="text-xs font-bold gap-2 py-2"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span className="hidden lg:block ">New Booking</span>
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -262,31 +249,7 @@ export const BookingList: React.FC = () => {
             className="rounded-xl py-2.5 text-xs"
             icon={<Search className="w-3.5 h-3.5" />}
           />
-
-          {/* Provider Filter (CustomSelect) */}
-          {role === 'admin' ? (
-            <CustomSelect
-              options={providerOptions}
-              value={providerFilter}
-              onChange={setProviderFilter}
-              placeholder="All Providers"
-              className="text-xs"
-            />
-          ) : (
-            <div className="flex items-center gap-2 bg-input px-3 py-2 rounded-xl border border-border text-xs text-muted-foreground">
-              <User className="w-3.5 h-3.5 text-primary" />
-              <span className="truncate">{user?.fullName}</span>
-            </div>
-          )}
-
-          {/* Status Filter (CustomSelect) */}
-          <CustomSelect
-            options={statusOptions}
-            value={statusFilter}
-            onChange={setStatusFilter}
-            placeholder="All Statuses"
-            className="text-xs"
-          />
+          
         </div>
       </div>
 
@@ -297,9 +260,13 @@ export const BookingList: React.FC = () => {
             <Calendar className="w-6 h-6" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-sm font-bold text-foreground">No Appointments Found</h3>
+            <h3 className="text-sm font-bold text-foreground">
+              No Appointments Found
+            </h3>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-              {searchQuery ? 'Try adjusting your search criteria.' : 'There are currently no bookings for this selected filter view.'}
+              {searchQuery
+                ? 'Try adjusting your search criteria.'
+                : 'There are currently no bookings for this selected filter view.'}
             </p>
           </div>
           <Button
@@ -331,9 +298,10 @@ export const BookingList: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-border/60">
                 {filteredBookings.map((b) => {
-                  const isDepositPaid = b.depositPaidKsh && b.depositPaidKsh > 0;
+                  const isDepositPaid =
+                    b.depositPaidKsh && b.depositPaidKsh > 0;
                   return (
-                    <tr 
+                    <tr
                       key={b.id}
                       onClick={() => openViewDrawer(b)}
                       className="hover:bg-muted/30 transition-colors cursor-pointer group"
@@ -361,7 +329,8 @@ export const BookingList: React.FC = () => {
                           {b.serviceNames.join(', ')}
                         </div>
                         <div className="text-[11px] text-muted-foreground">
-                          {b.durationMinutes} min • KSh {b.totalPriceKsh.toLocaleString()}
+                          {b.durationMinutes} min • KSh{' '}
+                          {b.totalPriceKsh.toLocaleString()}
                         </div>
                       </td>
 
@@ -377,19 +346,24 @@ export const BookingList: React.FC = () => {
                         </div>
                       </td>
 
-                      <td className="p-3.5">
-                        {getStatusBadge(b.status)}
-                      </td>
+                      <td className="p-3.5">{getStatusBadge(b.status)}</td>
 
                       <td className="p-3.5 font-mono">
                         <div>{getPaymentBadge(b)}</div>
                         <div className="text-[10px] text-muted-foreground mt-0.5">
-                          Bal: KSh {(b.remainingBalanceKsh ?? (b.totalPriceKsh - (b.depositPaidKsh || 0))).toLocaleString()}
+                          Bal: KSh{' '}
+                          {(
+                            b.remainingBalanceKsh ??
+                            b.totalPriceKsh - (b.depositPaidKsh || 0)
+                          ).toLocaleString()}
                         </div>
                       </td>
 
                       <td className="p-3.5 pr-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                        <div
+                          className="flex items-center justify-end gap-1.5"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           {(b.remainingBalanceKsh ?? 1) > 0 && (
                             <Button
                               type="button"
@@ -424,7 +398,7 @@ export const BookingList: React.FC = () => {
           {/* Mobile Cards */}
           <div className="grid grid-cols-1 gap-3 md:hidden">
             {filteredBookings.map((b) => (
-              <div 
+              <div
                 key={b.id}
                 onClick={() => openViewDrawer(b)}
                 className="bg-card border border-border p-4 rounded-2xl space-y-3 cursor-pointer hover:border-primary/50 transition-all shadow-xs"
@@ -443,13 +417,17 @@ export const BookingList: React.FC = () => {
 
                 <div className="grid grid-cols-2 gap-2 text-xs py-2 border-y border-border/60">
                   <div>
-                    <div className="text-[10px] uppercase font-bold text-muted-foreground">Time & Date</div>
+                    <div className="text-[10px] uppercase font-bold text-muted-foreground">
+                      Time & Date
+                    </div>
                     <div className="font-mono text-foreground font-semibold mt-0.5">
                       {b.timeSlot} • {b.date}
                     </div>
                   </div>
                   <div>
-                    <div className="text-[10px] uppercase font-bold text-muted-foreground">Provider</div>
+                    <div className="text-[10px] uppercase font-bold text-muted-foreground">
+                      Provider
+                    </div>
                     <div className="text-foreground font-semibold mt-0.5 truncate">
                       {b.providerName}
                     </div>
@@ -458,7 +436,9 @@ export const BookingList: React.FC = () => {
 
                 <div className="flex items-center justify-between text-xs">
                   <div>
-                    <span className="text-muted-foreground">{b.serviceNames[0]}</span>
+                    <span className="text-muted-foreground">
+                      {b.serviceNames[0]}
+                    </span>
                     <span className="text-foreground font-bold font-mono ml-2">
                       KSh {b.totalPriceKsh.toLocaleString()}
                     </span>

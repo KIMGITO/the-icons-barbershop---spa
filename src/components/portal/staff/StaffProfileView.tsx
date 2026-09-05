@@ -31,6 +31,7 @@ export const StaffProfileView: React.FC = () => {
 
   // Password change state
   const [showPasswordSection, setShowPasswordSection] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -53,11 +54,11 @@ export const StaffProfileView: React.FC = () => {
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPassword || newPassword !== confirmPassword) {
+    if (!currentPassword || !newPassword || newPassword !== confirmPassword) {
       addToast({
         type: 'error',
         title: 'Validation Error',
-        message: 'Passwords do not match or are empty.'
+        message: 'All fields are required and passwords must match.'
       });
       return;
     }
@@ -66,17 +67,18 @@ export const StaffProfileView: React.FC = () => {
       addToast({
         type: 'error',
         title: 'Weak Password',
-        message: 'Password must be at least 8 characters long.'
+        message: 'New password must be at least 8 characters long.'
       });
       return;
     }
 
     try {
       setIsChangingPassword(true);
-      await changePassword(newPassword);
+      await changePassword(currentPassword, newPassword);
       setIsChangingPassword(false);
       setNewPassword('');
       setConfirmPassword('');
+      setCurrentPassword('');
       setShowPasswordSection(false);
       addToast({
         type: 'success',
@@ -122,7 +124,7 @@ export const StaffProfileView: React.FC = () => {
 
   return (
     <div className="max-w-3xl space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card p-4 sm:p-5 rounded-2xl border border-border">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 ">
         <div>
           <div className="flex items-center gap-2">
             {currentProvider ? (
@@ -141,7 +143,7 @@ export const StaffProfileView: React.FC = () => {
             {currentProvider?.fullName || user?.fullName}
           </h1>
           <p className="text-xs text-muted-foreground">
-            {user?.role === 'admin' ? 'Studio Management' : 'Artisan Station'} • {user?.email}
+            {user?.role === 'admin' ? 'Icons Management' : 'Artisan Station'} • {user?.email}
           </p>
         </div>
 
@@ -162,14 +164,14 @@ export const StaffProfileView: React.FC = () => {
 
       {currentProvider && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 items-start bg-card p-5 rounded-2xl border border-border">
-          <div className="sm:col-span-1">
+          <div className="  sm:col-span-1">
             <ImageUploader
             currentImageUrl={avatarUrl}
             onImageUploaded={(url) => setAvatarUrl(url)}
             onImageRemoved={() => setAvatarUrl('')}
             bucket="avatars"
             aspectRatio="square"
-            label="Artisan Profile Photo"
+            label=" Profile Photo"
             helperText="Square portrait"
           />
         </div>
@@ -250,15 +252,15 @@ export const StaffProfileView: React.FC = () => {
       )}
 
       {/* Security & Password Section */}
-      <div className="bg-card p-5 rounded-2xl border border-border space-y-4">
+      <div className="bg-red-500/10 p-5 rounded-2xl border border-border space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-            <Lock className="w-3.5 h-3.5 text-primary" />
-            Security & Authentication
+          <h2 className="text-xs font-bold text-destructive uppercase tracking-wider flex items-center gap-1.5">
+            <Lock className="w-3.5 h-3.5 " />
+            Security
           </h2>
           <Button
             type="button"
-            variant="outline"
+            variant="destructive"
             size="sm"
             onClick={() => setShowPasswordSection(!showPasswordSection)}
             className="text-[10px] h-7 px-3"
@@ -269,6 +271,20 @@ export const StaffProfileView: React.FC = () => {
 
         {showPasswordSection ? (
           <form onSubmit={handlePasswordChange} className="space-y-4 pt-2 animate-in slide-in-from-top-2 duration-200">
+            <div className="space-y-1">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Current Password
+              </label>
+              <Input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Required for verification"
+                className="rounded-xl py-2 text-xs"
+                required
+              />
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
@@ -321,7 +337,7 @@ export const StaffProfileView: React.FC = () => {
             </div>
           </form>
         ) : (
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-[11px] text-destructive ">
             Update your account password to ensure your account remains secure.
           </p>
         )}

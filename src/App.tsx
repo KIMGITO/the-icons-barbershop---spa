@@ -26,55 +26,13 @@ import { StaffPortalPage } from './pages/StaffPortalPage';
 import { FAQPage } from './pages/FAQPage';
 import { TermsPage } from './pages/TermsPage';
 import { PrivacyPage } from './pages/PrivacyPage';
-import { updatePageSEO } from './utils/seo';
+import { SEO } from './components/SEO';
 
 const MainContent: React.FC = () => {
   const { currentRoute, navigateTo, openBookingModal, refreshData, services, faqs, products, barbers, gallery, serviceCategories } = useApp();
 
   // Global Real-time Subscriptions are now handled in AppContext.tsx to ensure 
   // public UI is always in sync without redundant store subscriptions.
-
-  // Root SEO initialization on route change
-  useEffect(() => {
-    if (currentRoute === '/') {
-      updatePageSEO({
-        title: "The Icons Barber & Spa | Premium Men's Grooming & Spa in Nairobi",
-        description: "Experience bespoke haircuts, luxury hot towel beard grooming, and rejuvenating scalp spa treatments at The Icons Barber & Spa. Located on Lenana Road, Kilimani, Nairobi. Book online."
-      });
-    } else if (currentRoute === '/services') {
-      updatePageSEO({
-        title: "Bespoke Services & Pricing | The Icons Barber & Spa Nairobi",
-        description: "Explore our full catalog of precision haircuts, skin fades, royal hot towel beard sculpting, and Moroccan scalp detox treatments in Kilimani, Nairobi."
-      });
-    } else if (currentRoute === '/products') {
-      updatePageSEO({
-        title: "Executive Grooming Products & Trichology Apothecary | The Icons",
-        description: "Shop curated shampoos, TR2 follicle therapy, organic Moroccan argan beard oils, and matte styling clays at The Icons Barber & Spa in Kilimani."
-      });
-    } else if (currentRoute === '/barbers') {
-      updatePageSEO({
-        title: "Master Barbers & Spa Specialists | The Icons Nairobi",
-        description: "Meet our certified master barbers and facial wellness therapists at The Icons. Choose your artisan and book your appointment directly."
-      });
-    } else if (currentRoute === '/about') {
-      updatePageSEO({
-        title: "Our Heritage & Sanctuary | The Icons Barber & Spa",
-        description: "Learn about the ethos, sterile implements standard, and private executive suites at The Icons Barber & Spa on Lenana Road, Kilimani."
-      });
-    } else if (currentRoute === '/gallery') {
-      updatePageSEO({
-        title: "Client Transformations & Studio Gallery | The Icons Nairobi",
-        description: "Visual showcase of sharp fades, beard artistry, scalp treatments, and our luxury penthouse barber studio in Kilimani."
-      });
-    } else if (currentRoute === '/contact') {
-      updatePageSEO({
-        title: "Location, Hours & Contact | The Icons Barber & Spa Kilimani",
-        description: "Visit Suite 4B, The Icon Heights on Lenana Road, Kilimani, Nairobi. Click to call +254 712 345 678, WhatsApp concierge, or get directions."
-      });
-    } else if (currentRoute === '/book') {
-      openBookingModal();
-    }
-  }, [currentRoute, openBookingModal]);
 
   // Route Dispatcher
   const renderCurrentView = () => {
@@ -84,7 +42,16 @@ const MainContent: React.FC = () => {
     }
 
     if (currentRoute === '/products') {
-      return <ProductsCatalogPage />;
+      return (
+        <div>
+          <SEO 
+            title="Executive Grooming Products & Trichology Apothecary | The Icons"
+            description="Shop curated shampoos, TR2 follicle therapy, organic Moroccan argan beard oils, and matte styling clays at The Icons Barber & Spa in Kilimani."
+            canonicalUrl="https://theiconsbarber.co.ke/products"
+          />
+          <ProductsCatalogPage />
+        </div>
+      );
     }
 
     if (currentRoute.startsWith('/services/')) {
@@ -113,6 +80,12 @@ const MainContent: React.FC = () => {
       }
       return (
         <div>
+          <SEO 
+            title="Bespoke Services & Pricing | The Icons Barber & Spa Nairobi"
+            description="Explore our full catalog of precision haircuts, skin fades, royal hot towel beard sculpting, and Moroccan scalp detox treatments in Kilimani, Nairobi."
+            canonicalUrl="https://theiconsbarber.co.ke/services"
+            services={services}
+          />
           <ServicesSection isStandalonePage={true} />
         </div>
       );
@@ -125,6 +98,11 @@ const MainContent: React.FC = () => {
       }
       return (
         <div>
+          <SEO 
+            title="Master Barbers & Spa Specialists | The Icons Nairobi"
+            description="Meet our certified master barbers and facial wellness therapists at The Icons. Choose your artisan and book your appointment directly."
+            canonicalUrl="https://theiconsbarber.co.ke/barbers"
+          />
           <BarbersSection isStandalonePage={true} />
         </div>
       );
@@ -133,6 +111,11 @@ const MainContent: React.FC = () => {
     if (currentRoute === '/about') {
       return (
         <div>
+          <SEO 
+            title="Our Heritage & Sanctuary | The Icons Barber & Spa"
+            description="Learn about the ethos, sterile implements standard, and the sanctuary of modern masculinity at The Icons Barber & Spa in Nairobi."
+            canonicalUrl="https://theiconsbarber.co.ke/about"
+          />
           <AboutSection isStandalonePage={true} />
         </div>
       );
@@ -145,6 +128,11 @@ const MainContent: React.FC = () => {
       }
       return (
         <div>
+          <SEO 
+            title="The Icons Gallery | Visual Story of Luxury Grooming"
+            description="Browse through our gallery of precision cuts, executive spa treatments, and the luxury ambiance of The Icons Barber & Spa Nairobi."
+            canonicalUrl="https://theiconsbarber.co.ke/gallery"
+          />
           <GallerySection isStandalonePage={true} />
         </div>
       );
@@ -157,22 +145,44 @@ const MainContent: React.FC = () => {
       }
       return (
         <div>
+          <SEO 
+            title="Frequently Asked Questions | The Icons Barber & Spa"
+            description="Got questions about our services, bookings, or grooming products? Find answers here or contact our concierge."
+            canonicalUrl="https://theiconsbarber.co.ke/faq"
+            schemaType="FAQPage"
+            faqs={faqs.filter(f => f.isActive !== false)}
+          />
           <FAQPage />
         </div>
       );
     }
 
     if (currentRoute === '/terms') {
-      return <TermsPage />;
+      return (
+        <>
+          <SEO title="Terms of Service" canonicalUrl="https://theiconsbarber.co.ke/terms" />
+          <TermsPage />
+        </>
+      );
     }
 
     if (currentRoute === '/privacy') {
-      return <PrivacyPage />;
+      return (
+        <>
+          <SEO title="Privacy Policy" canonicalUrl="https://theiconsbarber.co.ke/privacy" />
+          <PrivacyPage />
+        </>
+      );
     }
 
     if (currentRoute === '/contact') {
       return (
         <div>
+          <SEO 
+            title="Location, Hours & Contact | Visit The Icons in Kilimani"
+            description="Visit Suite 4B, The Icon Heights on Lenana Road, Kilimani, Nairobi. Click to call +254 712 345 678, WhatsApp concierge, or get directions."
+            canonicalUrl="https://theiconsbarber.co.ke/contact"
+          />
           <LocationContactSection isStandalonePage={true} />
         </div>
       );
@@ -186,6 +196,12 @@ const MainContent: React.FC = () => {
 
     return (
       <main id="homepage-main">
+        <SEO 
+          title="The Icons Barber & Spa | Premium Men's Grooming & Spa in Nairobi"
+          description="Experience bespoke haircuts, luxury hot towel beard grooming, and rejuvenating scalp spa treatments at The Icons Barber & Spa. Located on Lenana Road, Kilimani, Nairobi. Book online."
+          canonicalUrl="https://theiconsbarber.co.ke/"
+          services={services}
+        />
         <Hero />
         {hasServices && <ServicesSection limit={8} />}
         {hasProducts && <ProductsSection />}

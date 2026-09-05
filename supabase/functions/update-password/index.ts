@@ -15,8 +15,19 @@ Deno.serve(async (req) => {
     const { data: { user }, error: userErr } = await admin.auth.getUser(token);
     if (userErr || !user) return Response.json({ error: 'Unauthorized' }, { status: 401, headers: corsHeaders });
 
-    const { newPassword } = await req.json();
+    const { newPassword, currentPassword } = await req.json();
     if (!newPassword || newPassword.length < 8) return Response.json({ error: 'Password must be at least 8 characters' }, { status: 400, headers: corsHeaders });
+    if (!currentPassword) return Response.json({ error: 'Current password is required' }, { status: 400, headers: corsHeaders });
+
+    // Verify current password by attempting to sign in
+    const { error: authErr } = await admin.auth.signInWithPassword({
+      email: user.email!,
+      password: currentPassword,
+    });
+
+    if (authErr) {
+      return Response.json({ error: 'Invalid current password' }, { status: 401, headers: corsHeaders });
+    }
 
     const { error } = await admin.auth.admin.updateUserById(user.id, { password: newPassword });
     if (error) return Response.json({ error: error.message }, { status: 400, headers: corsHeaders });

@@ -122,17 +122,7 @@ export const ProviderSelector: React.FC<ProviderSelectorProps> = ({
       {/* Dropdown list */}
       {isOpen && (
         <div className="absolute left-0 right-0 z-50 mt-1 max-h-72 rounded-2xl border border-border bg-card shadow-2xl p-2 flex flex-col animate-in fade-in zoom-in-95 duration-150">
-          <div className="p-1.5 border-b border-border mb-1 flex items-center gap-2">
-            <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-            <Input
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search provider..."
-              className="w-full bg-transparent text-xs text-foreground placeholder:text-muted-foreground focus:outline-none border-transparent focus:border-transparent focus:shadow-none py-0 px-0"
-              autoFocus
-            />
-          </div>
+         
 
           <div className="overflow-y-auto max-h-56 p-1 space-y-1">
             {filteredProviders.length === 0 ? (

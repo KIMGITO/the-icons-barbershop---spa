@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { updatePageSEO } from '../utils/seo';
 import { ArrowRight, ChevronRight, FileText, ShieldCheck, Mail, Phone } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
@@ -81,28 +80,9 @@ const TERMS_SECTIONS: TermsSection[] = [
 export const TermsPage: React.FC = () => {
   const { businessInfo, navigateTo } = useApp();
 
-  // Update SEO Title, Meta Description & JSON-LD Structured Data
   useEffect(() => {
-    updatePageSEO({
-      title: 'Terms & Conditions',
-      description: 'Review the terms and conditions governing the use of The Icons Barber & Spa website, including booking policies, intellectual property, acceptable use, and governing law.',
-      canonicalUrl: 'https://theiconsbarber.co.ke/terms',
-      schemaType: 'LocalBusiness',
-      customSchema: {
-        '@context': 'https://schema.org',
-        '@type': 'WebPage',
-        'name': 'Terms & Conditions',
-        'description': 'Terms and conditions for The Icons Barber & Spa website.',
-        'url': 'https://theiconsbarber.co.ke/terms',
-        'isPartOf': {
-          '@type': 'WebSite',
-          'name': businessInfo.name,
-          'url': 'https://theiconsbarber.co.ke'
-        }
-      }
-    });
     window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [businessInfo.name]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background text-white pt-24 pb-20">

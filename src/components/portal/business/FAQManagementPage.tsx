@@ -125,13 +125,13 @@ export const FAQManagementPage: React.FC = () => {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card p-4 sm:p-5 rounded-2xl border border-border">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 ">
         <div>
           <h1 className="text-lg sm:text-xl font-bold text-foreground">
             FAQ Management
           </h1>
           <p className="text-xs text-muted-foreground">
-            Manage frequently asked questions displayed on the public site
+            Manage frequently asked questions to displayed on the public site
           </p>
         </div>
 
@@ -147,29 +147,7 @@ export const FAQManagementPage: React.FC = () => {
         </Button>
       </div>
 
-      {/* Filter Bar */}
-      <div className="bg-card p-3.5 rounded-xl border border-border grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-        <Input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search FAQs..."
-          className="rounded-lg py-1.5 text-xs"
-          icon={<Search className="w-3.5 h-3.5" />}
-        />
-
-        <ThemeSelect
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-          className="w-full bg-input border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary capitalize"
-        >
-          <option value="all">All Categories</option>
-          {categories.map(c => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </ThemeSelect>
-      </div>
-
+      
       {/* FAQ List */}
       <div className="space-y-3">
         {filteredFaqs.length === 0 ? (

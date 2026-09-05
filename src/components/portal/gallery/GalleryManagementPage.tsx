@@ -85,9 +85,7 @@ export const GalleryManagementPage: React.FC = () => {
       {/* Page Header */}
       <div>
         <h1 className="text-lg font-bold text-white font-heading tracking-wide">Style Gallery</h1>
-        <p className="text-xs text-muted-foreground mt-1">
-          Upload, reorder, and manage images displayed on the public gallery page. Changes reflect immediately.
-        </p>
+        
       </div>
 
       {/* Upload Area */}

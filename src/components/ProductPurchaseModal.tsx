@@ -14,8 +14,7 @@ import {
   PackageCheck
 } from 'lucide-react';
 import { ProductItem } from '../types';
-import { Button } from './ui/Button';
-import { Input } from './ui/Input';
+import { Button, Input, Price } from './ui';
 
 export const ProductPurchaseModal: React.FC = () => {
   const { 
@@ -134,7 +133,9 @@ export const ProductPurchaseModal: React.FC = () => {
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-white font-medium">{activeProduct.name} (x{quantity})</span>
-                <span className="text-white font-bold">{formatKsh(totalPrice)}</span>
+                <span className="text-white font-bold">
+                  <Price amount={totalPrice} />
+                </span>
               </div>
               <div className="flex justify-between items-center text-xs text-muted-foreground">
                 <span>Fulfillment</span>
@@ -195,7 +196,9 @@ export const ProductPurchaseModal: React.FC = () => {
               <div className="flex-grow min-w-0">
                 <h4 className="text-sm font-semibold text-white truncate">{activeProduct.name}</h4>
                 <div className="text-xs text-muted-foreground">{activeProduct.specifications.volume}</div>
-                <div className="text-sm font-bold text-primary mt-0.5">{formatKsh(activeProduct.priceKsh)}</div>
+                <div className="text-sm font-bold text-primary mt-0.5">
+                  <Price amount={activeProduct.priceKsh} />
+                </div>
               </div>
               {/* Quantity Controls */}
               <div className="flex items-center border border-white/20 rounded-lg bg-black/40 overflow-hidden shrink-0">
@@ -314,7 +317,9 @@ export const ProductPurchaseModal: React.FC = () => {
               <div className="pt-4 border-t border-white/10 flex items-center justify-between">
                 <div>
                   <div className="text-[11px] text-muted-foreground uppercase tracking-wider">Total Amount</div>
-                  <div className="text-xl font-bold text-primary">{formatKsh(totalPrice)}</div>
+                  <div className="text-xl font-bold text-primary">
+                    <Price amount={totalPrice} />
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2">

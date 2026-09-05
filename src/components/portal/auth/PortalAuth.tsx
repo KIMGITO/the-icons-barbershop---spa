@@ -38,6 +38,7 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({
   const [mode, setMode] = useState<'login' | 'forgot' | 'reset'>('login');
   const [forcedChange, setForcedChange] = useState(false);
   const [mustChange, setMustChange] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [email, setEmail] = useState('');
@@ -61,6 +62,10 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({
   const handleForcedPasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     setFeedbackMessage(null);
+    if (!currentPassword) {
+      setFeedbackMessage('Current password is required.');
+      return;
+    }
     if (newPassword.length < 8) {
       setFeedbackMessage('Password must be at least 8 characters.');
       return;
@@ -70,10 +75,11 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({
       return;
     }
     try {
-      await changePassword(newPassword);
+      await changePassword(currentPassword, newPassword);
       setForcedChange(false);
       setNewPassword('');
       setConfirmPassword('');
+      setCurrentPassword('');
       if (onSuccess) onSuccess();
     } catch (err: any) {
       setFeedbackMessage(err.message || 'Failed to update password.');
@@ -144,6 +150,21 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({
                 For your account security, you must set a new password before
                 continuing.
               </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Current Password
+              </label>
+              <Input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="The password you just used"
+                className="rounded-xl py-2.5 text-xs"
+                icon={<Lock className="w-4 h-4" />}
+                required
+              />
             </div>
 
             <div className="space-y-1.5">

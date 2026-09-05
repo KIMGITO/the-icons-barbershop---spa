@@ -86,7 +86,7 @@ export const BookingDrawer: React.FC = () => {
 
   return (
     <>
-      {/* Background Overlay (Click outside closes, but subtle so user can scan calendar context) */}
+      {/* Background Overlay */}
       <div 
         className={`fixed inset-0 z-50 transition-opacity duration-200 ${
           isDrawerCollapsed ? 'bg-transparent pointer-events-none' : 'bg-black/60 backdrop-blur-xs'
@@ -97,17 +97,14 @@ export const BookingDrawer: React.FC = () => {
       {/* Drawer Container */}
       <div 
         className={`fixed z-50 transition-all duration-300 ease-out shadow-2xl flex flex-col bg-card border-border ${
-          // Mobile: Bottom sheet
           'bottom-0 left-0 right-0 sm:bottom-0 sm:top-0 sm:left-auto sm:right-0'
         } ${
-          // Mobile heights vs Desktop widths
           isDrawerCollapsed 
             ? 'h-14 sm:h-full sm:w-16 border-t sm:border-t-0 sm:border-l' 
             : 'max-h-[88vh] sm:max-h-full sm:w-[480px] rounded-t-2xl sm:rounded-t-none sm:rounded-l-2xl border-t sm:border-t-0 sm:border-l'
         }`}
         onClick={e => e.stopPropagation()}
       >
-        {/* Collapsed Ribbon View on Desktop / Mobile */}
         {isDrawerCollapsed ? (
           <div className="h-full flex sm:flex-col items-center justify-between p-3 sm:py-6 text-foreground">
             <button
@@ -132,20 +129,19 @@ export const BookingDrawer: React.FC = () => {
             </button>
           </div>
         ) : (
-          /* Expanded Full Drawer */
           <div className="flex flex-col h-full overflow-hidden">
             {/* Header */}
             <div className="shrink-0 bg-card/95 backdrop-blur-md border-b border-border p-4 sm:p-5 flex items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/20">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-primary px-2 py-0.5 rounded shrink-0">
                     {drawerMode === 'create' ? 'New Booking' : drawerMode === 'edit' ? 'Edit Booking' : 'Booking Details'}
                   </span>
                   {selectedBooking && drawerMode === 'view' && (
-                    <span className="font-mono text-xs font-bold text-muted-foreground">
+                    <span className="font-mono text-xs font-bold text-muted-foreground truncate">
                       {selectedBooking.referenceNumber}
                     </span>
-                  )}
+                  )}  
                 </div>
                 <h3 className="text-base font-bold text-foreground truncate mt-1">
                   {drawerMode === 'create' 
@@ -156,7 +152,6 @@ export const BookingDrawer: React.FC = () => {
                 </h3>
               </div>
 
-              {/* Window Controls: Collapse & Close */}
               <div className="flex items-center gap-1.5 shrink-0">
                 <button
                   type="button"
@@ -191,10 +186,9 @@ export const BookingDrawer: React.FC = () => {
                   onCancel={drawerMode === 'edit' && selectedBooking ? () => openViewDrawer(selectedBooking) : closeDrawer}
                 />
               ) : selectedBooking ? (
-                /* View Booking Details Mode */
                 <div className="space-y-4 text-xs">
                   {/* Status Banner */}
-                  <div className="flex items-center justify-between p-3.5 rounded-xl bg-muted/30 border border-border">
+                  <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-muted/30 border border-border">
                     <div>
                       <div className="text-[10px] uppercase font-bold text-muted-foreground">Status</div>
                       <div className="mt-1">{getStatusBadge(selectedBooking.status)}</div>
@@ -215,14 +209,14 @@ export const BookingDrawer: React.FC = () => {
                       Client Profile
                     </div>
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center text-primary font-bold">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center text-primary font-bold shrink-0">
                         {selectedBooking.customerName.charAt(0)}
                       </div>
-                      <div>
-                        <div className="font-bold text-sm text-foreground">
+                      <div className="min-w-0 flex-1">
+                        <div className="font-bold text-sm text-foreground truncate">
                           {selectedBooking.customerName}
                         </div>
-                        <div className="text-muted-foreground font-mono">
+                        <div className="text-muted-foreground font-mono truncate">
                           {selectedBooking.customerPhone} • {selectedBooking.customerEmail}
                         </div>
                       </div>
@@ -235,11 +229,11 @@ export const BookingDrawer: React.FC = () => {
                       Service & Specialist
                     </div>
 
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
                         <Scissors className="w-4 h-4 text-primary shrink-0" />
-                        <div>
-                          <div className="font-bold text-foreground">
+                        <div className="min-w-0">
+                          <div className="font-bold text-foreground truncate">
                             {selectedBooking.serviceNames.join(', ')}
                           </div>
                           <div className="text-muted-foreground text-[11px]">
@@ -247,16 +241,16 @@ export const BookingDrawer: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                      <span className="font-mono font-bold text-sm text-primary">
+                      <span className="font-mono font-bold text-sm text-primary shrink-0">
                         KSh {selectedBooking.totalPriceKsh.toLocaleString()}
                       </span>
                     </div>
 
-                    <div className="pt-2 border-t border-border flex items-center justify-between text-[11px]">
-                      <span className="text-muted-foreground">Assigned Provider:</span>
-                      <span className="font-bold text-foreground flex items-center gap-1">
-                        <User className="w-3.5 h-3.5 text-primary" />
-                        {selectedBooking.providerName}
+                    <div className="pt-2 border-t border-border flex items-center justify-between gap-2 text-[11px]">
+                      <span className="text-muted-foreground shrink-0">Assigned Provider:</span>
+                      <span className="font-bold text-foreground flex items-center gap-1 min-w-0 truncate">
+                        <User className="w-3.5 h-3.5 text-primary shrink-0" />
+                        <span className="truncate">{selectedBooking.providerName}</span>
                       </span>
                     </div>
                   </div>
@@ -266,12 +260,12 @@ export const BookingDrawer: React.FC = () => {
                     <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                       Appointment Time
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-primary" />
-                        <span className="font-bold text-foreground">{selectedBooking.date}</span>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Calendar className="w-4 h-4 text-primary shrink-0" />
+                        <span className="font-bold text-foreground truncate">{selectedBooking.date}</span>
                       </div>
-                      <div className="flex items-center gap-2 font-mono text-primary font-semibold">
+                      <div className="flex items-center gap-2 font-mono text-primary font-semibold shrink-0">
                         <Clock className="w-4 h-4" />
                         <span>{selectedBooking.timeSlot} – {selectedBooking.endTime || 'end'}</span>
                       </div>
@@ -284,17 +278,17 @@ export const BookingDrawer: React.FC = () => {
                       <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground font-sans">
                         Financial Summary
                       </div>
-                      <div className="flex justify-between text-muted-foreground">
+                      <div className="flex justify-between gap-2 text-muted-foreground">
                         <span>Total Service:</span>
-                        <span>KSh {selectedBooking.totalPriceKsh.toLocaleString()}</span>
+                        <span className="shrink-0">KSh {selectedBooking.totalPriceKsh.toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between text-success">
+                      <div className="flex justify-between gap-2 text-success">
                         <span>Paid Deposit:</span>
-                        <span>- KSh {(selectedBooking.depositPaidKsh || 0).toLocaleString()}</span>
+                        <span className="shrink-0">- KSh {(selectedBooking.depositPaidKsh || 0).toLocaleString()}</span>
                       </div>
-                      <div className="pt-1.5 border-t border-border flex justify-between font-bold text-foreground">
+                      <div className="pt-1.5 border-t border-border flex justify-between gap-2 font-bold text-foreground">
                         <span>Balance at Station:</span>
-                        <span className="text-primary">
+                        <span className="text-primary shrink-0">
                           KSh {depositBreakdown.remainingKsh.toLocaleString()}
                         </span>
                       </div>
@@ -321,26 +315,15 @@ export const BookingDrawer: React.FC = () => {
                   )}
 
                   {/* Quick Action Buttons */}
-                  <div className="pt-3 border-t border-border flex flex-wrap items-center justify-between gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openEditDrawer(selectedBooking)}
-                      className="text-xs"
-                    >
-                      <Edit3 className="w-3.5 h-3.5 mr-1 text-primary" />
-                      Edit Booking
-                    </Button>
-
-                    <div className="flex items-center gap-2">
+                  <div className="pt-3 border-t border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div className="order-2 sm:order-1 grid grid-cols-1 sm:flex sm:items-center gap-2">
                       {depositBreakdown && depositBreakdown.remainingKsh > 0 && (
                         <Button
                           type="button"
                           variant="primary"
                           size="sm"
                           onClick={() => setIsMpesaModalOpen(true)}
-                          className="text-xs"
+                          className="text-xs w-full sm:w-auto justify-center"
                         >
                           <Smartphone className="w-3.5 h-3.5 mr-1" />
                           M-Pesa Pay
@@ -353,7 +336,7 @@ export const BookingDrawer: React.FC = () => {
                           variant="primary"
                           size="sm"
                           onClick={handleConfirm}
-                          className="text-xs"
+                          className="text-xs w-full sm:w-auto justify-center"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
                           Confirm
@@ -366,13 +349,24 @@ export const BookingDrawer: React.FC = () => {
                           variant="primary"
                           size="sm"
                           onClick={handleComplete}
-                          className="text-xs"
+                          className="text-xs w-full sm:w-auto justify-center"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
                           Complete
                         </Button>
                       )}
                     </div>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openEditDrawer(selectedBooking)}
+                      className="text-xs w-full sm:w-auto justify-center order-1 sm:order-2"
+                    >
+                      <Edit3 className="w-3.5 h-3.5 mr-1 text-primary" />
+                      Edit Booking
+                    </Button>
                   </div>
                 </div>
               ) : null}
@@ -381,7 +375,6 @@ export const BookingDrawer: React.FC = () => {
         )}
       </div>
 
-      {/* M-Pesa Modal */}
       {selectedBooking && (
         <MpesaPaymentModal
           isOpen={isMpesaModalOpen}

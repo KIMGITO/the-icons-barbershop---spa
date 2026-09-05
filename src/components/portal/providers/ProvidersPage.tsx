@@ -62,61 +62,27 @@ export const ProvidersPage: React.FC = () => {
   return (
     <div className="space-y-5">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card p-4 sm:p-5 rounded-2xl border border-border">
+      <div className="flex justify-between gap-4 items-center ">
         <div>
           <h1 className="text-lg sm:text-xl font-bold text-foreground">
             Service Providers
           </h1>
-          <p className="text-xs text-muted-foreground">
-            Manage barbers, scalp specialists, facialists, and spa therapists
-          </p>
+          
         </div>
 
         <Button
           type="button"
-          variant="primary"
+          variant="outline"
           size="sm"
           onClick={handleAddNew}
-          className="text-xs font-bold"
+          className="text-xs font-bold gap-2 "
         >
-          <Plus className="w-4 h-4 mr-1" />
-          <span>Add Service Provider</span>
+          <Plus className="w-4 h-4 " />
+          <span className='hidden  lg:block'>Add Service Provider</span>
         </Button>
       </div>
 
-      {/* Search & Filters */}
-      <div className="bg-card p-3.5 rounded-xl border border-border grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-        <Input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search provider by name..."
-          className="rounded-lg py-1.5 text-xs"
-          icon={<Search className="w-3.5 h-3.5" />}
-        />
-
-        <ThemeSelect
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value as any)}
-          className="bg-input border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary"
-        >
-          <option value="all" >All Specialties</option>
-          {Object.entries(PROVIDER_TYPE_LABELS).map(([key, label]) => (
-            <option key={key} value={key} >{label}</option>
-          ))}
-        </ThemeSelect>
-
-        <ThemeSelect
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value as any)}
-          className="bg-input border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary"
-        >
-          <option value="all" >All Statuses</option>
-          <option value="active" >Active Only</option>
-          <option value="inactive" >Inactive Only</option>
-        </ThemeSelect>
-      </div>
-
+      
       {/* Providers Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredProviders.map(provider => {
@@ -242,10 +208,10 @@ export const ProvidersPage: React.FC = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => handleEdit(provider)}
-                    className="text-xs py-1 h-auto"
+                    className="text-xs py-1 h-auto gap-2 " 
                   >
-                    <Edit className="w-3.5 h-3.5 mr-1" />
-                    <span>Edit Profile & Schedule</span>
+                    <Edit className="w-3.5 h-3.5 " />
+                    <span className='hidden  lg:block'>Edit Profile & Schedule</span>
                   </Button>
                 </div>
               </div>

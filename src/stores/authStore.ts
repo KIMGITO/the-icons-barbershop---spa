@@ -5,7 +5,7 @@ import { authService } from '../services/authService';
 interface AuthState {
   user: StaffUser | null;
   session: StaffSession | null;
-  role: PortalRole | null;
+  role: PortalRole ;
   loading: boolean;
   error: string | null;
   isAuthenticated: boolean;
@@ -16,14 +16,14 @@ interface AuthState {
   logout: () => Promise<void>;
   forgotPassword: (email: string) => Promise<{ success: boolean; message: string }>;
   resetPassword: (token: string, newPassword: string) => Promise<{ success: boolean; message: string }>;
-  changePassword: (newPassword: string) => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   clearError: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   session: null,
-  role: null,
+  role: 'provider',
   loading: false,
   error: null,
   isAuthenticated: false,
@@ -36,6 +36,12 @@ export const useAuthStore = create<AuthState>((set) => ({
         user: session.user,
         role: session.user.role,
         isAuthenticated: true
+      });
+    } else {
+      set({
+        session: null,
+        user: null,
+        isAuthenticated: false
       });
     }
   },
@@ -84,10 +90,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     return authService.resetPassword(token, newPassword);
   },
 
-  changePassword: async (newPassword: string) => {
+  changePassword: async (currentPassword: string, newPassword: string) => {
     set({ loading: true, error: null });
     try {
-      await authService.changePassword(newPassword);
+      await authService.changePassword(currentPassword, newPassword);
       set(state => ({
         user: state.user ? { ...state.user, mustChangePassword: false } : state.user,
         loading: false

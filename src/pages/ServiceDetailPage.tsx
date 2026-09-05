@@ -1,7 +1,7 @@
 import { SafeImage } from '../components/ui/SafeImage';
 import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { updatePageSEO } from '../utils/seo';
+import { SEO } from '../components/SEO';
 import { Clock, Calendar, Check, ArrowLeft, Shield, User, ArrowRight, Star } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
@@ -35,40 +35,8 @@ export const ServiceDetailPage: React.FC<ServiceDetailPageProps> = ({ slug }) =>
   }, [service?.id]);
 
   useEffect(() => {
-    if (service) {
-      updatePageSEO({
-        title: `${service.name} in Kilimani, Nairobi | The Icons Barber & Spa`,
-        description: `Book a professional ${service.name.toLowerCase()} at The Icons Barber & Spa on Lenana Road, Kilimani. Select your preferred master barber and secure your appointment online.`,
-        canonicalUrl: `https://theiconsbarber.co.ke/services/${service.slug}`,
-        ogImage: service.imageUrl,
-        type: 'service',
-        schemaType: 'Service',
-        customSchema: {
-          "@context": "https://schema.org",
-          "@type": "Service",
-          "serviceType": service.name,
-          "provider": {
-            "@type": "BarberShop",
-            "name": businessInfo.name,
-            "address": {
-              "@type": "PostalAddress",
-              "streetAddress": `${businessInfo.address.suite}, ${businessInfo.address.street}`,
-              "addressLocality": businessInfo.address.neighborhood,
-              "addressRegion": businessInfo.address.city,
-              "addressCountry": "KE"
-            }
-          },
-          "offers": {
-            "@type": "Offer",
-            "price": service.priceKsh,
-            "priceCurrency": "KES",
-            "availability": "https://schema.org/InStock"
-          },
-          "description": service.fullDescription
-        }
-      });
-    }
-  }, [service, businessInfo]);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   if (!service) {
     return (
@@ -102,6 +70,13 @@ export const ServiceDetailPage: React.FC<ServiceDetailPageProps> = ({ slug }) =>
 
   return (
     <div className="pt-28 pb-24 bg-background min-h-screen">
+      <SEO 
+        title={`${service.name} | The Icons Barber & Spa`}
+        description={service.shortDescription}
+        canonicalUrl={`https://theiconsbarber.co.ke/services/${service.slug}`}
+        ogImage={service.imageUrl}
+        type="service"
+      />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         
         {/* Breadcrumb Navigation */}

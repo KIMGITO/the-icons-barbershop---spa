@@ -18,14 +18,12 @@ import { useAuthStore } from '../../../stores/authStore';
 import { useBookingStore } from '../../../stores/bookingStore';
 import { useProviderStore } from '../../../stores/providerStore';
 import { StaffBooking } from '../../../types/staff';
-import { Button } from '../../ui/Button';
-import { Badge } from '../../ui/Badge';
+import { Button, Badge, StatCard, Price } from '../../ui';
 import { BookingDrawer } from '../bookings/BookingDrawer';
 import { NewBookingModal } from '../bookings/NewBookingModal';
 import { BookingDetailsDrawer } from '../bookings/BookingDetailsDrawer';
 import { MpesaPaymentModal } from '../payments/MpesaPaymentModal';
 import { smsService, SmsMessageRecord } from '../../../services/smsService';
-import { StatCard } from '../ui/DashboardMetrics';
 
 interface PortalOverviewProps {
   onNavigateTab: (tab: string) => void;
@@ -179,24 +177,24 @@ export const PortalOverview: React.FC<PortalOverviewProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 sm:grid-cols-3 gap-3.5">
+      <div className="grid grid-cols-3  gap-4">
         <StatCard
-          label="Appointments"
+          label="Bookings"
           value={upcomingBookings.length}
-          description={`${confirmedCount} confirmed • ${pendingBookingsCount} pending`}
+          description={`${confirmedCount} / ${pendingBookingsCount}`}
         />
 
         <StatCard
-          label="Pending Confirmations"
+          label="Un Confirmed"
           value={pendingCount}
-          description="Total bookings awaiting chair allocation"
+          description="Awaiting confirmation"
           valueClassName="text-warning"
         />
 
         <StatCard
-          label="Upcoming Expected Revenue"
-          value={`KSh ${totalRevenue.toLocaleString()}`}
-          description="Total value of all upcoming appointments"
+          label="Reve. Pending"
+          value={<Price amount={totalRevenue} />}
+          description="Upcoming value"
           valueClassName="text-primary"
         />
       </div>
@@ -251,14 +249,11 @@ export const PortalOverview: React.FC<PortalOverviewProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Upcoming Schedule Table/List */}
         <div className="lg:col-span-2 space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex lg:pt-4 items-center justify-between">
             <div>
               <h2 className="text-base font-bold text-foreground">
-                Upcoming Schedule
+                My <span className="text-primary">Appointments</span>
               </h2>
-              <p className="text-xs text-muted-foreground">
-                Operational lineup including upcoming appointments
-              </p>
             </div>
             <Button
               type="button"
@@ -267,13 +262,13 @@ export const PortalOverview: React.FC<PortalOverviewProps> = ({
               onClick={() => onNavigateTab('operations')}
               className="text-xs text-primary"
             >
-              <span>View All Bookings</span>
+              <span>See All</span>
               <ArrowRight className="w-3.5 h-3.5 ml-1" />
             </Button>
           </div>
 
           {upcomingBookings.length === 0 ? (
-            <div className="p-8 text-center bg-card rounded-xl border border-border space-y-2">
+            <div className="p-8 text-center  space-y-2">
               <p className="text-xs text-muted-foreground">
                 No upcoming appointments scheduled.
               </p>
@@ -285,7 +280,7 @@ export const PortalOverview: React.FC<PortalOverviewProps> = ({
                 className="text-xs"
               >
                 <Plus className="w-3.5 h-3.5 mr-1" />
-                Create First Booking
+                Create Booking
               </Button>
             </div>
           ) : (
@@ -334,13 +329,13 @@ export const PortalOverview: React.FC<PortalOverviewProps> = ({
 
                   <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/60">
                     <div className="text-right">
-                      <div className="text-xs font-mono font-bold text-foreground">
-                        KSh {b.totalPriceKsh.toLocaleString()}
+                      <div className="text-xs font-bold text-foreground">
+                        <Price amount={b.totalPriceKsh} />
                       </div>
                       <div className="text-[10px] font-semibold text-primary">
                         {b.remainingBalanceKsh === 0
                           ? 'Fully Paid'
-                          : `Bal: KSh ${b.remainingBalanceKsh.toLocaleString()}`}
+                          : <>Bal: <Price amount={b.remainingBalanceKsh} /></>}
                       </div>
                     </div>
 
@@ -377,15 +372,13 @@ export const PortalOverview: React.FC<PortalOverviewProps> = ({
 
         {/* Recent Communications */}
         {role === 'admin' && (
-          <div className="space-y-3">
+          <div className="space-y-3 border-0  border-t lg:border-t-0 lg:border-l  lg:col-span-1 rounded-0 p-4">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-base font-bold text-foreground">
-                  Recent Messages
+                  Recent <span className="text-primary">Messages</span>
                 </h2>
-                <p className="text-xs text-muted-foreground">
-                  Latest client communications
-                </p>
+                
               </div>
               <Button
                 type="button"
@@ -394,12 +387,12 @@ export const PortalOverview: React.FC<PortalOverviewProps> = ({
                 onClick={() => onNavigateTab('messages')}
                 className="text-xs text-primary"
               >
-                <span>View All</span>
+                <span>See All</span>
                 <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Button>
             </div>
 
-            <div className="bg-card border border-border rounded-xl divide-y divide-border/60 overflow-hidden">
+            <div className=" border-0 rounded-xl divide-y divide-border/60 overflow-hidden">
               {messagesLoading && recentMessages.length === 0 ? (
                 <div className="p-8 text-center text-xs text-muted-foreground">
                   <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2" />

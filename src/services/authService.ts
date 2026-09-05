@@ -59,22 +59,43 @@ export const authService = {
   },
 
   /**
-   * Retrieve active session
+   * Retrieve active session and validate integrity
    */
   async getCurrentSession(): Promise<StaffSession | null> {
     if (!isSupabaseConfigured) return null;
-    const { data } = await supabase.auth.getSession();
-    if (data?.session?.user) {
-      const cached = this.getCachedLocalSession();
-      if (cached) return cached;
-      const user = await mapSupabaseUser(data.session.user);
+    
+    // 1. Get current Supabase session
+    const { data: { session: sbSession } } = await supabase.auth.getSession();
+    
+    // 2. Get local cached session
+    const cached = this.getCachedLocalSession();
+    
+    // 3. Compare and validate
+    if (sbSession && cached) {
+      // If user IDs mismatch, force logout
+      if (sbSession.user.id !== cached.user.id) {
+        console.warn('Session mismatch detected. Logging out.');
+        await this.logout();
+        return null;
+      }
+      return cached;
+    }
+    
+    // If we have a Supabase session but no cache, or they mismatch, rebuild cache
+    if (sbSession?.user) {
+      const user = await mapSupabaseUser(sbSession.user);
       const session: StaffSession = {
-        token: data.session.access_token,
+        token: sbSession.access_token,
         user,
-        expiresAt: new Date((data.session.expires_at || 0) * 1000).toISOString()
+        expiresAt: new Date((sbSession.expires_at || 0) * 1000).toISOString()
       };
       try { localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session)); } catch {}
       return session;
+    }
+
+    // No valid session
+    if (cached) {
+      try { localStorage.removeItem(SESSION_STORAGE_KEY); } catch {}
     }
     return null;
   },
@@ -97,7 +118,7 @@ export const authService = {
   /**
    * Change password (forced first-login flow). Uses edge function when configured.
    */
-  async changePassword(newPassword: string): Promise<void> {
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
     if (!isSupabaseConfigured) {
       throw new Error('Supabase not configured.');
     }
@@ -106,7 +127,7 @@ export const authService = {
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (session?.token || '') },
-      body: JSON.stringify({ newPassword })
+      body: JSON.stringify({ currentPassword, newPassword })
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));

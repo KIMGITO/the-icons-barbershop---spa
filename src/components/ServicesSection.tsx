@@ -4,8 +4,7 @@ import { useApp } from '../context/AppContext';
 import { ServiceCategory, ServiceItem } from '../types';
 import { Clock, Scissors, Sparkles, Check, ArrowRight, ArrowLeft, Shield, ChevronLeft, ChevronRight, User } from 'lucide-react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
-import { Button } from './ui/Button';
-import { Badge } from './ui/Badge';
+import { Button, Badge, Price } from './ui';
 
 interface ServicesSectionProps {
   limit?: number;
@@ -375,15 +374,15 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
                     />
                     
                     {/* Subtle Top-Right Duration / Badge */}
-                    <div className="absolute top-2.5 right-2.5 bg-background/85 backdrop-blur-sm border border-border text-white text-[11px] font-medium px-2.5 py-1 rounded-md flex items-center gap-1">
+                    <Badge variant="glass" className="absolute top-2.5 right-2.5 gap-1 py-1 px-2.5">
                       <Clock className="w-3 h-3 text-primary" />
                       <span>{service.durationMinutes} min</span>
-                    </div>
+                    </Badge>
 
                     {/* Price Tag */}
-                    <div className="absolute bottom-2.5 left-2.5 bg-background/90 backdrop-blur-sm border border-primary/40 text-primary text-xs font-mono font-bold px-2.5 py-1 rounded-md">
-                      KSh {service.priceKsh.toLocaleString()}
-                    </div>
+                    <Badge variant="glass" className="absolute bottom-2.5 left-2.5 border-primary/40 text-primary py-1 px-2.5">
+                      <Price amount={service.priceKsh} />
+                    </Badge>
                   </div>
 
                   {/* Card Content (Display Serif Title, Short Description, and Learn More Link) */}

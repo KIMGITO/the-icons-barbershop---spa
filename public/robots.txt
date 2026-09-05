@@ -2,6 +2,9 @@ User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /barber/
+Disallow: /staff/
+Disallow: /portal/
 Disallow: /api/
 
 Sitemap: https://theiconsbarber.co.ke/sitemap.xml
+

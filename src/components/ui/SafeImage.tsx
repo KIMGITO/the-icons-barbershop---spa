@@ -39,6 +39,7 @@ export const SafeImage: React.FC<SafeImageProps> = ({
     <img
       {...rest}
       src={currentSrc || fallback}
+      loading={rest.loading || "lazy"}
       onError={(e) => {
         if (currentSrc !== fallback) {
           setCurrentSrc(fallback);

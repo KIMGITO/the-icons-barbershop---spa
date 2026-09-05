@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   AlertCircle,
   Camera,
@@ -78,7 +84,10 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
 
-  const [containerSize, setContainerSize] = useState<{ w: number; h: number } | null>(null);
+  const [containerSize, setContainerSize] = useState<{
+    w: number;
+    h: number;
+  } | null>(null);
   const [natural, setNatural] = useState<{ w: number; h: number } | null>(null);
   const [crop, setCrop] = useState<CropState>({ scale: 1, posX: 0, posY: 0 });
   const [applying, setApplying] = useState(false);
@@ -126,7 +135,10 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
   useEffect(() => {
     if (!containerSize || !natural || initializedRef.current) return;
     initializedRef.current = true;
-    const cover = Math.max(containerSize.w / natural.w, containerSize.h / natural.h);
+    const cover = Math.max(
+      containerSize.w / natural.w,
+      containerSize.h / natural.h,
+    );
     setCrop({ scale: cover * 1.05, posX: 0, posY: 0 });
   }, [containerSize, natural]);
 
@@ -143,7 +155,7 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
         posY: clampValue(next.posY, -maxY, maxY),
       };
     },
-    [natural, containerSize]
+    [natural, containerSize],
   );
 
   // Zoom anchored at a container-local point (mx, my)
@@ -152,7 +164,7 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
       const nat = natural;
       const size = containerSize;
       if (!nat || !size) return;
-      setCrop(prev => {
+      setCrop((prev) => {
         const newScale = clampValue(prev.scale * factor, MIN_ZOOM, MAX_ZOOM);
         const ratio = newScale / prev.scale;
         const centerX = size.w / 2;
@@ -167,7 +179,7 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
         return clampCropPosition(next, nat, size);
       });
     },
-    [natural, containerSize, clampCropPosition]
+    [natural, containerSize, clampCropPosition],
   );
 
   /* ------------------ Pointer (touch + mouse) handling ---------------- */
@@ -211,13 +223,19 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
       const centerX = (containerSize?.w ?? 0) / 2;
       const centerY = (containerSize?.h ?? 0) / 2;
 
-      setCrop(prev => {
-        const newScale = clampValue(pin.startScale * factor, MIN_ZOOM, MAX_ZOOM);
+      setCrop((prev) => {
+        const newScale = clampValue(
+          pin.startScale * factor,
+          MIN_ZOOM,
+          MAX_ZOOM,
+        );
         const ratio = newScale / pin.startScale;
         const next: CropState = {
           scale: newScale,
-          posX: mx - centerX - (pin.startMidX - centerX - pin.startPosX) * ratio,
-          posY: my - centerY - (pin.startMidY - centerY - pin.startPosY) * ratio,
+          posX:
+            mx - centerX - (pin.startMidX - centerX - pin.startPosX) * ratio,
+          posY:
+            my - centerY - (pin.startMidY - centerY - pin.startPosY) * ratio,
         };
         return clampCropPosition(next);
       });
@@ -225,7 +243,13 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
       // Single finger / mouse drag
       const dx = cur.x - prev.x;
       const dy = cur.y - prev.y;
-      setCrop(prev => clampCropPosition({ ...prev, posX: prev.posX + dx, posY: prev.posY + dy }));
+      setCrop((prev) =>
+        clampCropPosition({
+          ...prev,
+          posX: prev.posX + dx,
+          posY: prev.posY + dy,
+        }),
+      );
     }
   };
 
@@ -269,7 +293,10 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
 
   const handleReset = () => {
     if (!containerSize || !natural) return;
-    const cover = Math.max(containerSize.w / natural.w, containerSize.h / natural.h);
+    const cover = Math.max(
+      containerSize.w / natural.w,
+      containerSize.h / natural.h,
+    );
     setCrop({ scale: cover * 1.05, posX: 0, posY: 0 });
   };
 
@@ -306,7 +333,7 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
       const renderAt = (factor: number): Promise<Blob | null> => {
         const outW = Math.max(1, Math.round(W * outScale * factor));
         const outH = Math.max(1, Math.round(H * outScale * factor));
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           try {
             const canvas = document.createElement('canvas');
             canvas.width = outW;
@@ -336,11 +363,13 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
 
       if (!blob) {
         throw new Error(
-          'Unable to process this image. If it came from a URL, the host may block editing.'
+          'Unable to process this image. If it came from a URL, the host may block editing.',
         );
       }
       if (blob.size > MAX_OUTPUT_BYTES) {
-        throw new Error('Processed image is still too large for upload (5 MB max).');
+        throw new Error(
+          'Processed image is still too large for upload (5 MB max).',
+        );
       }
 
       await onApply(blob);
@@ -352,7 +381,8 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
 
   /* ------------------------------- Render ------------------------------ */
 
-  const zoomPercent = natural && containerSize ? Math.round(crop.scale * 100) : null;
+  const zoomPercent =
+    natural && containerSize ? Math.round(crop.scale * 100) : null;
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-xs animate-in fade-in duration-150">
@@ -381,25 +411,33 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
         <div
           ref={containerRef}
           className="relative w-full overflow-hidden rounded-xl bg-black/50 border border-border select-none"
-          style={{ aspectRatio: `${aspectRatio}`, touchAction: 'none', cursor: isInteracting ? 'grabbing' : 'grab' }}
+          style={{
+            aspectRatio: `${aspectRatio}`,
+            touchAction: 'none',
+            cursor: isInteracting ? 'grabbing' : 'grab',
+          }}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerEnd}
           onPointerCancel={handlePointerEnd}
-          onContextMenu={e => e.preventDefault()}
+          onContextMenu={(e) => e.preventDefault()}
         >
           <img
             ref={imgRef}
             src={imageSrc}
             alt="Crop preview"
             draggable={false}
-            onLoad={e => {
+            onLoad={(e) => {
               const el = e.currentTarget;
               if (el.naturalWidth > 0 && el.naturalHeight > 0) {
                 setNatural({ w: el.naturalWidth, h: el.naturalHeight });
               }
             }}
-            onError={() => setError('Could not load the image. Check the URL or file and try again.')}
+            onError={() =>
+              setError(
+                'Could not load the image. Check the URL or file and try again.',
+              )
+            }
             className="absolute max-w-none pointer-events-none select-none"
             style={{
               left: '50%',
@@ -424,7 +462,9 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
           {applying && (
             <div className="absolute inset-0 z-10 bg-background/60 backdrop-blur-xs flex flex-col items-center justify-center space-y-2">
               <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              <span className="text-[11px] font-semibold text-foreground">Processing & Uploading...</span>
+              <span className="text-[11px] font-semibold text-foreground">
+                Processing & Uploading...
+              </span>
             </div>
           )}
         </div>
@@ -471,7 +511,13 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
         )}
 
         <div className="flex items-center justify-end gap-2 pt-1 border-t border-border">
-          <Button type="button" variant="outline" size="sm" onClick={onCancel} disabled={applying}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onCancel}
+            disabled={applying}
+          >
             Cancel
           </Button>
           <Button
@@ -512,11 +558,15 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   disabled = false,
   maxCropDimension = DEFAULT_MAX_DIMENSION,
 }) => {
-  const [previewUrl, setPreviewUrl] = useState<string | undefined>(currentImageUrl);
+  const [previewUrl, setPreviewUrl] = useState<string | undefined>(
+    currentImageUrl,
+  );
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
-  const [sourceMode, setSourceMode] = useState<'select' | 'capture' | 'url' | null>(null);
+  const [sourceMode, setSourceMode] = useState<
+    'select' | 'capture' | 'url' | null
+  >(null);
   const [urlInput, setUrlInput] = useState('');
   const [cropSource, setCropSource] = useState<string | null>(null);
 
@@ -593,7 +643,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     setSourceMode(null);
 
     // Test if the image host allows CORS — if not, skip cropping and upload directly
-    const isCorsEnabled = await new Promise<boolean>(resolve => {
+    const isCorsEnabled = await new Promise<boolean>((resolve) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.onload = () => resolve(true);
@@ -613,7 +663,9 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         if (!validation.valid) {
           throw new Error(validation.error || 'Invalid image file');
         }
-        const file = new File([blob], 'image.jpg', { type: blob.type || 'image/jpeg' });
+        const file = new File([blob], 'image.jpg', {
+          type: blob.type || 'image/jpeg',
+        });
         const result = await storageService.uploadImage(file, bucket as any);
         setPreviewUrl(result.url);
         onImageUploaded(result.url);
@@ -644,7 +696,9 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         throw new Error(validation.error || 'Processed image is not valid.');
       }
 
-      const file = new File([blob], 'cropped-image.jpg', { type: 'image/jpeg' });
+      const file = new File([blob], 'cropped-image.jpg', {
+        type: 'image/jpeg',
+      });
       const result = await storageService.uploadImage(file, bucket as any);
 
       setPreviewUrl(result.url);
@@ -706,23 +760,22 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       )}
 
       <div
-        onDragOver={e => {
+        onDragOver={(e) => {
           e.preventDefault();
           if (!disabled && !isUploading) setIsDragOver(true);
         }}
         onDragLeave={() => setIsDragOver(false)}
         onDrop={handleDrop}
         onClick={() => {
-          if (!disabled && !isUploading && !previewUrl) fileInputRef.current?.click();
+          if (!disabled && !isUploading && !previewUrl)
+            fileInputRef.current?.click();
         }}
-        className={`relative group rounded-xl border border-dashed transition-all duration-200 overflow-hidden flex flex-col items-center justify-center p-3 text-center ${
-          getAspectClass()
-        } ${
+        className={`relative group rounded-xl border border-dashed transition-all duration-200 overflow-hidden flex flex-col items-center justify-center p-3   text-center ${getAspectClass()} ${
           isDragOver
             ? 'border-primary bg-primary/10 cursor-pointer'
             : previewUrl
-            ? 'border-border bg-card cursor-default'
-            : 'border-border hover:border-primary/50 bg-card/60 hover:bg-card cursor-pointer'
+              ? 'border-border bg-card cursor-default'
+              : 'border-border hover:border-primary/50 bg-card/60 hover:bg-card cursor-pointer'
         } ${disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}
       >
         {/* Hidden file inputs */}
@@ -748,7 +801,9 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         {isUploading && (
           <div className="absolute inset-0 bg-background/80 backdrop-blur-xs flex flex-col items-center justify-center z-20 space-y-2">
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
-            <span className="text-[11px] font-semibold text-foreground">Processing Image...</span>
+            <span className="text-[11px] font-semibold text-foreground">
+              Processing Image...
+            </span>
           </div>
         )}
 
@@ -769,7 +824,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                 variant="primary"
                 size="sm"
                 className="text-[11px] py-1 px-2.5 h-auto"
-                onClick={e => {
+                onClick={(e) => {
                   e.stopPropagation();
                   setCropSource(previewUrl);
                 }}
@@ -782,7 +837,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                 variant="secondary"
                 size="sm"
                 className="text-[11px] py-1 px-2.5 h-auto"
-                onClick={e => {
+                onClick={(e) => {
                   e.stopPropagation();
                   fileInputRef.current?.click();
                 }}
@@ -810,13 +865,23 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             </div>
 
             <div className="space-y-0.5">
-              <p className="text-xs font-semibold text-foreground">
+              
+              {aspectRatio != 'square' && (
+                <div>
+                  <p className="text-xs font-semibold text-foreground">
                 Add an image
               </p>
-              <p className="text-[10px] text-muted-foreground">Select, capture, or paste a URL</p>
+                <p className="text-[10px] text-muted-foreground">
+                  Select, capture, or paste a URL
+                </p>
+                </div>
+              )}
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-1.5" onClick={e => e.stopPropagation()}>
+            <div
+              className="flex flex-wrap items-center justify-center gap-1.5"
+              onClick={(e) => e.stopPropagation()}
+            >
               <button
                 type="button"
                 className={sourceButtonClass}
@@ -845,7 +910,9 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                 type="button"
                 className={`${sourceButtonClass} ${sourceMode === 'url' ? 'border-primary text-primary bg-primary/5' : ''}`}
                 disabled={disabled || isUploading}
-                onClick={() => setSourceMode(mode => (mode === 'url' ? null : 'url'))}
+                onClick={() =>
+                  setSourceMode((mode) => (mode === 'url' ? null : 'url'))
+                }
               >
                 <Link2 className="w-3.5 h-3.5" />
                 URL
@@ -855,13 +922,13 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             {sourceMode === 'url' && (
               <div
                 className="w-full flex items-center gap-1.5 bg-card/80 border border-border rounded-lg p-1.5"
-                onClick={e => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
               >
                 <Input
                   type="url"
                   value={urlInput}
-                  onChange={e => setUrlInput(e.target.value)}
-                  onKeyDown={e => {
+                  onChange={(e) => setUrlInput(e.target.value)}
+                  onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       handleUrlLoad();

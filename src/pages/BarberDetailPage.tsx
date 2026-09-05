@@ -1,7 +1,7 @@
 import { SafeImage } from '../components/ui/SafeImage';
 import React, { useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { updatePageSEO } from '../utils/seo';
+import { SEO } from '../components/SEO';
 import { Scissors, Calendar, ArrowLeft, Award, Clock, Star, ShieldCheck } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
@@ -13,18 +13,6 @@ interface BarberDetailPageProps {
 export const BarberDetailPage: React.FC<BarberDetailPageProps> = ({ slug }) => {
   const { barbers, services, openBookingModal, navigateTo } = useApp();
   const barber = barbers.find(b => b.slug === slug) || barbers[0];
-
-  useEffect(() => {
-    if (barber) {
-      updatePageSEO({
-        title: `${barber.name} (${barber.title}) | The Icons Barber Nairobi`,
-        description: barber.bio,
-        canonicalUrl: `https://theiconsbarber.co.ke/barbers/${barber.slug}`,
-        ogImage: barber.avatarUrl,
-        type: 'article'
-      });
-    }
-  }, [barber]);
 
   if (!barber) {
     return (
@@ -41,6 +29,13 @@ export const BarberDetailPage: React.FC<BarberDetailPageProps> = ({ slug }) => {
 
   return (
     <div className="pt-28 pb-24 bg-background min-h-screen">
+      <SEO 
+        title={`${barber.name} (${barber.title}) | The Icons Barber Nairobi`}
+        description={barber.bio}
+        canonicalUrl={`https://theiconsbarber.co.ke/barbers/${barber.slug}`}
+        ogImage={barber.avatarUrl}
+        type="article"
+      />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         
         {/* Breadcrumb */}

@@ -3,7 +3,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { Heart, ArrowRight, Sparkles, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
-import { Button } from './ui/Button';
+import { Button, Badge, Price } from './ui';
 
 export const ProductsSection: React.FC = () => {
   const { products, navigateTo, wishlistSlugs, toggleWishlist, openPurchaseModal } = useApp();
@@ -25,10 +25,6 @@ export const ProductsSection: React.FC = () => {
       return true;
     })
     .slice(0, 4);
-
-  const formatKsh = (amount: number) => {
-    return `KSh ${amount.toLocaleString()}`;
-  };
 
   const handleProductClick = (slug: string) => {
     navigateTo(`/products/${slug}`);
@@ -162,12 +158,12 @@ export const ProductsSection: React.FC = () => {
 
                   {/* Pill Tags: Price Pill & Volume Pill (Clean pill chips matching reference layout without ratings) */}
                   <div className="flex items-center gap-2 mb-3.5">
-                    <span className="px-2.5 py-0.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-primary font-semibold text-[11px] tracking-tight">
-                      {formatKsh(product.priceKsh)}
-                    </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white/80 font-normal text-[10px] truncate max-w-[120px]">
+                    <Badge variant="glass" pill className="text-primary font-semibold">
+                      <Price amount={product.priceKsh} />
+                    </Badge>
+                    <Badge variant="glass" pill className="text-white/80 font-normal">
                       {product.specifications.volume.split('/')[0].trim()}
-                    </span>
+                    </Badge>
                   </div>
 
                   {/* Full-width Pill Action Button (Matches "Reserve now" in reference image) */}

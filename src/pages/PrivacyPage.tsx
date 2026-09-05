@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { updatePageSEO } from '../utils/seo';
 import { ArrowRight, ChevronRight, Lock, Database, Cookie, UserCheck, Mail, Phone, ShieldCheck } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
@@ -91,26 +90,8 @@ export const PrivacyPage: React.FC = () => {
   const { businessInfo, navigateTo } = useApp();
 
   useEffect(() => {
-    updatePageSEO({
-      title: 'Privacy Policy',
-      description: 'Read the Privacy Policy of The Icons Barber & Spa, covering how we collect, use, protect, and respect your personal information in accordance with the Kenya Data Protection Act, 2019.',
-      canonicalUrl: 'https://theiconsbarber.co.ke/privacy',
-      schemaType: 'LocalBusiness',
-      customSchema: {
-        '@context': 'https://schema.org',
-        '@type': 'WebPage',
-        'name': 'Privacy Policy',
-        'description': 'Privacy policy for The Icons Barber & Spa, Nairobi.',
-        'url': 'https://theiconsbarber.co.ke/privacy',
-        'isPartOf': {
-          '@type': 'WebSite',
-          'name': businessInfo.name,
-          'url': 'https://theiconsbarber.co.ke'
-        }
-      }
-    });
     window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [businessInfo.name]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background text-white pt-24 pb-20">

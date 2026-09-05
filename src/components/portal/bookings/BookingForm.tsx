@@ -20,10 +20,11 @@ import { CustomerSelector } from './CustomerSelector';
 import { ServiceSelector } from './ServiceSelector';
 import { ProviderSelector } from './ProviderSelector';
 import { CustomDatePicker } from '../ui/CustomDatePicker';
-import { CustomTimePicker } from '../ui/CustomTimePicker';
+import { TimeRangeSlider } from './TimeRangeSlider';
 import { CustomSelect } from '../ui/CustomSelect';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
+import { DepositChoice, PaymentChoiceSelector } from './PaymentOptions';
 
 export interface BookingFormProps {
   mode: 'create' | 'edit';
@@ -57,6 +58,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
   const [customerName, setCustomerName] = useState(initialBooking?.customerName || '');
   const [customerPhone, setCustomerPhone] = useState(initialBooking?.customerPhone || '+254 ');
   const [customerEmail, setCustomerEmail] = useState(initialBooking?.customerEmail || '');
+  const [customerVipStatus, setCustomerVipStatus] = useState(false);
 
   const [selectedServiceId, setSelectedServiceId] = useState<string>(
     initialBooking?.serviceIds?.[0] || ''
@@ -213,7 +215,8 @@ export const BookingForm: React.FC<BookingFormProps> = ({
           paymentStatus,
           paymentMethod: calculatedDeposit > 0 ? 'mpesa' : 'unpaid',
           specialRequests: specialRequests.trim(),
-          staffNotes: staffNotes.trim()
+          staffNotes: staffNotes.trim(),
+          isVip: customerVipStatus
         });
 
         if (onSubmitSuccess) onSubmitSuccess(newBooking);
@@ -233,7 +236,8 @@ export const BookingForm: React.FC<BookingFormProps> = ({
           totalPriceKsh: totalPrice,
           status,
           specialRequests: specialRequests.trim(),
-          staffNotes: staffNotes.trim()
+          staffNotes: staffNotes.trim(),
+          isVip: customerVipStatus
         });
 
         if (onSubmitSuccess) onSubmitSuccess(updated);
@@ -255,15 +259,16 @@ export const BookingForm: React.FC<BookingFormProps> = ({
       )}
 
       {/* 1. Client Details with Auto-Lookup */}
-      <div className="bg-muted/20 border border-border p-3.5 sm:p-4 rounded-2xl space-y-3">
+      <div className=" p-2 rounded-2xl space-y-3">
         <CustomerSelector
           customerName={customerName}
           customerPhone={customerPhone}
           customerEmail={customerEmail}
-          onSelectCustomer={({ name, phone, email }) => {
+          onSelectCustomer={({ name, phone, email, vipStatus }) => {
             setCustomerName(name);
             setCustomerPhone(phone);
             setCustomerEmail(email);
+            if (vipStatus !== undefined) setCustomerVipStatus(vipStatus);
           }}
           onNameChange={setCustomerName}
           onPhoneChange={setCustomerPhone}
@@ -272,7 +277,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
       </div>
 
       {/* 2. Service Selection */}
-      <div className="bg-muted/20 border border-border p-3.5 sm:p-4 rounded-2xl space-y-3">
+      <div className=" rounded-2xl space-y-3">
         <ServiceSelector
           services={services}
           selectedServiceId={selectedServiceId}
@@ -281,7 +286,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
       </div>
 
       {/* 3. Provider Selection (Including Admin) */}
-      <div className="bg-muted/20 border border-border p-3.5 sm:p-4 rounded-2xl space-y-3">
+      <div className="  rounded-2xl space-y-3">
         <ProviderSelector
           providers={providers}
           selectedProviderId={selectedProviderId}
@@ -291,49 +296,44 @@ export const BookingForm: React.FC<BookingFormProps> = ({
       </div>
 
       {/* 4. Scheduling: Date, Start Time & Duration */}
-      <div className="bg-muted/20 border border-border p-3.5 sm:p-4 rounded-2xl space-y-3.5">
-        <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+      <div className="  rounded-2xl space-y-3.5">
+        <div className="text-xs font-bold  tracking-wider text-muted-foreground">
           Appointment Schedule & Duration
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-4">
           <CustomDatePicker
-            label="Date"
+            label="1. Select Date"
             value={date}
             onChange={setDate}
           />
-          <CustomTimePicker
-            label="Start Time"
+
+          <TimeRangeSlider
+            selectedDate={date}
             value={timeSlot}
+            durationMinutes={durationMinutes}
+            providerId={selectedProviderId}
             onChange={setTimeSlot}
+            error={conflict.hasConflict ? `Conflicts with ${conflict.conflictingBooking?.customerName}'s booking` : undefined}
           />
         </div>
 
         {/* Duration */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-semibold text-muted-foreground uppercase tracking-wider">
+            <span className="font-semibold text-muted-foreground  tracking-wider">
               Duration
             </span>
-            <span className="font-mono text-primary font-bold">
+            <span className="font-mono text-primary ">
               {timeSlot} – {calculatedEndTime} ({durationMinutes} min)
             </span>
           </div>
 
           {mode === 'create' ? (
-            // Duration is fully determined by the selected service — no manual
-            // override here. A separate duration control let staff set a value
-            // that never actually reached the backend (create_booking always
-            // recomputes duration server-side from the service), so the two
-            // controls could silently disagree with what actually got booked.
             <p className="text-[11px] text-muted-foreground">
-              Set automatically from the selected service.
+              
             </p>
           ) : (
-            // Editing an existing booking is different: this does write
-            // duration_minutes directly via updateBooking, so a manual
-            // correction here (e.g. the appointment actually ran long) is
-            // meaningful and safe to keep.
             <div className="grid grid-cols-5 gap-1.5">
               {[30, 45, 60, 90, 120].map(mins => (
                 <button
@@ -389,11 +389,10 @@ export const BookingForm: React.FC<BookingFormProps> = ({
         )}
       </div>
 
-      {/* 5. Status & Payment (If edit mode, can adjust status) */}
-      <div className="bg-muted/20 border border-border p-3.5 sm:p-4 rounded-2xl space-y-3">
+      <div className=" pt-4 rounded-2xl space-y-3">
         {mode === 'edit' && (
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+            <label className="block text-xs font-semibold  tracking-wider text-muted-foreground mb-1.5">
               Booking Status
             </label>
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
@@ -415,60 +414,31 @@ export const BookingForm: React.FC<BookingFormProps> = ({
           </div>
         )}
 
-        {/* Deposit breakdown for new bookings */}
-        {mode === 'create' && (
-          <div className="space-y-2">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Payment & Deposit Policy
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => setDepositChoice('deposit')}
-                className={`p-2.5 text-left rounded-xl border text-xs transition-all cursor-pointer ${
-                  depositChoice === 'deposit'
-                    ? 'bg-primary/15 border-primary text-foreground ring-1 ring-primary/40'
-                    : 'bg-input border-border text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <div className="font-bold text-foreground">50% Deposit</div>
-                <div className="text-[10px] text-primary font-mono font-bold mt-0.5">
-                  KSh {depositBreakdown.minimumDepositKsh.toLocaleString()}
-                </div>
-              </button>
 
-              <button
-                type="button"
-                onClick={() => setDepositChoice('full')}
-                className={`p-2.5 text-left rounded-xl border text-xs transition-all cursor-pointer ${
-                  depositChoice === 'full'
-                    ? 'bg-primary/15 border-primary text-foreground ring-1 ring-primary/40'
-                    : 'bg-input border-border text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <div className="font-bold text-foreground">Full Payment</div>
-                <div className="text-[10px] text-primary font-mono font-bold mt-0.5">
-                  KSh {totalPrice.toLocaleString()}
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setDepositChoice('none')}
-                className={`p-2.5 text-left rounded-xl border text-xs transition-all cursor-pointer ${
-                  depositChoice === 'none'
-                    ? 'bg-primary/15 border-primary text-foreground ring-1 ring-primary/40'
-                    : 'bg-input border-border text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <div className="font-bold text-foreground">Station Pay</div>
-                <div className="text-[10px] text-muted-foreground mt-0.5">
-                  Unpaid
-                </div>
-              </button>
-            </div>
-          </div>
-        )}
+{mode === 'create' && (
+  <PaymentChoiceSelector<DepositChoice>
+    label="Payment & Deposit Policy"
+    value={depositChoice}
+    onChange={setDepositChoice}
+    options={[
+      {
+        value: 'deposit',
+        label: 'Deposit',
+        amountLabel: `KSh ${depositBreakdown.minimumDepositKsh.toLocaleString()}`,
+      },
+      {
+        value: 'full',
+        label: 'Full Payment',
+        amountLabel: `KSh ${totalPrice.toLocaleString()}`,
+      },
+      {
+        value: 'none',
+        label: 'Station Pay',
+        helperLabel: 'Unpaid',
+      },
+    ]}
+  />
+)}
 
         {/* Pricing Summary */}
         <div className="pt-2 border-t border-border/60 flex items-center justify-between text-xs">
@@ -481,17 +451,27 @@ export const BookingForm: React.FC<BookingFormProps> = ({
 
       {/* 6. Special Requests & Notes */}
       <div className="bg-muted/20 border border-border p-3.5 sm:p-4 rounded-2xl space-y-2.5">
-        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <label className="block text-xs font-semibold  tracking-wider text-muted-foreground">
           Client Requests & Staff Notes
         </label>
-        <Input
-          multiline
-          rows={2}
-          value={specialRequests}
-          onChange={e => setSpecialRequests(e.target.value)}
-          placeholder="Client preferences, skin sensitivity, beverage request..."
-          className="w-full text-foreground text-xs rounded-xl p-2.5 placeholder:text-muted-foreground"
-        />
+        <div className="space-y-3">
+          <Input
+            multiline
+            rows={2}
+            value={specialRequests}
+            onChange={e => setSpecialRequests(e.target.value)}
+            placeholder="Client preferences, skin sensitivity, beverage request..."
+            className="w-full text-foreground text-xs rounded-xl p-2.5 placeholder:text-muted-foreground"
+          />
+          <Input
+            multiline
+            rows={2}
+            value={staffNotes}
+            onChange={e => setStaffNotes(e.target.value)}
+            placeholder="Staff notes (internal only)..."
+            className="w-full text-foreground text-xs rounded-xl p-2.5 placeholder:text-muted-foreground"
+          />
+        </div>
       </div>
 
       {/* Action Footer */}

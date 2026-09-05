@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Save, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Calendar, Save } from 'lucide-react';
 import { useAuthStore } from '../../../stores/authStore';
 import { useProviderStore } from '../../../stores/providerStore';
 import { useUIStore } from '../../../stores/uiStore';
@@ -15,6 +15,7 @@ export const StaffScheduleView: React.FC = () => {
   const currentProvider = providers.find(p => p.id === user?.providerId) || providers[0];
   const [schedule, setSchedule] = useState<DaySchedule[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
     loadProviders();
@@ -23,6 +24,7 @@ export const StaffScheduleView: React.FC = () => {
   useEffect(() => {
     if (currentProvider && currentProvider.schedule) {
       setSchedule(currentProvider.schedule);
+      setIsDirty(false);
     }
   }, [currentProvider]);
 
@@ -35,6 +37,7 @@ export const StaffScheduleView: React.FC = () => {
       setIsSaving(true);
       await updateSchedule(currentProvider.id, schedule);
       setIsSaving(false);
+      setIsDirty(false);
       addToast({
         type: 'success',
         title: 'Schedule Saved',
@@ -51,52 +54,46 @@ export const StaffScheduleView: React.FC = () => {
   };
 
   return (
-    <div className="max-w-3xl space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card p-4 sm:p-5 rounded-2xl border border-border">
-        <div>
-          <h1 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-primary" />
-            <span>My Weekly Working Schedule</span>
-          </h1>
-          <p className="text-xs text-muted-foreground">
-            Set your working shifts, rest days, and lunch breaks. Client bookings will automatically align with these hours.
-          </p>
-        </div>
+    <div className="max-w-3xl">
+      {/* Sticky header: title + save stay visible while scrolling the schedule below */}
+      <div className="sticky top-0 z-10 -mx-1 px-1 pb-3 bg-background/95 backdrop-blur-sm">
+        <div className="flex items-center justify-between gap-3 bg-card p-3.5 sm:p-5 rounded-2xl border border-border">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-sm sm:text-xl font-bold text-foreground flex items-center gap-2 truncate">
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
+              <span className="truncate">My Weekly Schedule</span>
+            </h1>
+            <p className="hidden sm:block text-xs text-muted-foreground mt-1">
+              Set your working shifts, rest days, and lunch breaks. Client bookings will automatically align with these hours.
+            </p>
+          </div>
 
-        <Button
-          type="button"
-          variant="primary"
-          size="sm"
-          onClick={handleSave}
-          disabled={isSaving}
-          className="text-xs font-bold"
-        >
-          <Save className="w-3.5 h-3.5 mr-1" />
-          <span>{isSaving ? 'Saving...' : 'Save Availability'}</span>
-        </Button>
+          <Button
+            type="button"
+            variant="primary"
+            size="sm"
+            onClick={handleSave}
+            disabled={isSaving}
+            className="text-xs font-bold shrink-0"
+          >
+            <Save className="w-3.5 h-3.5 sm:mr-1" />
+            <span className="hidden sm:inline">{isSaving ? 'Saving...' : 'Save Availability'}</span>
+          </Button>
+        </div>
       </div>
 
-      <div className="bg-card p-5 rounded-2xl border border-border">
+      {/* Schedule content: bottom padding on mobile clears the fixed bar below */}
+      <div className=" pb-20 sm:pb-5">
         <ProviderSchedule
           schedule={schedule}
-          onChange={(newSched) => setSchedule(newSched)}
+          onChange={(newSched) => {
+            setSchedule(newSched);
+            setIsDirty(true);
+          }}
           editable={true}
         />
       </div>
 
-      <div className="flex justify-end">
-        <Button
-          type="button"
-          variant="primary"
-          size="sm"
-          onClick={handleSave}
-          disabled={isSaving}
-          className="text-xs font-bold px-6"
-        >
-          <Save className="w-3.5 h-3.5 mr-1" />
-          <span>{isSaving ? 'Saving...' : 'Save Availability'}</span>
-        </Button>
-      </div>
     </div>
   );
 };

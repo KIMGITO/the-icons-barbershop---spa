@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { 
   ReceiptText, Search, Download, Filter, 
-  ArrowUpDown, CheckCircle2, Clock, XCircle,
-  TrendingUp, Wallet, ArrowRightLeft, RefreshCw
+  ArrowUpDown, RefreshCw, TrendingUp, Clock, ArrowRightLeft
 } from 'lucide-react';
 import { useBookingStore } from '../../../stores/bookingStore';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 import { Badge } from '../../ui/Badge';
+import { StatCard } from '../../ui/StatCard';
 
 export const TransactionsPage: React.FC = () => {
   const { bookings, loading } = useBookingStore();
@@ -17,7 +17,6 @@ export const TransactionsPage: React.FC = () => {
     direction: 'desc'
   });
 
-  // Extract transactions from bookings
   const transactions = useMemo(() => {
     return bookings
       .filter(b => b.depositPaidKsh > 0 || b.paymentStatus === 'paid')
@@ -43,20 +42,14 @@ export const TransactionsPage: React.FC = () => {
     ).sort((a, b) => {
       const aValue = a[sortConfig.key as keyof typeof a];
       const bValue = b[sortConfig.key as keyof typeof b];
-      
       if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
       if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
       return 0;
     });
   }, [transactions, searchQuery, sortConfig]);
 
-  const totalRevenue = useMemo(() => 
-    transactions.reduce((sum, t) => sum + t.amount, 0), 
-  [transactions]);
-
-  const pendingBalance = useMemo(() => 
-    transactions.reduce((sum, t) => sum + t.balance, 0), 
-  [transactions]);
+  const totalRevenue = useMemo(() => transactions.reduce((sum, t) => sum + t.amount, 0), [transactions]);
+  const pendingBalance = useMemo(() => transactions.reduce((sum, t) => sum + t.balance, 0), [transactions]);
 
   const handleSort = (key: string) => {
     setSortConfig(prev => ({
@@ -76,77 +69,98 @@ export const TransactionsPage: React.FC = () => {
     }
   };
 
+  const formatDate = (date: string) =>
+    new Date(date).toLocaleDateString('en-KE', { day: '2-digit', month: 'short', year: 'numeric' });
+  const formatTime = (date: string) =>
+    new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
   return (
-    <div className="space-y-6">
-      {/* Header & Stats */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">
+    <div className="space-y-3.5 sm:space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="min-w-0">
+          <h1 className="text-base sm:text-2xl font-extrabold text-foreground tracking-tight truncate">
             Transaction <span className="text-primary">Summary</span>
           </h1>
-          <p className="text-xs text-muted-foreground">Financial ledger and payment tracking</p>
+          <p className="hidden sm:block text-xs text-muted-foreground">Financial ledger and payment tracking</p>
         </div>
-        
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="text-xs">
-            <Download className="w-3.5 h-3.5 mr-1" />
-            Export CSV
-          </Button>
-        </div>
+
+       
       </div>
 
-      {/* Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-card border border-border p-4 rounded-2xl space-y-1">
-          <div className="flex items-center gap-2 text-primary">
-            <TrendingUp className="w-4 h-4" />
-            <span className="text-[11px] font-bold uppercase tracking-wider">Total Collected</span>
-          </div>
-          <div className="text-2xl font-mono font-extrabold text-foreground">
-            KSh {totalRevenue.toLocaleString()}
-          </div>
-        </div>
-
-        <div className="bg-card border border-border p-4 rounded-2xl space-y-1">
-          <div className="flex items-center gap-2 text-warning">
-            <Clock className="w-4 h-4" />
-            <span className="text-[11px] font-bold uppercase tracking-wider">Pending Balance</span>
-          </div>
-          <div className="text-2xl font-mono font-extrabold text-foreground">
-            KSh {pendingBalance.toLocaleString()}
-          </div>
-        </div>
-
-        <div className="bg-card border border-border p-4 rounded-2xl space-y-1">
-          <div className="flex items-center gap-2 text-success">
-            <ArrowRightLeft className="w-4 h-4" />
-            <span className="text-[11px] font-bold uppercase tracking-wider">Total Transactions</span>
-          </div>
-          <div className="text-2xl font-mono font-extrabold text-foreground">
-            {transactions.length}
-          </div>
-        </div>
+      {/* Metrics — reused StatCard component, 3 tight columns even on mobile */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
+        <StatCard
+          label="Collected"
+          value={`KSh ${totalRevenue.toLocaleString()}`}
+          valueClassName="text-foreground"
+        />
+        <StatCard
+          label="Pending"
+          value={`KSh ${pendingBalance.toLocaleString()}`}
+          valueClassName="text-warning"
+        />
+        <StatCard
+          label="Transactions"
+          value={transactions.length}
+          valueClassName="text-success"
+        />
       </div>
 
       {/* Filters */}
-      <div className="bg-card border border-border p-3.5 rounded-xl flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Input
-            placeholder="Search by code, name or reference..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 text-xs"
-          />
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        </div>
-        <Button variant="outline" size="sm" className="text-xs">
-          <Filter className="w-3.5 h-3.5 mr-1" />
-          More Filters
-        </Button>
+      <div className="rounded-xl flex gap-2">
+        <Input
+          placeholder="Search code, name, or ref..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="flex-1 text-xs min-w-0"
+          icon={<Search className="w-4 h-4" />}
+        />
+       
       </div>
 
-      {/* Table */}
-      <div className="bg-card border border-border rounded-xl overflow-hidden">
+      {/* ============ MOBILE: compact card list ============ */}
+      <div className="sm:hidden bg-card border border-border rounded-xl overflow-hidden">
+        {loading ? (
+          <div className="p-6 text-center text-muted-foreground text-xs">
+            <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2" />
+            Loading transactions...
+          </div>
+        ) : filteredTransactions.length === 0 ? (
+          <div className="p-8 text-center text-muted-foreground text-xs">
+            <ReceiptText className="w-7 h-7 mx-auto mb-2 opacity-20" />
+            No transactions found.
+          </div>
+        ) : (
+          <div className="divide-y divide-border/60">
+            {filteredTransactions.map((t) => (
+              <div key={t.id} className="p-3 flex items-start justify-between gap-2.5">
+                <div className="min-w-0 flex-1 space-y-0.5">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="font-mono font-bold text-primary text-xs truncate">{t.code}</span>
+                    {getStatusBadge(t.status)}
+                  </div>
+                  <div className="font-bold text-foreground text-xs truncate">{t.customerName}</div>
+                  <div className="text-[10px] text-muted-foreground">
+                    {formatDate(t.date)} · {formatTime(t.date)} · <span className="uppercase">{t.method}</span>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="font-mono font-bold text-foreground text-xs">
+                    KSh {t.amount.toLocaleString()}
+                  </div>
+                  {t.balance > 0 && (
+                    <div className="text-[10px] text-warning">Bal {t.balance.toLocaleString()}</div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ============ DESKTOP/TABLET: full table ============ */}
+      <div className="hidden sm:block bg-card border border-border rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
@@ -162,13 +176,11 @@ export const TransactionsPage: React.FC = () => {
                   </button>
                 </th>
                 <th className="p-4 font-bold text-muted-foreground uppercase tracking-wider text-right">
-                  <button onClick={() => handleSort('amount')} className="flex items-center gap-1 hover:text-foreground justify-end">
+                  <button onClick={() => handleSort('amount')} className="flex items-center gap-1 hover:text-foreground justify-end ml-auto">
                     Amount <ArrowUpDown className="w-3 h-3" />
                   </button>
                 </th>
-                <th className="p-4 font-bold text-muted-foreground uppercase tracking-wider">
-                  Status
-                </th>
+                <th className="p-4 font-bold text-muted-foreground uppercase tracking-wider">Status</th>
                 <th className="p-4 font-bold text-muted-foreground uppercase tracking-wider">
                   <button onClick={() => handleSort('date')} className="flex items-center gap-1 hover:text-foreground">
                     Date <ArrowUpDown className="w-3 h-3" />
@@ -208,18 +220,10 @@ export const TransactionsPage: React.FC = () => {
                         <div className="text-[10px] text-warning">Bal: KSh {t.balance.toLocaleString()}</div>
                       )}
                     </td>
-                    <td className="p-4">
-                      {getStatusBadge(t.status)}
-                    </td>
+                    <td className="p-4">{getStatusBadge(t.status)}</td>
                     <td className="p-4 text-muted-foreground">
-                      {new Date(t.date).toLocaleDateString('en-KE', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric'
-                      })}
-                      <div className="text-[10px]">
-                        {new Date(t.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </div>
+                      {formatDate(t.date)}
+                      <div className="text-[10px]">{formatTime(t.date)}</div>
                     </td>
                   </tr>
                 ))

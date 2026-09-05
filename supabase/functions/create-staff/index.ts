@@ -21,12 +21,14 @@ Deno.serve(async (req) => {
     if (!profile || profile.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403, headers: corsHeaders });
 
     const {
-      email, password, fullName, role, providerId, phone,
+      email, password: providedPassword, fullName, role, providerId, phone,
       providerFirstName, providerLastName, providerType, bio, avatarUrl, yearsExperience
     } = await req.json();
 
-    if (!email || !password || !fullName) {
-      return Response.json({ error: 'email, password, fullName required' }, { status: 400, headers: corsHeaders });
+    const password = providedPassword || 'Welcome@Icons2024';
+
+    if (!email || !fullName) {
+      return Response.json({ error: 'email, fullName required' }, { status: 400, headers: corsHeaders });
     }
     if (password.length < 8) {
       return Response.json({ error: 'Password must be at least 8 characters' }, { status: 400, headers: corsHeaders });
@@ -84,7 +86,7 @@ Deno.serve(async (req) => {
           content: `
             <p>Hi ${fullName},</p>
             <p>You have been added as a <strong>${role || 'provider'}</strong> at The Icons Barber & Spa.</p>
-            <p>You can now log in to the staff portal using your email and the temporary password provided by your administrator.</p>
+            <p>You can now log in to the staff portal using your email and the password provided by your administrator${!providedPassword ? ' (Default: <strong>Welcome@Icons2024</strong>)' : ''}.</p>
             <p>For security, you will be required to change your password upon your first login.</p>
           `,
           cta: {

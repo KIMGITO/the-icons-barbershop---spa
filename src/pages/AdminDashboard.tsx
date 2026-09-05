@@ -26,9 +26,7 @@ import {
 } from 'lucide-react';
 import { ServiceItem, FAQItem, GalleryItem } from '../types';
 import { storageService } from '../services/storageService';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Badge } from '../components/ui/Badge';
+import { Button, Input, Badge, StatCard, Price } from '../components/ui';
 import { ThemeSelect } from '../components/ui/ThemeSelect';
 
 export const AdminDashboard: React.FC = () => {
@@ -167,25 +165,22 @@ export const AdminDashboard: React.FC = () => {
 
         {/* Top Quick Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-5 bg-card border border-border rounded-sm space-y-1">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider block">Total Bookings</span>
-            <div className="text-2xl font-extrabold text-white font-mono">{bookings.length}</div>
-            <span className="text-[11px] text-primary">{confirmedCount} confirmed & pending chair</span>
-          </div>
-
-          <div className="p-5 bg-card border border-border rounded-sm space-y-1">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider block">Estimated Booked Value</span>
-            <div className="text-2xl font-extrabold text-primary font-mono">
-              KSh {totalRevenue.toLocaleString()}
-            </div>
-            <span className="text-[11px] text-muted-foreground">Active chair reservations</span>
-          </div>
-
-          <div className="p-5 bg-card border border-border rounded-sm space-y-1">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider block">Live Services</span>
-            <div className="text-2xl font-extrabold text-white font-mono">{services.length}</div>
-            <span className="text-[11px] text-muted-foreground">Dynamic menu items</span>
-          </div>
+          <StatCard
+            label="Total Bookings"
+            value={bookings.length}
+            description={`${confirmedCount} confirmed & pending chair`}
+          />
+          <StatCard
+            label="Estimated Booked Value"
+            value={<Price amount={totalRevenue} />}
+            valueClassName="text-primary"
+            description="Active chair reservations"
+          />
+          <StatCard
+            label="Live Services"
+            value={services.length}
+            description="Dynamic menu items"
+          />
         </div>
 
         {/* Tab Controls */}
@@ -368,7 +363,6 @@ export const AdminDashboard: React.FC = () => {
           </div>
         )}
 
-        {/* TAB 3: FAQ Management */}
         {activeTab === 'faqs' && (
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -397,13 +391,13 @@ export const AdminDashboard: React.FC = () => {
                   <div className="flex items-start justify-between gap-4">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-sm bg-secondary text-primary border border-border">
+                        <Badge variant="secondary">
                           {faq.category}
-                        </span>
+                        </Badge>
                         {faq.isFeaturedOnHome && (
-                          <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-sm bg-emerald-950/40 text-emerald-400 border border-emerald-500/40">
+                          <Badge variant="success">
                             ★ Homepage Preview
-                          </span>
+                          </Badge>
                         )}
                       </div>
                       <h3 className="text-xs sm:text-sm font-bold text-white pt-1">{faq.question}</h3>

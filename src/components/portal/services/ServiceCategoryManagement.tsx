@@ -126,25 +126,16 @@ export const ServiceCategoryManagement: React.FC = () => {
   return (
     <div className="space-y-4 pt-4 border-t border-border">
       <div className="flex items-center justify-between">
-        <div className="relative flex-1 max-w-md">
+        <div className="relative gap-4 flex max-w-md">
           <Input
             type="text"
             placeholder="Filter service categories..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 text-xs py-2"
-            icon={<Search className="w-3.5 h-3.5" />}
+            className="pl-9 text-xs py-2 w-50"
           />
         </div>
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={handleOpenAdd}
-          className="text-xs font-bold"
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Add Service Category
-        </Button>
+        
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

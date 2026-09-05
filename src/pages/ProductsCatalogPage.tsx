@@ -15,11 +15,8 @@ import {
   Award,
   ChevronRight,
 } from 'lucide-react';
-import { updatePageSEO } from '../utils/seo';
 import { ProductCategory } from '../types';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Badge } from '../components/ui/Badge';
+import { Button, Input, Badge, Price } from '../components/ui';
 import { ThemeSelect } from '../components/ui/ThemeSelect';
 
 export const ProductsCatalogPage: React.FC = () => {
@@ -40,14 +37,6 @@ export const ProductsCatalogPage: React.FC = () => {
   >('featured');
 
   useEffect(() => {
-    updatePageSEO({
-      title: 'Executive Grooming Products & Trichology Apothecary',
-      description:
-        'Explore The Icons exclusive apothecary: clarifying shampoos, TR2 follicle therapy, organic argan beard oils, and matte styling clays. Available at our Kilimani Nairobi studio or for courier delivery.',
-      canonicalUrl: 'https://theiconsbarber.co.ke/products',
-      type: 'website',
-      schemaType: 'LocalBusiness',
-    });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
@@ -83,8 +72,6 @@ export const ProductsCatalogPage: React.FC = () => {
         return 0; // default featured
       });
   }, [products, selectedCategory, searchQuery, sortBy, isSupabaseConfigured]);
-
-  const formatKsh = (amount: number) => `KSh ${amount.toLocaleString()}`;
 
   return (
     <div className="min-h-screen bg-background text-foreground pt-24 pb-20">
@@ -241,12 +228,12 @@ export const ProductsCatalogPage: React.FC = () => {
 
                     {/* Pill Tags */}
                     <div className="flex items-center justify-between gap-2 mb-3.5">
-                      <span className="px-2.5 py-0.5 rounded-full bg-white/10 backdrop-blur-lg  text-white font-semibold text-[11px] tracking-tight">
-                        {formatKsh(product.priceKsh)}
-                      </span>
-                      <span className="px-2.5 py-0.5 rounded-full bg-white/10 backdrop-blur-md  text-primary/80 font-normal text-[10px] truncate max-w-[120px]">
+                      <Badge variant="glass" pill className="text-white">
+                        <Price amount={product.priceKsh} />
+                      </Badge>
+                      <Badge variant="glass" pill className="text-primary/80 font-normal">
                         {product.specifications.volume.split('/')[0].trim()}
-                      </span>
+                      </Badge>
                     </div>
 
                     {/* Full Width Pill Action Button */}

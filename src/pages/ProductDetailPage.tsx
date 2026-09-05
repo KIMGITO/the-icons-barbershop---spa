@@ -18,11 +18,9 @@ import {
   Layers,
   Sparkle,
 } from 'lucide-react';
-import { updatePageSEO } from '../utils/seo';
+import { SEO } from '../components/SEO';
 import { ProductItem, ServiceItem, ProductReview } from '../types';
-import { Button } from '../components/ui/Button';
-import { Badge } from '../components/ui/Badge';
-import { SafeImage } from '../components/ui/SafeImage';
+import { Button, Badge, SafeImage, Price } from '../components/ui';
 import { ReviewForm } from '../components/reviews/ReviewForm';
 import { ReviewList } from '../components/reviews/ReviewList';
 import { reviewService } from '../services/reviewService';
@@ -77,48 +75,6 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
     if (product) {
       setSelectedImage(product.imageUrl);
       setQuantity(1);
-
-      // JSON-LD Product Schema
-      const productSchema = {
-        '@context': 'https://schema.org/',
-        '@type': 'Product',
-        name: product.name,
-        image: [product.imageUrl, ...(product.secondaryImages || [])],
-        description: product.detailedDescription,
-        sku: product.id,
-        brand: {
-          '@type': 'Brand',
-          name: 'The Icons Barber & Spa',
-        },
-        offers: {
-          '@type': 'Offer',
-          url: `https://theiconsbarber.co.ke/products/${product.slug}`,
-          priceCurrency: 'KES',
-          price: product.priceKsh,
-          availability:
-            product.availability === 'in-stock'
-              ? 'https://schema.org/InStock'
-              : product.availability === 'low-stock'
-                ? 'https://schema.org/LimitedAvailability'
-                : 'https://schema.org/OutOfStock',
-          itemCondition: 'https://schema.org/NewCondition',
-        },
-        aggregateRating: {
-          '@type': 'AggregateRating',
-          ratingValue: product.rating,
-          reviewCount: product.reviewCount,
-        },
-      };
-
-      updatePageSEO({
-        title: `${product.name} — Luxury Grooming`,
-        description: `${product.shortDescription} Available for pickup at ${businessInfo.name} ${businessInfo.address.neighborhood} or courier delivery across Kenya.`,
-        canonicalUrl: `https://theiconsbarber.co.ke/products/${product.slug}`,
-        ogImage: product.imageUrl,
-        type: 'product',
-        customSchema: productSchema,
-      });
-
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [product, slug]);
@@ -139,7 +95,6 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   }
 
   const isWishlisted = wishlistSlugs.includes(product.slug);
-  const formatKsh = (amount: number) => `KSh ${amount.toLocaleString()}`;
 
   const handleSubmitReview = async (data: {
     authorName: string;
@@ -182,6 +137,13 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
 
   return (
     <div className="min-h-screen bg-background text-foreground pt-24 pb-20">
+      <SEO 
+        title={`${product.name} | Luxury Grooming Apothecary`}
+        description={`${product.shortDescription} Available for pickup at ${businessInfo.name} ${businessInfo.address.neighborhood} or courier delivery across Kenya.`}
+        canonicalUrl={`https://theiconsbarber.co.ke/products/${product.slug}`}
+        ogImage={product.imageUrl}
+        type="product"
+      />
       {/* Breadcrumbs Navigation */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <nav
@@ -215,9 +177,9 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           <div className="lg:col-span-6 flex flex-col gap-4">
             <div className="relative bg-product-surface rounded-2xl p-8 flex items-center justify-center min-h-[380px] sm:min-h-[460px] border border-white/10 overflow-hidden shadow-2xl">
               {product.badge && (
-                <span className="absolute top-5 left-5 z-10 px-3 py-1 text-xs font-bold tracking-wider uppercase bg-card text-white rounded-sm shadow-md">
+                <Badge className="absolute top-5 left-5 z-10" variant="secondary">
                   {product.badge}
-                </span>
+                </Badge>
               )}
 
               <button
@@ -302,11 +264,11 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               {/* Price Display */}
               <div className="flex items-baseline gap-4 mb-6">
                 <span className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-                  {formatKsh(product.priceKsh)}
+                  <Price amount={product.priceKsh} />
                 </span>
                 {product.originalPriceKsh && (
                   <span className="text-base text-primary italic line-through">
-                    {formatKsh(product.originalPriceKsh)}
+                    <Price amount={product.originalPriceKsh} />
                   </span>
                 )}
                 <Badge variant="success" pill className="gap-1.5 py-1">
@@ -653,7 +615,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                     {rel.specifications.volume}
                   </div>
                   <div className="text-sm font-bold text-primary">
-                    {formatKsh(rel.priceKsh)}
+                    <Price amount={rel.priceKsh} />
                   </div>
                 </div>
               </div>
