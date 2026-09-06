@@ -481,6 +481,9 @@ export const BookingModal: React.FC = () => {
 
   const handlePrevious = () => {
     if (step === 5) {
+      if (paymentStatus === 'awaiting_pin' && pendingBooking?.bookingId) {
+        cleanupPendingBooking(pendingBooking.bookingId);
+      }
       setPaymentStatus('idle');
       setPaymentError(null);
       setCheckoutRequestId(null);
@@ -492,6 +495,13 @@ export const BookingModal: React.FC = () => {
   const handleStepClick = (target: number) => {
     if (target === step) return;
     if (target < step) {
+      if (
+        step === 5 &&
+        paymentStatus === 'awaiting_pin' &&
+        pendingBooking?.bookingId
+      ) {
+        cleanupPendingBooking(pendingBooking.bookingId);
+      }
       clearStepErrors();
       setStep(target as 1 | 2 | 3 | 4 | 5);
       return;
@@ -506,6 +516,20 @@ export const BookingModal: React.FC = () => {
     }
     clearStepErrors();
     setStep(target as 1 | 2 | 3 | 4 | 5);
+  };
+
+  /** Cleanup a pending booking from the database if payment fails or is abandoned. */
+  const cleanupPendingBooking = async (bookingId?: string) => {
+    const id = bookingId || pendingBooking?.bookingId;
+    if (!id) return;
+
+    try {
+      console.warn('Cleaning up pending booking:', id);
+      await bookingService.deleteBooking(id);
+      setPendingBooking(null);
+    } catch (err) {
+      console.error('Failed to cleanup booking:', err);
+    }
   };
 
   /** Initiate the M-Pesa STK push for the 50% deposit of a reserved booking. */
@@ -560,6 +584,7 @@ export const BookingModal: React.FC = () => {
       return;
     }
 
+    let createdBookingId: string | null = null;
     try {
       // 1. Create the booking atomically via check_and_reserve (race-condition-safe).
       // Use a strict 24-hour HH:mm:ss timestamp — "10:00 AM" is not parseable by Date.
@@ -592,6 +617,8 @@ export const BookingModal: React.FC = () => {
         return;
       }
 
+      createdBookingId = result.bookingId || null;
+
       setPendingBooking({
         bookingId: result.bookingId,
         referenceNumber: result.referenceNumber,
@@ -607,6 +634,15 @@ export const BookingModal: React.FC = () => {
         result.depositPaidKsh || depositKsh,
       );
     } catch (err: any) {
+      // If booking was created but STK push failed, clean it up to free the slot
+      if (createdBookingId) {
+        console.warn('Cleaning up booking after STK push failure:', createdBookingId);
+        await bookingService.deleteBooking(createdBookingId).catch(e => 
+          console.error('Failed to cleanup booking:', e)
+        );
+        setPendingBooking(null);
+      }
+
       setPaymentStatus('failed');
       setPaymentError(
         err.message || 'Failed to create booking or initiate M-Pesa payment.',
@@ -654,8 +690,16 @@ export const BookingModal: React.FC = () => {
       isFinished = true;
       if (pollingInterval) window.clearInterval(pollingInterval);
 
+      const bookingIdToCleanup = pendingBooking?.bookingId;
+
       setPaymentStatus('failed');
-      setPaymentError(msg || 'M-Pesa payment failed or was cancelled. Please try again.');
+      setPaymentError(
+        msg || 'M-Pesa payment failed or was cancelled. Please try again.',
+      );
+
+      if (bookingIdToCleanup) {
+        cleanupPendingBooking(bookingIdToCleanup);
+      }
     };
 
     // 1. Subscribe to the specific booking record (Realtime)
@@ -720,6 +764,18 @@ export const BookingModal: React.FC = () => {
       clearTimeout(timeout);
     };
   }, [paymentStatus, pendingBooking?.bookingId, checkoutRequestId, isBookingModalOpen]);
+  // If the modal is closed while a payment is pending, cleanup the booking to free the slot.
+  useEffect(() => {
+    if (
+      !isBookingModalOpen &&
+      paymentStatus === 'awaiting_pin' &&
+      pendingBooking?.bookingId
+    ) {
+      cleanupPendingBooking(pendingBooking.bookingId);
+    }
+  }, [isBookingModalOpen, paymentStatus, pendingBooking?.bookingId]);
+
+
 
   const generateGoogleCalendarUrl = () => {
     if (!confirmedBooking) return '#';
@@ -1042,7 +1098,38 @@ export const BookingModal: React.FC = () => {
                     </div>
 
                     {/* Horizontal timeline spanning opening hours */}
-                    <div className="relative h-10 bg-background border border-border rounded-sm overflow-hidden">
+                    <div 
+                      className="relative h-10 bg-background border border-border rounded-none overflow-hidden cursor-pointer touch-none"
+                      onMouseDown={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const percentage = Math.max(0, Math.min(1, x / rect.width));
+                        const minutes = openMin + percentage * timelineSpan;
+                        const stepped = Math.round(minutes / SLOT_INTERVAL_MINUTES) * SLOT_INTERVAL_MINUTES;
+                        const final = Math.max(earliestBookableMin, Math.min(latestBookableMin, stepped));
+                        setSelectedTimeSlot(minutesToHHMM(final));
+                      }}
+                      onMouseMove={(e) => {
+                        if (e.buttons !== 1) return;
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const percentage = Math.max(0, Math.min(1, x / rect.width));
+                        const minutes = openMin + percentage * timelineSpan;
+                        const stepped = Math.round(minutes / SLOT_INTERVAL_MINUTES) * SLOT_INTERVAL_MINUTES;
+                        const final = Math.max(earliestBookableMin, Math.min(latestBookableMin, stepped));
+                        setSelectedTimeSlot(minutesToHHMM(final));
+                      }}
+                      onTouchMove={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const x = e.touches[0].clientX - rect.left;
+                        const percentage = Math.max(0, Math.min(1, x / rect.width));
+                        const minutes = openMin + percentage * timelineSpan;
+                        const stepped = Math.round(minutes / SLOT_INTERVAL_MINUTES) * SLOT_INTERVAL_MINUTES;
+                        const final = Math.max(earliestBookableMin, Math.min(latestBookableMin, stepped));
+                        setSelectedTimeSlot(minutesToHHMM(final));
+                      }}
+                    >
+                      {/* Busy Ranges & Selection Rendering... */}
                       {Array.from(
                         {
                           length: Math.max(
@@ -1081,7 +1168,7 @@ export const BookingModal: React.FC = () => {
 
                       {selectedInRange && selectedStartMin >= 0 && (
                         <div
-                          className="absolute top-0 bottom-0 bg-primary/30 border-y-2 border-primary flex items-center justify-center"
+                          className="absolute top-0 bottom-0 bg-primary/30 border-y-2 border-primary flex items-center justify-center rounded-none"
                           style={{
                             left: `${((selectedStartMin - openMin) / timelineSpan) * 100}%`,
                             width: `${((Math.min(selectedEndMin, closeMin) - selectedStartMin) / timelineSpan) * 100}%`,
@@ -1143,8 +1230,16 @@ export const BookingModal: React.FC = () => {
                           setScheduleError(null);
                           setSelectedTimeSlot(minutesToHHMM(val));
                         }}
-                        className="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary hover:accent-primary-hover transition-all"
+                        className="w-full h-1.5 bg-secondary rounded-none appearance-none cursor-pointer accent-primary hover:accent-primary-hover transition-all"
                       />
+                      
+                      {/* Scroll Simulation Overlay on the Range Input */}
+                      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-40">
+                        <div className="absolute top-1/2 -translate-y-1/2 animate-drag-hand flex flex-col items-center gap-0.5">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.82-2.82L7 15"/><path d="M14 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/></svg>
+                          <span className="text-[7px] uppercase font-bold text-primary tracking-tighter">Slide to select</span>
+                        </div>
+                      </div>
                       
                       {/* Slider Min/Max Labels */}
                       <div className="absolute -bottom-5 left-0 right-0 flex justify-between text-[9px] text-muted-foreground font-mono uppercase tracking-tighter">
@@ -1250,17 +1345,18 @@ export const BookingModal: React.FC = () => {
           {step === 4 && (
             <form onSubmit={handleSubmitBooking} className="space-y-4">
               <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-                Enter Your Contact Information
+                Contact Information
               </h3>
 
               <div className="space-y-3 text-xs">
                 <div>
                   <label className="block text-foreground/90 font-semibold mb-1">
-                    Full Name <span className="text-primary">*</span>
+                     Name <span className="text-primary">*</span>
                   </label>
                   <Input
                     type="text"
                     required
+                    autoFocus
                     placeholder="e.g. Kiprono Tanui"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
@@ -1271,7 +1367,7 @@ export const BookingModal: React.FC = () => {
 
                 <div>
                   <label className="block text-foreground/90 font-semibold mb-1">
-                    Phone Number (M-Pesa / SMS, Safaricom){' '}
+                    Phone Number (M-Pesa)
                     <span className="text-primary">*</span>
                   </label>
                   <Input
@@ -1284,14 +1380,14 @@ export const BookingModal: React.FC = () => {
                     icon={<Phone className="w-4 h-4" />}
                   />
                   <p className="text-[10px] text-muted-foreground mt-1">
-                    We send the M-Pesa deposit prompt to this Safaricom number
-                    (+254 format).
+                   We will send M-Pesa prompt to pay 50% deposit to this phone.
+              
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-foreground/90 font-semibold mb-1">
-                    Email Address (Optional for digital calendar invite)
+                    Email Address (Optional )
                   </label>
                   <Input
                     type="email"
@@ -1325,6 +1421,21 @@ export const BookingModal: React.FC = () => {
                 </div>
               )}
 
+<div className="pt-2">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  className="w-full uppercase tracking-wider text-xs shadow-xl"
+                >
+                  <Smartphone className="w-4 h-4" />
+                  <span>Confirm & Pay 50% Deposit (M-Pesa)</span>
+                </Button>
+                <p className="text-[10px] text-red-600 text-danger text-center mt-2">
+                  Your slot is held as pending until the M-Pesa deposit is
+                  confirmed.
+                </p>
+              </div>
               {/* Order Summary Box with 50% deposit */}
               <div className="p-4 bg-secondary border border-border rounded-sm space-y-2 text-xs">
                 <div className="flex justify-between text-muted-foreground">
@@ -1351,15 +1462,14 @@ export const BookingModal: React.FC = () => {
                   <span className="text-white">{totalDuration} min</span>
                 </div>
                 <div className="pt-2 border-t border-border flex justify-between items-center text-sm font-bold">
-                  <span className="text-white">Total Experience:</span>
+                  <span className="text-white">Total:</span>
                   <span className="font-mono text-primary text-base">
                     KSh {totalPrice.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-[11px]">
                   <span className="text-muted-foreground flex items-center gap-1">
-                    <Lock className="w-3 h-3 text-primary" /> 50% Deposit via
-                    M-Pesa (secures slot)
+                    <Lock className="w-3 h-3 text-primary" /> 50% Deposit  (secures slot)
                   </span>
                   <span className="font-mono font-bold text-white">
                     KSh {depositKsh.toLocaleString()}
@@ -1373,21 +1483,7 @@ export const BookingModal: React.FC = () => {
                 </div>
               </div>
 
-              <div className="pt-2">
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="lg"
-                  className="w-full uppercase tracking-wider text-xs shadow-xl"
-                >
-                  <Smartphone className="w-4 h-4" />
-                  <span>Confirm & Pay 50% Deposit (M-Pesa)</span>
-                </Button>
-                <p className="text-[10px] text-red-600 text-danger text-center mt-2">
-                  Your slot is held as pending until the M-Pesa deposit is
-                  confirmed.
-                </p>
-              </div>
+              
             </form>
           )}
 

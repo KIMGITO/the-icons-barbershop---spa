@@ -57,7 +57,7 @@ export const StaffScheduleView: React.FC = () => {
     <div className="max-w-3xl">
       {/* Sticky header: title + save stay visible while scrolling the schedule below */}
       <div className="sticky top-0 z-10 -mx-1 px-1 pb-3 bg-background/95 backdrop-blur-sm">
-        <div className="flex items-center justify-between gap-3 bg-card p-3.5 sm:p-5 rounded-2xl border border-border">
+        <div className="flex items-center justify-between gap-3 bg-card p-3.5 sm:p-5 rounded-none border border-border">
           <div className="min-w-0 flex-1">
             <h1 className="text-sm sm:text-xl font-bold text-foreground flex items-center gap-2 truncate">
               <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />

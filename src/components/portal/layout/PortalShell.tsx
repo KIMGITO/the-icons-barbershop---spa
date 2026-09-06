@@ -58,7 +58,7 @@ export const PortalShell: React.FC<PortalShellProps> = ({
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
+            className="md:hidden p-2 rounded-none text-muted-foreground hover:text-foreground hover:bg-muted"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -97,7 +97,7 @@ export const PortalShell: React.FC<PortalShellProps> = ({
           <button
             type="button"
             onClick={onExitToPublicWebsite}
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors hidden sm:flex items-center gap-1 text-xs"
+            className="p-2 rounded-none text-muted-foreground hover:text-foreground hover:bg-muted transition-colors hidden sm:flex items-center gap-1 text-xs"
             title="Return to Public Website"
           >
             <ExternalLink className="w-4 h-4" />
@@ -108,7 +108,7 @@ export const PortalShell: React.FC<PortalShellProps> = ({
           <button
             type="button"
             onClick={() => logout()}
-            className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-muted transition-colors"
+            className="p-2 rounded-none text-muted-foreground hover:text-destructive hover:bg-muted transition-colors"
             title="Sign Out"
           >
             <LogOut className="w-4 h-4" />
@@ -175,7 +175,7 @@ export const PortalShell: React.FC<PortalShellProps> = ({
                 <button
                   type="button"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-1 rounded-lg text-muted-foreground hover:text-foreground"
+                  className="p-1 rounded-none text-muted-foreground hover:text-foreground"
                 >
                   <X className="w-5 h-5" />
                 </button>

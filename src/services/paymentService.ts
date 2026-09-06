@@ -14,9 +14,9 @@ export const paymentService = {
    */
   calculateDeposit(totalPriceKsh: number, customDepositPaidKsh: number = 0): DepositBreakdown {
     const total = Math.max(0, Math.round(totalPriceKsh));
-    const minimumDeposit = Math.round(total * 0.5); // Whole number 50%
-    const paid = Math.max(0, Math.round(customDepositPaidKsh));
-    const remaining = Math.max(0, total - paid);
+    const minimumDeposit = Math.round(total * 0.5); 
+    // const paid = Math.max(0, Math.round(customDepositPaidKsh));
+    const remaining = Math.max(0, total - minimumDeposit);
 
     return {
       totalKsh: total,

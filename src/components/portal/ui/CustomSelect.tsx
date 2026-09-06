@@ -160,7 +160,7 @@ export function CustomSelect<T = string>({
         disabled={disabled}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border text-sm text-left transition-all ${
+        className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-none border text-sm text-left transition-all ${
           disabled 
             ? 'opacity-50 cursor-not-allowed bg-muted/40 border-border text-muted-foreground' 
             : 'cursor-pointer bg-input text-foreground hover:border-primary/50'
@@ -217,7 +217,7 @@ export function CustomSelect<T = string>({
       {/* Floating Dropdown Listbox */}
       {isOpen && (
         <div 
-          className="absolute left-0 right-0 z-50 mt-1 max-h-64 rounded-xl border border-border bg-card shadow-2xl overflow-hidden flex flex-col animate-in fade-in-50 zoom-in-95 duration-150"
+          className="absolute left-0 right-0 z-50 mt-1 max-h-64 rounded-none border border-border bg-card shadow-2xl overflow-hidden flex flex-col animate-in fade-in-50 zoom-in-95 duration-150"
         >
           {searchable && (
             <div className="p-2 border-b border-border bg-input/40 flex items-center gap-2">
@@ -263,7 +263,7 @@ export function CustomSelect<T = string>({
                     disabled={opt.disabled}
                     onClick={() => handleSelect(opt)}
                     onMouseEnter={() => setHighlightedIndex(idx)}
-                    className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs text-left transition-all ${
+                    className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-none text-xs text-left transition-all ${
                       opt.disabled 
                         ? 'opacity-40 cursor-not-allowed text-muted-foreground' 
                         : 'cursor-pointer'

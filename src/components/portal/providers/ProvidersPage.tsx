@@ -92,7 +92,7 @@ export const ProvidersPage: React.FC = () => {
           return (
             <div
               key={provider.id}
-              className={`p-4 sm:p-5 rounded-2xl border transition-all flex flex-col justify-between space-y-4 ${
+              className={`p-4 sm:p-5 rounded-none border transition-all flex flex-col justify-between space-y-4 ${
                 provider.status === 'active' 
                   ? 'bg-card border-border hover:border-primary/40' 
                   : 'bg-muted/20 border-border/60 opacity-75'
@@ -100,7 +100,7 @@ export const ProvidersPage: React.FC = () => {
             >
               {/* Header Info */}
               <div className="flex items-start gap-3.5">
-                <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-border bg-muted">
+                <div className="relative w-14 h-14 rounded-none overflow-hidden shrink-0 border border-border bg-muted">
                   {provider.avatarUrl ? (
                     <img
                       src={provider.avatarUrl}
@@ -155,7 +155,7 @@ export const ProvidersPage: React.FC = () => {
 
               {/* Bio Snippet */}
               {provider.bio && (
-                <p className="text-xs text-muted-foreground line-clamp-2 italic bg-muted/30 p-2.5 rounded-xl border border-border/50">
+                <p className="text-xs text-muted-foreground line-clamp-2 italic bg-muted/30 p-2.5 rounded-none border border-border/50">
                   "{provider.bio}"
                 </p>
               )}
@@ -193,7 +193,7 @@ export const ProvidersPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => toggleStatus(provider.id)}
-                    className={`p-1.5 rounded-lg border text-xs transition-colors ${
+                    className={`p-1.5 rounded-none border text-xs transition-colors ${
                       provider.status === 'active'
                         ? 'border-border text-muted-foreground hover:text-warning'
                         : 'border-success/40 text-success hover:bg-success/10'

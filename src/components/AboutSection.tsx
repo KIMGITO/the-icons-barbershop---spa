@@ -33,7 +33,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             <div className="grid grid-cols-2 gap-4">
               {/* Photo 1 */}
               <div className="space-y-4">
-                <div className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden bg-secondary border border-border shadow-xl">
+                <div className="relative aspect-[3/4] w-full rounded-none overflow-hidden bg-secondary border border-border shadow-xl">
                   <img
                     src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=800&auto=format&fit=crop"
                     alt="Master barber sculpting client hairline at The Icons Barber in Kilimani Nairobi"
@@ -42,7 +42,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                   />
                 </div>
 
-                <div className="p-4 bg-card border border-border rounded-xl">
+                <div className="p-4 bg-card border border-border rounded-none">
                   <div className="text-lg font-display font-bold text-primary">
                     Hospital Grade Care
                   </div>
@@ -55,7 +55,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
 
               {/* Photo 2 */}
               <div className="space-y-4 pt-6 sm:pt-10">
-                <div className="p-4 bg-card border border-border rounded-xl">
+                <div className="p-4 bg-card border border-border rounded-none">
                   <div className="text-lg font-display font-bold text-white">
                     {businessInfo.address.suite}
                   </div>
@@ -64,7 +64,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                   </div>
                 </div>
 
-                <div className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden bg-secondary border border-border shadow-xl">
+                <div className="relative aspect-[3/4] w-full rounded-none overflow-hidden bg-secondary border border-border shadow-xl">
                   <img
                     src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=800&auto=format&fit=crop"
                     alt="Gentleman experiencing rejuvenating scalp spa therapy at The Icons Spa"

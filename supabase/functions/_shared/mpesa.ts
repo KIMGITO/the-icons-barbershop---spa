@@ -56,6 +56,7 @@ export async function getAccessToken(config: MpesaConfig): Promise<string> {
   }
 
   const data = await res.json();
+  console.log('M-Pesa Token generated successfully');
   cachedToken = {
     token: data.access_token,
     expiresAt: Date.now() + (data.expires_in - 600) * 1000

@@ -117,7 +117,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ isStandalonePage
                 <div
                   id="gallery-card-1"
                   onClick={() => openLightbox(0)}
-                  className="group relative aspect-[4/3.9] bg-secondary rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/70 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10"
+                  className="group relative aspect-[4/3.9] bg-secondary rounded-none sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/70 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10"
                 >
                   <img
                     src={mosaicItems[0].imageUrl}
@@ -147,7 +147,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ isStandalonePage
                 <div
                   id="gallery-card-2"
                   onClick={() => openLightbox(1)}
-                  className="group relative aspect-[4/4.3] bg-secondary rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/70 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10"
+                  className="group relative aspect-[4/4.3] bg-secondary rounded-none sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/70 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10"
                 >
                   <img
                     src={mosaicItems[1].imageUrl}
@@ -180,7 +180,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ isStandalonePage
                 <div
                   id="gallery-card-3"
                   onClick={() => openLightbox(2)}
-                  className="group relative aspect-[3/4.5] sm:aspect-[3/4.6] bg-secondary rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/70 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10"
+                  className="group relative aspect-[3/4.5] sm:aspect-[3/4.6] bg-secondary rounded-none sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/70 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10"
                 >
                   <img
                     src={mosaicItems[2].imageUrl}
@@ -210,7 +210,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ isStandalonePage
                 <div
                   id="gallery-card-4"
                   onClick={() => openLightbox(3)}
-                  className="group relative aspect-[4/3.8] bg-secondary rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/70 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10"
+                  className="group relative aspect-[4/3.8] bg-secondary rounded-none sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/70 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10"
                 >
                   <img
                     src={mosaicItems[3].imageUrl}
@@ -243,7 +243,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ isStandalonePage
                 <div
                   id="gallery-card-5"
                   onClick={() => openLightbox(4)}
-                  className="group relative aspect-[4/4] bg-secondary rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/70 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10"
+                  className="group relative aspect-[4/4] bg-secondary rounded-none sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/70 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10"
                 >
                   <img
                     src={mosaicItems[4].imageUrl}
@@ -273,7 +273,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ isStandalonePage
                 <div
                   id="gallery-card-6"
                   onClick={() => openLightbox(5)}
-                  className="group relative aspect-[4/4.1] bg-secondary rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/70 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10"
+                  className="group relative aspect-[4/4.1] bg-secondary rounded-none sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/70 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10"
                 >
                   <img
                     src={mosaicItems[5].imageUrl}
@@ -307,7 +307,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ isStandalonePage
               <div
                 key={item.id}
                 onClick={() => openLightbox(index)}
-                className="group relative aspect-[4/4.5] bg-secondary rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/70 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10"
+                className="group relative aspect-[4/4.5] bg-secondary rounded-none sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/70 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10"
               >
                 <img
                   src={item.imageUrl}
@@ -343,7 +343,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ isStandalonePage
                     navigateTo('/gallery');
                   }
                 }}
-                className="px-5 sm:px-6 py-2.5 bg-primary hover:bg-primary-hover active:scale-95 text-primary-foreground font-bold text-xs sm:text-sm rounded-lg sm:rounded-xl shadow-lg transition-all duration-200 cursor-pointer inline-flex items-center gap-2"
+                className="px-5 sm:px-6 py-2.5 bg-primary hover:bg-primary-hover active:scale-95 text-primary-foreground font-bold text-xs sm:text-sm rounded-none sm:rounded-none shadow-lg transition-all duration-200 cursor-pointer inline-flex items-center gap-2"
                 aria-label="View more gallery photos"
               >
                 <span>View More</span>
@@ -359,7 +359,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ isStandalonePage
             onClick={closeLightbox}
           >
             <div 
-              className="relative max-w-4xl w-full bg-card border border-border rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl"
+              className="relative max-w-4xl w-full bg-card border border-border rounded-none sm:rounded-3xl overflow-hidden shadow-2xl"
               onClick={e => e.stopPropagation()}
             >
               {/* Close button */}

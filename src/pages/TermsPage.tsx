@@ -108,7 +108,7 @@ export const TermsPage: React.FC = () => {
         </h1>
 
         <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto font-light leading-relaxed">
-          Last updated: {new Date().toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' })} • {businessInfo.name}
+          Last updated: {new Date().toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' })} <span className='font-script text-primary'> {businessInfo.name}</span>
         </p>
 
         <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl mx-auto font-light leading-relaxed mt-3">
@@ -119,11 +119,9 @@ export const TermsPage: React.FC = () => {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 space-y-4">
         {/* Consent Intro Card */}
-        <div className="bg-card border border-border rounded-2xl p-5 sm:p-6">
+        <div className="rounded-2xl p-5 sm:p-6">
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-lg bg-secondary border border-border flex items-center justify-center text-primary shrink-0 mt-0.5">
-              <ShieldCheck className="w-4 h-4" />
-            </div>
+           
             <div className="space-y-2">
               <h2 className="font-serif text-base sm:text-lg font-bold text-white">
                 Acceptance of These Terms
@@ -143,13 +141,11 @@ export const TermsPage: React.FC = () => {
           <section
             key={section.title}
             id={`terms-section-${index + 1}`}
-            className="bg-card border border-border rounded-2xl p-5 sm:p-6"
+            className="rounded-2xl p-5 sm:p-6"
             aria-label={section.title}
           >
             <h2 className="font-serif text-sm sm:text-base font-bold text-white tracking-wide mb-3 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-lg bg-primary/10 border border-primary/25 text-primary flex items-center justify-center text-[10px] font-mono shrink-0">
-                {index + 1}
-              </span>
+             
               {section.title.replace(/^\d+\.\s*/, '')}
             </h2>
             <div className="space-y-2.5">
@@ -172,8 +168,8 @@ export const TermsPage: React.FC = () => {
               Questions about these terms?
             </h3>
             <p className="text-xs text-muted-foreground font-light">
-              Our executive concierge team is available 7 days a week in Nairobi.
-            </p>
+              Contact us for more  information  about our terms and conditions.
+              </p>
             <div className="flex items-center justify-center sm:justify-start gap-4 pt-2 text-[11px] text-muted-foreground-light">
               <a
                 href={`mailto:${businessInfo.email}`}

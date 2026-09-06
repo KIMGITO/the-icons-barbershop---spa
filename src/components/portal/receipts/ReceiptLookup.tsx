@@ -155,7 +155,7 @@ export const ReceiptLookup: React.FC = () => {
           <button
             type="button"
             onClick={() => setViewMode('lookup')}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+            className={`px-2.5 py-1 rounded-none text-[11px] font-bold transition-all ${
               viewMode === 'lookup' ? 'bg-primary text-black' : 'bg-muted/50 text-muted-foreground hover:text-foreground'
             }`}
           >
@@ -164,7 +164,7 @@ export const ReceiptLookup: React.FC = () => {
           <button
             type="button"
             onClick={() => setViewMode('provider-schedule')}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+            className={`px-2.5 py-1 rounded-none text-[11px] font-bold transition-all ${
               viewMode === 'provider-schedule' ? 'bg-primary text-black' : 'bg-muted/50 text-muted-foreground hover:text-foreground'
             }`}
           >
@@ -176,7 +176,7 @@ export const ReceiptLookup: React.FC = () => {
       {/* ============ CODE LOOKUP VIEW ============ */}
       {viewMode === 'lookup' && (
         <div className="space-y-3.5">
-          <form onSubmit={handleLookup} className="p-3 rounded-xl  space-y-2">
+          <form onSubmit={handleLookup} className="p-3 rounded-none  space-y-2">
             <div className="flex gap-2">
               <Input
                 type="text"
@@ -184,26 +184,26 @@ export const ReceiptLookup: React.FC = () => {
                 onChange={e => setCode(e.target.value.toUpperCase())}
                 placeholder="Receipt code (e.g. AB3CD4)"
                 maxLength={10}
-                className="flex-1 rounded-lg py-2 text-sm font-mono font-bold tracking-widest uppercase min-w-0"
+                className="flex-1 rounded-none py-2 text-sm font-mono font-bold tracking-widest uppercase min-w-0"
                 icon={<Search className="w-4 h-4" />}
               />
               <button
                 type="submit"
                 disabled={loading}
-                className="px-3.5 py-2 rounded-lg bg-primary text-black text-xs font-bold uppercase tracking-wider hover:bg-primary/90 disabled:opacity-50 transition-colors shrink-0"
+                className="px-3.5 py-2 rounded-none bg-primary text-black text-xs font-bold uppercase tracking-wider hover:bg-primary/90 disabled:opacity-50 transition-colors shrink-0"
               >
                 {loading ? '...' : 'Retrieve'}
               </button>
             </div>
             {error && (
-              <p className="text-xs text-destructive bg-destructive/10 border border-destructive/30 rounded-lg px-3 py-2">
+              <p className="text-xs text-destructive bg-destructive/10 border border-destructive/30 rounded-none px-3 py-2">
                 {error}
               </p>
             )}
           </form>
 
           {booking && (
-            <div className="bg-card border border-border rounded-2xl overflow-hidden">
+            <div className="bg-card border border-border rounded-none overflow-hidden">
               <div className="p-3 sm:p-4 bg-secondary border-b border-border flex items-center justify-between gap-2 flex-wrap">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
@@ -222,7 +222,7 @@ export const ReceiptLookup: React.FC = () => {
                   type="button"
                   onClick={handleSendSms}
                   disabled={smsSending}
-                  className="px-2.5 py-1.5 rounded-lg border border-border text-[11px] font-semibold text-foreground hover:bg-muted disabled:opacity-50 transition-colors shrink-0"
+                  className="px-2.5 py-1.5 rounded-none border border-border text-[11px] font-semibold text-foreground hover:bg-muted disabled:opacity-50 transition-colors shrink-0"
                 >
                   {smsSending ? 'Sending...' : 'Resend SMS'}
                 </button>
@@ -256,7 +256,7 @@ export const ReceiptLookup: React.FC = () => {
 
           {/* Customer Schedule History */}
           {booking && (
-            <div className="bg-card border border-border rounded-2xl overflow-hidden">
+            <div className="bg-card border border-border rounded-none overflow-hidden">
               <div className="p-3 sm:p-4 border-b border-border flex items-center gap-2">
                 <History className="w-4 h-4 text-primary" />
                 <h3 className="text-xs sm:text-sm font-bold text-foreground">Customer History</h3>
@@ -310,7 +310,7 @@ export const ReceiptLookup: React.FC = () => {
           )}
 
           {!booking && !loading && !error && (
-            <div className="p-6 text-center bg-card border border-border rounded-xl space-y-1.5">
+            <div className="p-6 text-center bg-card border border-border rounded-none space-y-1.5">
               <ReceiptText className="w-7 h-7 text-muted-foreground mx-auto" />
               <h3 className="text-xs font-bold text-foreground">No receipt looked up yet</h3>
               <p className="text-[11px] text-muted-foreground">
@@ -325,7 +325,7 @@ export const ReceiptLookup: React.FC = () => {
       {viewMode === 'provider-schedule' && (
         <div className="space-y-3.5">
           {!user?.providerId ? (
-            <div className="p-6 text-center bg-card border border-border rounded-xl">
+            <div className="p-6 text-center bg-card border border-border rounded-none">
               <AlertTriangle className="w-7 h-7 text-warning mx-auto mb-1.5" />
               <p className="text-xs text-muted-foreground">
                 No provider profile linked to your account. Contact the admin to link your provider profile.
@@ -333,7 +333,7 @@ export const ReceiptLookup: React.FC = () => {
             </div>
           ) : (
             <>
-              <div className="bg-card p-2.5 rounded-xl border border-border flex items-center gap-2">
+              <div className="bg-card p-2.5 rounded-none border border-border flex items-center gap-2">
                 <Clock className="w-4 h-4 text-primary shrink-0" />
                 <ThemeSelect
                   value={String(daysBack)}
@@ -348,7 +348,7 @@ export const ReceiptLookup: React.FC = () => {
               </div>
 
               {summaryError && (
-                <div className="p-2.5 bg-destructive/10 border border-destructive/30 rounded-xl text-xs text-destructive">
+                <div className="p-2.5 bg-destructive/10 border border-destructive/30 rounded-none text-xs text-destructive">
                   {summaryError}
                 </div>
               )}
@@ -366,12 +366,12 @@ export const ReceiptLookup: React.FC = () => {
               )}
 
               {summaryLoading ? (
-  <div className="p-8 text-center bg-card rounded-xl border border-border flex flex-col items-center gap-1.5">
+  <div className="p-8 text-center bg-card rounded-none border border-border flex flex-col items-center gap-1.5">
     <Loader2 className="w-5 h-5 animate-spin text-primary" />
     <p className="text-xs text-muted-foreground">Loading schedule history...</p>
   </div>
 ) : providerSummary ? (
-  <div className="bg-card border border-border rounded-2xl overflow-hidden">
+  <div className="bg-card border border-border rounded-none overflow-hidden">
     {/* Tab bar */}
     <div className="flex border-b border-border">
       <button

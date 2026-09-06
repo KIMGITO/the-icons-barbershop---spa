@@ -107,7 +107,7 @@ export const BookingDetailsDrawer: React.FC<BookingDetailsDrawerProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              className="p-1.5 rounded-none text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -116,7 +116,7 @@ export const BookingDetailsDrawer: React.FC<BookingDetailsDrawerProps> = ({
           {/* Body Content */}
           <div className="p-4 sm:p-5 space-y-5 flex-1">
             {/* Customer Details */}
-            <div className="p-3.5 rounded-xl bg-muted/40 border border-border space-y-2.5">
+            <div className="p-3.5 rounded-none bg-muted/40 border border-border space-y-2.5">
               <div className="text-[10px]  uppercase tracking-wider text-muted-foreground">
                 Client Information
               </div>
@@ -154,7 +154,7 @@ export const BookingDetailsDrawer: React.FC<BookingDetailsDrawerProps> = ({
               </div>
 
               {booking.specialRequests && (
-                <div className="mt-2 text-xs bg-card p-2 rounded-lg border border-border/80">
+                <div className="mt-2 text-xs bg-card p-2 rounded-none border border-border/80">
                   <span className="font-semibold text-primary block text-[10px] uppercase">Special Notes:</span>
                   <p className="text-muted-foreground text-[11px] mt-0.5">{booking.specialRequests}</p>
                 </div>
@@ -162,7 +162,7 @@ export const BookingDetailsDrawer: React.FC<BookingDetailsDrawerProps> = ({
             </div>
 
             {/* Service & Provider */}
-            <div className="p-3.5 rounded-xl bg-card border border-border space-y-3">
+            <div className="p-3.5 rounded-none bg-card border border-border space-y-3">
               <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 Service & Assignment
               </div>
@@ -197,7 +197,7 @@ export const BookingDetailsDrawer: React.FC<BookingDetailsDrawerProps> = ({
             </div>
 
             {/* Financials & 50% Deposit Status */}
-            <div className="p-3.5 rounded-xl bg-card border border-border space-y-3">
+            <div className="p-3.5 rounded-none bg-card border border-border space-y-3">
               <div className="flex items-center justify-between border-b border-border pb-2">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                   Financials & Deposit
@@ -229,7 +229,7 @@ export const BookingDetailsDrawer: React.FC<BookingDetailsDrawerProps> = ({
               </div>
 
               {booking.mpesaReceiptNumber && (
-                <div className="bg-input p-2 rounded-lg border border-border text-[11px] font-mono flex items-center justify-between">
+                <div className="bg-input p-2 rounded-none border border-border text-[11px] font-mono flex items-center justify-between">
                   <span className="text-muted-foreground">M-Pesa Receipt:</span>
                   <span className="text-primary font-bold">{booking.mpesaReceiptNumber}</span>
                 </div>
@@ -252,7 +252,7 @@ export const BookingDetailsDrawer: React.FC<BookingDetailsDrawerProps> = ({
 
             {/* Cancel reason prompt if open */}
             {cancelPromptOpen && (
-              <form onSubmit={handleCancelSubmit} className="p-3.5 rounded-xl bg-destructive/10 border border-destructive/30 space-y-2.5">
+              <form onSubmit={handleCancelSubmit} className="p-3.5 rounded-none bg-destructive/10 border border-destructive/30 space-y-2.5">
                 <span className="text-xs font-bold text-destructive block">
                   Provide Cancellation Reason:
                 </span>
@@ -261,7 +261,7 @@ export const BookingDetailsDrawer: React.FC<BookingDetailsDrawerProps> = ({
                   value={cancelReason}
                   onChange={(e) => setCancelReason(e.target.value)}
                   placeholder="e.g. Client requested reschedule via phone"
-                  className="text-xs rounded-lg p-2"
+                  className="text-xs rounded-none p-2"
                   required
                 />
                 <div className="flex justify-end gap-2">

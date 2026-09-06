@@ -31,7 +31,7 @@ export const Footer: React.FC<FooterProps> = ({
   hideProducts,
   hideBarbers,
   hideFaqs,
-  hideGallery
+  hideGallery,
 }) => {
   const { businessInfo, navigateTo } = useApp();
   const [email, setEmail] = useState('');
@@ -84,9 +84,9 @@ export const Footer: React.FC<FooterProps> = ({
 
             {/* Philosophy Text */}
             <p className="text-xs sm:text-[13px] text-muted-foreground-light leading-relaxed max-w-sm font-light mx-auto sm:mx-0">
-              Start with empathy. We create distinctive silhouettes, elevate
-              confidence, collaborate with master artisans, and deliver
-              sanctuary care.
+              Every cut is a chance to look your best, feel confident, and make
+              an impression. At <span className='font-script text-primary'>The Icons Barbershop</span>, we bring precision, style,
+              and personal attention to every chair.
             </p>
           </div>
 
@@ -224,7 +224,7 @@ export const Footer: React.FC<FooterProps> = ({
               onSubmit={handleSubscribe}
               className="space-y-2.5 w-full max-w-sm mx-auto sm:mx-0"
             >
-              <div className="flex items-center bg-white/95 backdrop-blur-md rounded-xl gap-2  p-1 shadow-lg border border-white/30 focus-within:border-primary transition-all">
+              <div className="flex items-center bg-white/95 backdrop-blur-md rounded-none gap-2  p-1 shadow-lg border border-white/30 focus-within:border-primary transition-all">
                 <Input
                   type="email"
                   value={email}
@@ -237,7 +237,7 @@ export const Footer: React.FC<FooterProps> = ({
                   type="submit"
                   variant="primary"
                   size="md"
-                  className=" text-[10px]  sm:text-xs uppercase tracking-wider   rounded-lg shadow-md"
+                  className=" text-[10px]  sm:text-xs uppercase tracking-wider   rounded-none shadow-md"
                 >
                   {isSubscribed ? 'DONE' : 'SUBSCRIBE'}
                 </Button>
@@ -336,7 +336,6 @@ export const Footer: React.FC<FooterProps> = ({
           </div>
         </div>
       </div>
-
     </footer>
   );
 };

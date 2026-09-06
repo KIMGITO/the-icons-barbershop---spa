@@ -72,7 +72,7 @@ export const TestimonialsSection: React.FC = () => {
         <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
          
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold text-white tracking-tight leading-tight mt-2 mb-3">
-            Hear  from other  <span className="text-primary">Icons </span>.
+            What other  <span className="text-primary">Icons </span> Say.
           </h2>
           <p className="text-xs sm:text-sm text-muted-foreground-light font-light leading-relaxed">
            Reviews from clients who have experienced <span className='text-primary font-script'>The Icons Barbershop</span> .
@@ -83,7 +83,7 @@ export const TestimonialsSection: React.FC = () => {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-card border border-white/10 rounded-2xl p-6 animate-pulse">
+              <div key={i} className="bg-card border border-white/10 rounded-none p-6 animate-pulse">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-11 h-11 rounded-full bg-muted/50" />
                   <div className="space-y-1.5">
@@ -107,7 +107,7 @@ export const TestimonialsSection: React.FC = () => {
               return (
                 <div
                   key={review.id}
-                  className="group bg-card border border-white/10 hover:border-primary/50 rounded-2xl p-6 flex flex-col justify-between space-y-4 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5"
+                  className="group bg-card border border-white/10 hover:border-primary/50 rounded-none p-6 flex flex-col justify-between space-y-4 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5"
                 >
                   <div className="space-y-4">
                     {/* Quote Icon + Stars */}

@@ -18,12 +18,12 @@ export function CalendarNav({ formattedTitle, onPrev, onNext, onToday }: Calenda
       </div>
 
       {/* Nav controls */}
-      <div className="flex items-center gap-1 rounded-xl border border-border bg-card p-1 self-start sm:self-auto shrink-0">
+      <div className="flex items-center gap-1 rounded-none border border-border bg-card p-1 self-start sm:self-auto shrink-0">
         <button
           type="button"
           onClick={onPrev}
           aria-label="Previous date"
-          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+          className="p-1.5 rounded-none text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
@@ -31,7 +31,7 @@ export function CalendarNav({ formattedTitle, onPrev, onNext, onToday }: Calenda
         <button
           type="button"
           onClick={onToday}
-          className="px-3 py-1 text-xs font-bold rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer"
+          className="px-3 py-1 text-xs font-bold rounded-none bg-primary text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer"
         >
           Today
         </button>
@@ -40,7 +40,7 @@ export function CalendarNav({ formattedTitle, onPrev, onNext, onToday }: Calenda
           type="button"
           onClick={onNext}
           aria-label="Next date"
-          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+          className="p-1.5 rounded-none text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
         >
           <ChevronRight className="w-4 h-4" />
         </button>

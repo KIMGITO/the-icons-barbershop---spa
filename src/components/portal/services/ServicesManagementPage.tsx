@@ -214,13 +214,13 @@ export const ServicesManagementPage: React.FC = () => {
       {activeTab === 'services' ? (
         <>
           {/* Filter Bar */}
-          <div className="bg-card p-3.5 rounded-xl border border-border grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="bg-card p-3.5 rounded-none border border-border grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <Input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search services by title or description..."
-              className="rounded-lg py-1.5 text-xs"
+              className="rounded-none py-1.5 text-xs"
               icon={<Search className="w-3.5 h-3.5" />}
             />
 
@@ -228,7 +228,7 @@ export const ServicesManagementPage: React.FC = () => {
               <ThemeSelect
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-full bg-input border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary capitalize"
+                className="w-full bg-input border border-border rounded-none px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary capitalize"
               >
                 {categories.map(c => (
                   <option key={c} value={c} >
@@ -250,7 +250,7 @@ export const ServicesManagementPage: React.FC = () => {
               return (
                 <div
                   key={service.id}
-                  className="bg-card border border-border hover:border-primary/40 rounded-2xl p-4 flex flex-col justify-between space-y-3 transition-all"
+                  className="bg-card border border-border hover:border-primary/40 rounded-none p-4 flex flex-col justify-between space-y-3 transition-all"
                 >
                   <div className="space-y-2">
                     <div className="flex items-start justify-between gap-2">
@@ -323,7 +323,7 @@ export const ServicesManagementPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => deleteService(service.id)}
-                        className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive transition-colors"
+                        className="p-1.5 rounded-none text-muted-foreground hover:text-destructive transition-colors"
                         title="Delete Service"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -336,7 +336,7 @@ export const ServicesManagementPage: React.FC = () => {
           </div>
         </>
       ) : (
-        <div className="bg-card p-5 rounded-2xl border border-border space-y-4">
+        <div className="bg-card p-5 rounded-none border border-border space-y-4">
           <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
            Service Categories
           </h2>
@@ -348,7 +348,7 @@ export const ServicesManagementPage: React.FC = () => {
       {/* Add / Edit Service Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="relative w-full max-w-xl bg-card border border-border rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4 max-h-[92vh] overflow-y-auto">
+          <div className="relative w-full max-w-xl bg-card border border-border rounded-none shadow-2xl p-5 sm:p-6 space-y-4 max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="text-base font-bold text-foreground">
                 {editingService ? `Edit Service: ${editingService.name}` : 'Add New Service'}
@@ -356,14 +356,14 @@ export const ServicesManagementPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 rounded-lg text-muted-foreground hover:text-foreground"
+                className="p-1 rounded-none text-muted-foreground hover:text-foreground"
               >
                 ✕
               </button>
             </div>
 
             {error && (
-              <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-xl text-xs text-destructive">
+              <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-none text-xs text-destructive">
                 {error}
               </div>
             )}
@@ -378,7 +378,7 @@ export const ServicesManagementPage: React.FC = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Royal Hot Towel Beard Sculpting"
-                  className="rounded-xl py-2 text-xs"
+                  className="rounded-none py-2 text-xs"
                   required
                 />
               </div>
@@ -392,7 +392,7 @@ export const ServicesManagementPage: React.FC = () => {
                   value={slug}
                   onChange={(e) => setSlug(e.target.value)}
                   placeholder="e.g. royal-beard-sculpt"
-                  className="rounded-xl py-2 text-xs font-mono"
+                  className="rounded-none py-2 text-xs font-mono"
                 />
                 <p className="text-[9px] text-muted-foreground">Leave blank to auto-generate from name</p>
               </div>
@@ -405,7 +405,7 @@ export const ServicesManagementPage: React.FC = () => {
                   <ThemeSelect
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full bg-input border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary capitalize"
+                    className="w-full bg-input border border-border rounded-none px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary capitalize"
                   >
                     {serviceCategories && serviceCategories.length > 0 ? (
                       serviceCategories.map(cat => (
@@ -434,7 +434,7 @@ export const ServicesManagementPage: React.FC = () => {
                     onChange={(e) => setPriceKsh(Number(e.target.value))}
                     min={100}
                     step={50}
-                    className="rounded-xl py-2 text-xs font-mono"
+                    className="rounded-none py-2 text-xs font-mono"
                     required
                   />
                 </div>
@@ -449,7 +449,7 @@ export const ServicesManagementPage: React.FC = () => {
                     onChange={(e) => setDurationMinutes(Number(e.target.value))}
                     min={10}
                     step={5}
-                    className="rounded-xl py-2 text-xs font-mono"
+                    className="rounded-none py-2 text-xs font-mono"
                     required
                   />
                 </div>
@@ -465,7 +465,7 @@ export const ServicesManagementPage: React.FC = () => {
                   onChange={(e) => setDescription(e.target.value)}
                   rows={2}
                   placeholder="Detail what ritual products, techniques, and client care this includes..."
-                  className="rounded-xl p-2.5 text-xs"
+                  className="rounded-none p-2.5 text-xs"
                 />
               </div>
 
@@ -485,7 +485,7 @@ export const ServicesManagementPage: React.FC = () => {
                 <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                   Assign Providers Qualified for this Service ({selectedProviderIds.length})
                 </label>
-                <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto p-1 bg-muted/20 rounded-xl border border-border">
+                <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto p-1 bg-muted/20 rounded-none border border-border">
                   {providers.map(p => {
                     const isSelected = selectedProviderIds.includes(p.id);
                     return (
@@ -493,7 +493,7 @@ export const ServicesManagementPage: React.FC = () => {
                         key={p.id}
                         type="button"
                         onClick={() => toggleProvider(p.id)}
-                        className={`flex items-center justify-between p-2 rounded-lg text-xs text-left border transition-all ${
+                        className={`flex items-center justify-between p-2 rounded-none text-xs text-left border transition-all ${
                           isSelected
                             ? 'border-primary bg-primary/10 text-foreground font-semibold'
                             : 'border-border bg-card text-muted-foreground hover:text-foreground'
@@ -515,7 +515,7 @@ export const ServicesManagementPage: React.FC = () => {
                 <ThemeSelect
                   value={status}
                   onChange={(e) => setStatus(e.target.value as any)}
-                  className="w-full bg-input border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary"
+                  className="w-full bg-input border border-border rounded-none px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary"
                 >
                   <option value="active">Active (Available for customer booking)</option>
                   <option value="inactive">Inactive (Hidden)</option>

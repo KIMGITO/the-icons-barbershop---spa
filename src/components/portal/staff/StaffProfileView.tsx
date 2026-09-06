@@ -163,7 +163,7 @@ export const StaffProfileView: React.FC = () => {
       </div>
 
       {currentProvider && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 items-start bg-card p-5 rounded-2xl border border-border">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 items-start bg-card p-5 rounded-none border border-border">
           <div className="  sm:col-span-1">
             <ImageUploader
             currentImageUrl={avatarUrl}
@@ -185,7 +185,7 @@ export const StaffProfileView: React.FC = () => {
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="rounded-xl py-2 text-xs font-mono"
+              className="rounded-none py-2 text-xs font-mono"
               icon={<Phone className="w-3.5 h-3.5" />}
               required
             />
@@ -200,7 +200,7 @@ export const StaffProfileView: React.FC = () => {
               value={instagram}
               onChange={(e) => setInstagram(e.target.value)}
               placeholder="@yourhandle"
-              className="rounded-xl py-2 text-xs"
+              className="rounded-none py-2 text-xs"
             />
           </div>
 
@@ -214,7 +214,7 @@ export const StaffProfileView: React.FC = () => {
               onChange={(e) => setBio(e.target.value)}
               rows={3}
               placeholder="Describe your craft, scissor techniques, hot towel rituals, and background..."
-              className="rounded-xl p-2.5 text-xs"
+              className="rounded-none p-2.5 text-xs"
             />
           </div>
         </div>
@@ -223,7 +223,7 @@ export const StaffProfileView: React.FC = () => {
 
       {/* Services Assigned by Management */}
       {currentProvider && assignedServices.length > 0 && (
-        <div className="bg-card p-5 rounded-2xl border border-border space-y-3">
+        <div className="bg-card p-5 rounded-none border border-border space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
               <Scissors className="w-3.5 h-3.5 text-primary" />
@@ -238,7 +238,7 @@ export const StaffProfileView: React.FC = () => {
             {assignedServices.map((s: any) => (
               <div
                 key={s.id}
-                className="p-3 bg-muted/40 rounded-xl border border-border flex items-center justify-between text-xs"
+                className="p-3 bg-muted/40 rounded-none border border-border flex items-center justify-between text-xs"
               >
                 <div>
                   <span className="font-bold text-foreground block">{s.name}</span>
@@ -252,7 +252,7 @@ export const StaffProfileView: React.FC = () => {
       )}
 
       {/* Security & Password Section */}
-      <div className="bg-red-500/10 p-5 rounded-2xl border border-border space-y-4">
+      <div className="bg-red-500/10 p-5 rounded-none border border-border space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-bold text-destructive uppercase tracking-wider flex items-center gap-1.5">
             <Lock className="w-3.5 h-3.5 " />
@@ -280,7 +280,7 @@ export const StaffProfileView: React.FC = () => {
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 placeholder="Required for verification"
-                className="rounded-xl py-2 text-xs"
+                className="rounded-none py-2 text-xs"
                 required
               />
             </div>
@@ -296,7 +296,7 @@ export const StaffProfileView: React.FC = () => {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Min. 8 characters"
-                    className="rounded-xl py-2 text-xs pr-10"
+                    className="rounded-none py-2 text-xs pr-10"
                     required
                   />
                   <button
@@ -318,7 +318,7 @@ export const StaffProfileView: React.FC = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Repeat new password"
-                  className="rounded-xl py-2 text-xs"
+                  className="rounded-none py-2 text-xs"
                   required
                 />
               </div>

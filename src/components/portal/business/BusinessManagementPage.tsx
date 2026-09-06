@@ -168,7 +168,7 @@ export const BusinessManagementPage: React.FC = () => {
           </div>
 
           {/* Brand Imagery (Logo & Cover) */}
-      <div className="bg-card p-5 rounded-2xl border border-border space-y-4">
+      <div className="bg-card p-5 rounded-none border border-border space-y-4">
         <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
        Imagery
         </h2>
@@ -201,7 +201,7 @@ export const BusinessManagementPage: React.FC = () => {
       </div>
 
       {/* Core Brand Details */}
-      <div className="bg-card p-5 rounded-2xl border border-border space-y-4">
+      <div className="bg-card p-5 rounded-none border border-border space-y-4">
         <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
           <Building2 className="w-3.5 h-3.5 text-primary" /> General Information
         </h2>
@@ -215,7 +215,7 @@ export const BusinessManagementPage: React.FC = () => {
               type="text"
               value={formData.name}
               onChange={(e) => handleChange('name', e.target.value)}
-              className="rounded-xl py-2 text-xs"
+              className="rounded-none py-2 text-xs"
               required
             />
           </div>
@@ -228,7 +228,7 @@ export const BusinessManagementPage: React.FC = () => {
               type="text"
               value={formData.description}
               onChange={(e) => handleChange('description', e.target.value)}
-              className="rounded-xl py-2 text-xs"
+              className="rounded-none py-2 text-xs"
             />
           </div>
         </div>
@@ -242,7 +242,7 @@ export const BusinessManagementPage: React.FC = () => {
               type="text"
               value={formData.phone}
               onChange={(e) => handleChange('phone', e.target.value)}
-              className="rounded-xl py-2 text-xs font-mono"
+              className="rounded-none py-2 text-xs font-mono"
               icon={<Phone className="w-3.5 h-3.5" />}
               required
             />
@@ -256,7 +256,7 @@ export const BusinessManagementPage: React.FC = () => {
               type="email"
               value={formData.email}
               onChange={(e) => handleChange('email', e.target.value)}
-              className="rounded-xl py-2 text-xs"
+              className="rounded-none py-2 text-xs"
               icon={<Mail className="w-3.5 h-3.5" />}
               required
             />
@@ -265,7 +265,7 @@ export const BusinessManagementPage: React.FC = () => {
       </div>
 
       {/* Location Details */}
-      <div className="bg-card p-5 rounded-2xl border border-border space-y-4">
+      <div className="bg-card p-5 rounded-none border border-border space-y-4">
         <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
           <MapPin className="w-3.5 h-3.5 text-primary" /> Physical Location & Access
         </h2>
@@ -279,7 +279,7 @@ export const BusinessManagementPage: React.FC = () => {
               type="text"
               value={formData.address}
               onChange={(e) => handleChange('address', e.target.value)}
-              className="rounded-xl py-2 text-xs"
+              className="rounded-none py-2 text-xs"
               required
             />
           </div>
@@ -292,7 +292,7 @@ export const BusinessManagementPage: React.FC = () => {
               type="text"
               value={formData.neighborhood}
               onChange={(e) => handleChange('neighborhood', e.target.value)}
-              className="rounded-xl py-2 text-xs"
+              className="rounded-none py-2 text-xs"
             />
           </div>
         </div>
@@ -306,14 +306,14 @@ export const BusinessManagementPage: React.FC = () => {
             value={formData.locationDetails || ''}
             onChange={(e) => handleChange('locationDetails', e.target.value)}
             rows={2}
-            className="rounded-xl p-2.5 text-xs"
+            className="rounded-none p-2.5 text-xs"
           />
         </div>
       </div>
 
      
       {/* Operating Hours */}
-      <div className="bg-card p-5 rounded-2xl border border-border space-y-4">
+      <div className="bg-card p-5 rounded-none border border-border space-y-4">
         <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
           <Clock className="w-3.5 h-3.5 text-primary" /> Shop Operating Hours
         </h2>
@@ -327,7 +327,7 @@ export const BusinessManagementPage: React.FC = () => {
             { key: 'saturday' as const, label: 'Saturday' },
             { key: 'sunday' as const, label: 'Sunday & Public Holidays' },
           ]).map(({ key, label }) => (
-            <div key={key} className="space-y-2 p-3 bg-background rounded-xl border border-border">
+            <div key={key} className="space-y-2 p-3 bg-background rounded-none border border-border">
               <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 {label}
               </span>
@@ -338,7 +338,7 @@ export const BusinessManagementPage: React.FC = () => {
                     type="time"
                     value={formData.openingHours[key].start}
                     onChange={(e) => handleHoursChange(key, 'start', e.target.value)}
-                    className="w-full rounded-lg border border-border bg-card px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full rounded-none border border-border bg-card px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
                 <span className="text-muted-foreground text-xs mt-3">–</span>
@@ -348,7 +348,7 @@ export const BusinessManagementPage: React.FC = () => {
                     type="time"
                     value={formData.openingHours[key].end}
                     onChange={(e) => handleHoursChange(key, 'end', e.target.value)}
-                    className="w-full rounded-lg border border-border bg-card px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full rounded-none border border-border bg-card px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -358,7 +358,7 @@ export const BusinessManagementPage: React.FC = () => {
       </div>
 
       {/* Social & Messaging Channels */}
-      <div className="bg-card p-5 rounded-2xl border border-border space-y-4">
+      <div className="bg-card p-5 rounded-none border border-border space-y-4">
         <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
           <Share2 className="w-3.5 h-3.5 text-primary" /> Client Messaging & Channels
         </h2>
@@ -373,7 +373,7 @@ export const BusinessManagementPage: React.FC = () => {
               value={formData.socialLinks.whatsapp}
               onChange={(e) => handleSocialChange('whatsapp', e.target.value)}
               placeholder="+254 7XX XXX XXX"
-              className="rounded-xl py-2 text-xs"
+              className="rounded-none py-2 text-xs"
             />
           </div>
 
@@ -386,7 +386,7 @@ export const BusinessManagementPage: React.FC = () => {
               value={formData.socialLinks.instagram || ''}
               onChange={(e) => handleSocialChange('instagram', e.target.value)}
               placeholder="@theiconsbarber.ke"
-              className="rounded-xl py-2 text-xs"
+              className="rounded-none py-2 text-xs"
             />
           </div>
 
@@ -399,7 +399,7 @@ export const BusinessManagementPage: React.FC = () => {
               value={formData.socialLinks.facebook || ''}
               onChange={(e) => handleSocialChange('facebook', e.target.value)}
               placeholder="The Icons Barber Nairobi"
-              className="rounded-xl py-2 text-xs"
+              className="rounded-none py-2 text-xs"
             />
           </div>
         </div>

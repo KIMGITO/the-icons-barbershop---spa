@@ -106,7 +106,7 @@ export const Navigation: React.FC = () => {
               <button
                 id="main-menu-toggle-btn"
                 onClick={() => setIsMenuOpen(true)}
-                className="flex items-center justify-center p-2.5 sm:px-3 sm:py-2.5 rounded-lg border border-white/20 bg-black/40 hover:bg-white/10 hover:border-white/40 text-white transition-all duration-200 cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+                className="flex items-center justify-center p-2.5 sm:px-3 sm:py-2.5 rounded-none border border-white/20 bg-black/40 hover:bg-white/10 hover:border-white/40 text-white transition-all duration-200 cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
                 aria-label="Open Navigation Menu"
                 aria-expanded={isMenuOpen}
               >
@@ -173,7 +173,7 @@ export const Navigation: React.FC = () => {
                     <button
                       key={link.label}
                       onClick={() => handleNavClick(link.path)}
-                      className={`w-full text-left p-3.5 rounded-lg transition-all flex items-center justify-between group cursor-pointer ${
+                      className={`w-full text-left p-3.5 rounded-none transition-all flex items-center justify-between group cursor-pointer ${
                         isActive
                           ? 'nav-item-drawer-active'
                           : 'text-foreground hover:bg-secondary hover:text-white'

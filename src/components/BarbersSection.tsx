@@ -57,11 +57,9 @@ export const BarbersSection: React.FC<BarbersSectionProps> = ({ isStandalonePage
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 sm:mb-10 lg:mb-12 gap-4">
           <div className="max-w-xl text-left">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight mb-2">
-              Meet Our <span className="text-primary"> Master Artisans </span>
+              Meet Our <span className="text-primary"> Masters </span>
             </h2>
-            <p className="text-muted-foreground-light text-xs sm:text-sm md:text-base leading-relaxed font-light max-w-xl">
-              Elite specialists hand-selected for surgical scissor precision, traditional hot-towel rituals, and white-glove client etiquette.
-            </p>
+            
           </div>
 
           
@@ -83,7 +81,7 @@ export const BarbersSection: React.FC<BarbersSectionProps> = ({ isStandalonePage
               <div
                 id={`barber-card-${b0.slug}`}
                 onClick={() => openBarberModal(b0)}
-                className="group relative aspect-[4/3.9] bg-secondary rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/80 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10 backdrop-blur-md"
+                className="group relative aspect-[4/3.9] bg-secondary rounded-none sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/80 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10 backdrop-blur-md"
               >
                 <img
                   src={b0.avatarUrl}
@@ -113,7 +111,7 @@ export const BarbersSection: React.FC<BarbersSectionProps> = ({ isStandalonePage
               <div
                 id={`barber-card-${b3.slug}`}
                 onClick={() => openBarberModal(b3)}
-                className="group relative aspect-[4/4.3] bg-secondary rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/80 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10 backdrop-blur-md"
+                className="group relative aspect-[4/4.3] bg-secondary rounded-none sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/80 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10 backdrop-blur-md"
               >
                 <img
                   src={b3.avatarUrl}
@@ -146,7 +144,7 @@ export const BarbersSection: React.FC<BarbersSectionProps> = ({ isStandalonePage
               <div
                 id={`barber-card-${b1.slug}`}
                 onClick={() => openBarberModal(b1)}
-                className="group relative aspect-[3/4.5] sm:aspect-[3/4.6] bg-secondary rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/80 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10 backdrop-blur-md"
+                className="group relative aspect-[3/4.5] sm:aspect-[3/4.6] bg-secondary rounded-none sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/80 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10 backdrop-blur-md"
               >
                 <img
                   src={b1.avatarUrl}
@@ -176,7 +174,7 @@ export const BarbersSection: React.FC<BarbersSectionProps> = ({ isStandalonePage
               <div
                 id={`barber-card-${b4.slug}`}
                 onClick={() => openBarberModal(b4)}
-                className="group relative aspect-[4/3.8] bg-secondary rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/80 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10 backdrop-blur-md"
+                className="group relative aspect-[4/3.8] bg-secondary rounded-none sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/80 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10 backdrop-blur-md"
               >
                 <img
                   src={b4.avatarUrl}
@@ -209,7 +207,7 @@ export const BarbersSection: React.FC<BarbersSectionProps> = ({ isStandalonePage
               <div
                 id={`barber-card-${b2.slug}`}
                 onClick={() => openBarberModal(b2)}
-                className="group relative aspect-[4/3.9] bg-secondary rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/80 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10 backdrop-blur-md"
+                className="group relative aspect-[4/3.9] bg-secondary rounded-none sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/80 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10 backdrop-blur-md"
               >
                 <img
                   src={b2.avatarUrl}
@@ -239,7 +237,7 @@ export const BarbersSection: React.FC<BarbersSectionProps> = ({ isStandalonePage
               <div
                 id={`barber-card-${b5.slug}`}
                 onClick={() => openBarberModal(b5)}
-                className="group relative aspect-[4/4.3] bg-secondary rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/80 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10 backdrop-blur-md"
+                className="group relative aspect-[4/4.3] bg-secondary rounded-none sm:rounded-3xl overflow-hidden cursor-pointer border border-white/10 hover:border-primary/80 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/10 backdrop-blur-md"
               >
                 <img
                   src={b5.avatarUrl}
@@ -284,7 +282,7 @@ export const BarbersSection: React.FC<BarbersSectionProps> = ({ isStandalonePage
             onClick={closeBarberModal}
           >
             <div 
-              className="relative max-w-2xl w-full bg-card border border-white/15 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl my-auto text-left"
+              className="relative max-w-2xl w-full bg-card border border-white/15 rounded-none sm:rounded-3xl overflow-hidden shadow-2xl my-auto text-left"
               onClick={e => e.stopPropagation()}
             >
               {/* Close Button */}
@@ -379,7 +377,7 @@ export const BarbersSection: React.FC<BarbersSectionProps> = ({ isStandalonePage
                       .map(service => (
                         <div 
                           key={service.id} 
-                          className="p-2.5 rounded-xl bg-white/[0.02] border border-white/10 flex items-center justify-between"
+                          className="p-2.5 rounded-none bg-white/[0.02] border border-white/10 flex items-center justify-between"
                         >
                           <div className="min-w-0 pr-2">
                             <p className="text-xs font-semibold text-white truncate">{service.name}</p>

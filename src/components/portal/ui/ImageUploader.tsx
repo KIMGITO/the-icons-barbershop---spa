@@ -386,7 +386,7 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="relative w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl p-4 sm:p-5 space-y-4">
+      <div className="relative w-full max-w-lg bg-card border border-border rounded-none shadow-2xl p-4 sm:p-5 space-y-4">
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
             <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
@@ -401,7 +401,7 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
             type="button"
             onClick={onCancel}
             disabled={applying}
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors shrink-0"
+            className="p-1.5 rounded-none text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors shrink-0"
             aria-label="Cancel cropping"
           >
             <X className="w-4 h-4" />
@@ -410,7 +410,7 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
 
         <div
           ref={containerRef}
-          className="relative w-full overflow-hidden rounded-xl bg-black/50 border border-border select-none"
+          className="relative w-full overflow-hidden rounded-none bg-black/50 border border-border select-none"
           style={{
             aspectRatio: `${aspectRatio}`,
             touchAction: 'none',
@@ -456,7 +456,7 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
             <div className="absolute inset-x-0 top-2/3 h-px bg-white/25" />
           </div>
 
-          <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/10 rounded-xl" />
+          <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/10 rounded-none" />
 
           {/* Busy overlay */}
           {applying && (
@@ -475,7 +475,7 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
             type="button"
             onClick={handleZoomOut}
             disabled={applying}
-            className="p-2 rounded-lg bg-muted/50 text-foreground hover:bg-muted transition-colors disabled:opacity-40"
+            className="p-2 rounded-none bg-muted/50 text-foreground hover:bg-muted transition-colors disabled:opacity-40"
             title="Zoom out"
           >
             <ZoomOut className="w-4 h-4" />
@@ -487,7 +487,7 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
             type="button"
             onClick={handleZoomIn}
             disabled={applying}
-            className="p-2 rounded-lg bg-muted/50 text-foreground hover:bg-muted transition-colors disabled:opacity-40"
+            className="p-2 rounded-none bg-muted/50 text-foreground hover:bg-muted transition-colors disabled:opacity-40"
             title="Zoom in"
           >
             <ZoomIn className="w-4 h-4" />
@@ -496,7 +496,7 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
             type="button"
             onClick={handleReset}
             disabled={applying}
-            className="p-2 rounded-lg bg-muted/50 text-foreground hover:bg-muted transition-colors disabled:opacity-40"
+            className="p-2 rounded-none bg-muted/50 text-foreground hover:bg-muted transition-colors disabled:opacity-40"
             title="Reset view"
           >
             <RefreshCw className="w-4 h-4" />
@@ -747,7 +747,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   };
 
   const sourceButtonClass =
-    'flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border transition-all bg-card text-foreground border-border hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed';
+    'flex items-center gap-1 px-2.5 py-1.5 rounded-none text-[11px] font-semibold border transition-all bg-card text-foreground border-border hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed';
 
   /* ------------------------------ Render ------------------------------ */
 
@@ -770,7 +770,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           if (!disabled && !isUploading && !previewUrl)
             fileInputRef.current?.click();
         }}
-        className={`relative group rounded-xl border border-dashed transition-all duration-200 overflow-hidden flex flex-col items-center justify-center p-3   text-center ${getAspectClass()} ${
+        className={`relative group rounded-none border border-dashed transition-all duration-200 overflow-hidden flex flex-col items-center justify-center p-3   text-center ${getAspectClass()} ${
           isDragOver
             ? 'border-primary bg-primary/10 cursor-pointer'
             : previewUrl
@@ -813,7 +813,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             <img
               src={previewUrl}
               alt="Preview"
-              className="w-full h-full object-cover rounded-lg"
+              className="w-full h-full object-cover rounded-none"
               referrerPolicy="no-referrer"
             />
 
@@ -921,7 +921,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 
             {sourceMode === 'url' && (
               <div
-                className="w-full flex items-center gap-1.5 bg-card/80 border border-border rounded-lg p-1.5"
+                className="w-full flex items-center gap-1.5 bg-card/80 border border-border rounded-none p-1.5"
                 onClick={(e) => e.stopPropagation()}
               >
                 <Input

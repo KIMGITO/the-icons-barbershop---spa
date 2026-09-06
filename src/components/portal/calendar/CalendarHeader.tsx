@@ -89,16 +89,16 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   ];
 
   return (
-    <div className="p-2 sm:p-4 rounded-2xl flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-3 shadow-xs">
+    <div className="p-2 sm:p-4 rounded-none flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-3 shadow-xs">
       {/* Top row on mobile: view toggle + new booking. Left side on desktop. */}
       <div className="flex items-center justify-between gap-2 md:justify-start md:gap-4">
-        <div className="flex items-center bg-input p-1 rounded-xl border border-border text-xs">
+        <div className="flex items-center bg-input p-1 rounded-none border border-border text-xs">
           {(['day', 'week', 'month'] as CalendarViewMode[]).map((mode) => (
             <button
               key={mode}
               type="button"
               onClick={() => onViewModeChange(mode)}
-              className={`px-3 py-1.5 rounded-lg font-bold capitalize transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-none font-bold capitalize transition-all cursor-pointer ${
                 viewMode === mode
                   ? 'bg-primary text-black shadow-xs font-extrabold'
                   : 'text-muted-foreground hover:text-foreground'

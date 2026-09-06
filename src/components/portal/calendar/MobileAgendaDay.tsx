@@ -59,7 +59,7 @@ export const MobileAgendaDay: React.FC<MobileAgendaDayProps> = ({
             key={booking.id}
             type="button"
             onClick={() => onBookingClick(booking)}
-            className={`w-full text-left p-3 rounded-2xl border flex items-center gap-3 active:scale-[0.99] transition-transform ${
+            className={`w-full text-left p-3 rounded-none border flex items-center gap-3 active:scale-[0.99] transition-transform ${
               statusStyles[booking.status] || 'border-border bg-input'
             }`}
           >
@@ -108,7 +108,7 @@ export const MobileAgendaDay: React.FC<MobileAgendaDayProps> = ({
       <button
         type="button"
         onClick={onAddClick}
-        className="w-full py-3 rounded-2xl border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors flex items-center justify-center gap-1.5 text-xs font-semibold cursor-pointer"
+        className="w-full py-3 rounded-none border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors flex items-center justify-center gap-1.5 text-xs font-semibold cursor-pointer"
       >
         <Plus className="w-3.5 h-3.5" />
         Add Booking

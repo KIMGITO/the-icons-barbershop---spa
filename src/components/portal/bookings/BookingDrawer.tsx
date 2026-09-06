@@ -111,7 +111,7 @@ export const BookingDrawer: React.FC = () => {
               type="button"
               onClick={toggleDrawerCollapsed}
               title="Expand drawer"
-              className="p-2 rounded-xl bg-input hover:bg-primary/20 text-primary border border-border transition-colors cursor-pointer"
+              className="p-2 rounded-none bg-input hover:bg-primary/20 text-primary border border-border transition-colors cursor-pointer"
             >
               <ChevronLeft className="w-5 h-5 hidden sm:block" />
               <Maximize2 className="w-4 h-4 sm:hidden" />
@@ -123,7 +123,7 @@ export const BookingDrawer: React.FC = () => {
               type="button"
               onClick={closeDrawer}
               title="Close drawer"
-              className="p-2 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              className="p-2 rounded-none hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -157,14 +157,14 @@ export const BookingDrawer: React.FC = () => {
                   type="button"
                   onClick={toggleDrawerCollapsed}
                   title="Minimize drawer to scan calendar"
-                  className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+                  className="p-1.5 rounded-none text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
                 >
                   <Minimize2 className="w-4 h-4" />
                 </button>
                 <button
                   type="button"
                   onClick={closeDrawer}
-                  className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+                  className="p-1.5 rounded-none text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -188,7 +188,7 @@ export const BookingDrawer: React.FC = () => {
               ) : selectedBooking ? (
                 <div className="space-y-4 text-xs">
                   {/* Status Banner */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-muted/30 border border-border">
+                  <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-none bg-muted/30 border border-border">
                     <div>
                       <div className="text-[10px] uppercase font-bold text-muted-foreground">Status</div>
                       <div className="mt-1">{getStatusBadge(selectedBooking.status)}</div>
@@ -204,7 +204,7 @@ export const BookingDrawer: React.FC = () => {
                   </div>
 
                   {/* Customer Information */}
-                  <div className="p-4 rounded-xl bg-card border border-border space-y-2">
+                  <div className="p-4 rounded-none bg-card border border-border space-y-2">
                     <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                       Client Profile
                     </div>
@@ -224,7 +224,7 @@ export const BookingDrawer: React.FC = () => {
                   </div>
 
                   {/* Service & Specialist Details */}
-                  <div className="p-4 rounded-xl bg-card border border-border space-y-3">
+                  <div className="p-4 rounded-none bg-card border border-border space-y-3">
                     <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                       Service & Specialist
                     </div>
@@ -256,7 +256,7 @@ export const BookingDrawer: React.FC = () => {
                   </div>
 
                   {/* Schedule Details */}
-                  <div className="p-4 rounded-xl bg-card border border-border space-y-2">
+                  <div className="p-4 rounded-none bg-card border border-border space-y-2">
                     <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                       Appointment Time
                     </div>
@@ -274,7 +274,7 @@ export const BookingDrawer: React.FC = () => {
 
                   {/* Financial Breakdown */}
                   {depositBreakdown && (
-                    <div className="p-4 rounded-xl bg-card border border-border space-y-2 font-mono">
+                    <div className="p-4 rounded-none bg-card border border-border space-y-2 font-mono">
                       <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground font-sans">
                         Financial Summary
                       </div>
@@ -297,7 +297,7 @@ export const BookingDrawer: React.FC = () => {
 
                   {/* Notes */}
                   {(selectedBooking.specialRequests || selectedBooking.staffNotes) && (
-                    <div className="p-3.5 rounded-xl bg-muted/20 border border-border space-y-1.5">
+                    <div className="p-3.5 rounded-none bg-muted/20 border border-border space-y-1.5">
                       <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                         Notes
                       </div>

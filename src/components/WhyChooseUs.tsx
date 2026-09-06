@@ -61,11 +61,11 @@ export const WhyChooseUs: React.FC = () => {
             return (
               <div 
                 key={index}
-                className="relative p-6 sm:p-7 bg-card border border-border hover:border-primary/60 rounded-2xl flex flex-col justify-between space-y-6 transition-all duration-300 group hover:shadow-xl hover:shadow-primary/5"
+                className="relative p-6 sm:p-7 bg-card border border-border hover:border-primary/60 rounded-none flex flex-col justify-between space-y-6 transition-all duration-300 group hover:shadow-xl hover:shadow-primary/5"
               >
                 <div>
                   <div className="flex items-center justify-between mb-5">
-                    <div className="w-11 h-11 rounded-xl bg-secondary border border-border-subtle flex items-center justify-center text-primary group-hover:border-primary/50 group-hover:bg-secondary-hover transition-colors">
+                    <div className="w-11 h-11 rounded-none bg-secondary border border-border-subtle flex items-center justify-center text-primary group-hover:border-primary/50 group-hover:bg-secondary-hover transition-colors">
                       <IconComponent className="w-5 h-5" />
                     </div>
                     <span className="text-xs font-mono text-muted-foreground/60 group-hover:text-primary transition-colors">

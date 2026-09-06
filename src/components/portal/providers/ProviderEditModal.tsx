@@ -145,7 +145,7 @@ export const ProviderEditModal: React.FC<ProviderEditModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-card border border-border rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4 max-h-[92vh] overflow-y-auto">
+      <div className="relative w-full max-w-2xl bg-card border border-border rounded-none shadow-2xl p-5 sm:p-6 space-y-4 max-h-[92vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border pb-3">
           <div>
@@ -159,14 +159,14 @@ export const ProviderEditModal: React.FC<ProviderEditModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
+            className="p-1.5 rounded-none text-muted-foreground hover:text-foreground hover:bg-muted"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {error && (
-          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-xl text-xs text-destructive">
+          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-none text-xs text-destructive">
             {error}
           </div>
         )}
@@ -197,7 +197,7 @@ export const ProviderEditModal: React.FC<ProviderEditModalProps> = ({
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder="e.g. Samuel"
-                    className="rounded-xl py-2 text-xs"
+                    className="rounded-none py-2 text-xs"
                     required
                   />
                 </div>
@@ -210,7 +210,7 @@ export const ProviderEditModal: React.FC<ProviderEditModalProps> = ({
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     placeholder="e.g. Mwangi"
-                    className="rounded-xl py-2 text-xs"
+                    className="rounded-none py-2 text-xs"
                     required
                   />
                 </div>
@@ -225,7 +225,7 @@ export const ProviderEditModal: React.FC<ProviderEditModalProps> = ({
                   value={slug}
                   onChange={(e) => setSlug(e.target.value)}
                   placeholder="e.g. samuel-mwangi"
-                  className="rounded-xl py-2 text-xs font-mono"
+                  className="rounded-none py-2 text-xs font-mono"
                 />
                 <p className="text-[9px] text-muted-foreground">Leave blank to auto-generate from name</p>
               </div>
@@ -273,7 +273,7 @@ export const ProviderEditModal: React.FC<ProviderEditModalProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="staff@theicons.co.ke"
-                    className="rounded-xl py-2 text-xs"
+                    className="rounded-none py-2 text-xs"
                     required
                   />
                 </div>
@@ -287,7 +287,7 @@ export const ProviderEditModal: React.FC<ProviderEditModalProps> = ({
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+254 7XX XXX XXX"
-                    className="rounded-xl py-2 text-xs"
+                    className="rounded-none py-2 text-xs"
                     required
                   />
                 </div>
@@ -306,7 +306,7 @@ export const ProviderEditModal: React.FC<ProviderEditModalProps> = ({
               onChange={(e) => setBio(e.target.value)}
               rows={2}
               placeholder="e.g. Master barber specializing in scissor work, beard sculpture, and executive hair restorations."
-              className="rounded-xl p-2.5 text-xs"
+              className="rounded-none p-2.5 text-xs"
             />
           </div>
 
@@ -321,7 +321,7 @@ export const ProviderEditModal: React.FC<ProviderEditModalProps> = ({
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto p-1 bg-muted/20 rounded-xl border border-border">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto p-1 bg-muted/20 rounded-none border border-border">
               {services.map(s => {
                 const isSelected = selectedServices.includes(s.id);
                 return (
@@ -329,7 +329,7 @@ export const ProviderEditModal: React.FC<ProviderEditModalProps> = ({
                     key={s.id}
                     type="button"
                     onClick={() => toggleServiceSelection(s.id)}
-                    className={`flex items-center justify-between p-2 rounded-lg text-xs text-left border transition-all ${
+                    className={`flex items-center justify-between p-2 rounded-none text-xs text-left border transition-all ${
                       isSelected
                         ? 'border-primary bg-primary/10 text-foreground font-semibold'
                         : 'border-border bg-card text-muted-foreground hover:text-foreground'

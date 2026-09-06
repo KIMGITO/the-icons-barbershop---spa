@@ -62,9 +62,9 @@ export const LocationContactSection: React.FC<LocationContactSectionProps> = ({
           <div className="lg:col-span-5 flex flex-col space-y-3 sm:space-y-4 w-full">
             
             {/* Address & Direct Direction Buttons */}
-            <div className="p-3.5 sm:p-5  rounded-xl space-y-3">
+            <div className="p-3.5 sm:p-5  rounded-none space-y-3">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-secondary border border-border flex items-center justify-center text-primary shrink-0 mt-0.5">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-none bg-secondary border border-border flex items-center justify-center text-primary shrink-0 mt-0.5">
                   <MapPin className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
@@ -81,7 +81,7 @@ export const LocationContactSection: React.FC<LocationContactSectionProps> = ({
                   href={businessInfo.address.directionsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-base btn-primary text-[11px] sm:text-xs uppercase tracking-wider py-2 px-2.5 rounded-lg shadow-sm gap-1.5"
+                  className="btn-base btn-primary text-[11px] sm:text-xs uppercase tracking-wider py-2 px-2.5 rounded-none shadow-sm gap-1.5"
                 >
                   <NavIcon className="w-3 h-3" />
                   <span>Get Directions</span>
@@ -89,7 +89,7 @@ export const LocationContactSection: React.FC<LocationContactSectionProps> = ({
 
                 <a
                   href={`tel:${businessInfo.phone}`}
-                  className="btn-base btn-secondary text-[11px] sm:text-xs uppercase tracking-wider py-2 px-2.5 rounded-lg gap-1.5"
+                  className="btn-base btn-secondary text-[11px] sm:text-xs uppercase tracking-wider py-2 px-2.5 rounded-none gap-1.5"
                 >
                   <Phone className="w-3 h-3 text-primary" />
                   <span>Call Now</span>
@@ -132,7 +132,7 @@ export const LocationContactSection: React.FC<LocationContactSectionProps> = ({
 
           {/* Right Column: Google Maps Frame - REMOVED ON SMALL SCREENS (hidden on mobile/tablet, shown only on lg+) */}
           <div className="hidden lg:flex lg:col-span-7 flex-col">
-            <div className="relative w-full h-full min-h-[340px] bg-background border border-border rounded-xl overflow-hidden shadow-xl">
+            <div className="relative w-full h-full min-h-[340px] bg-background border border-border rounded-none overflow-hidden shadow-xl">
               
               {/* Map Iframe */}
               <iframe
@@ -148,7 +148,7 @@ export const LocationContactSection: React.FC<LocationContactSectionProps> = ({
               />
 
               {/* Map Floating Card */}
-              <div className="absolute top-3 left-3 right-3 sm:right-auto sm:max-w-xs bg-background/40 backdrop-blur-md border border-border p-3 rounded-lg shadow-xl">
+              <div className="absolute top-3 left-3 right-3 sm:right-auto sm:max-w-xs bg-background/40 backdrop-blur-md border border-border p-3 rounded-none shadow-xl">
                 <div className="flex items-center gap-1.5 text-[11px] font-bold text-primary uppercase tracking-wider mb-0.5">
                   <Pin className="w-3.5 h-3.5" />
                   <span>Location:</span>

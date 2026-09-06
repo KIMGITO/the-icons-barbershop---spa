@@ -153,7 +153,7 @@ export const MessagesDashboard: React.FC = () => {
             setActiveTab('sms');
             setTypeFilter('all');
           }}
-          className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${activeTab === 'sms' ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+          className={`px-4 py-2 rounded-none text-xs font-bold transition-all flex items-center gap-2 ${activeTab === 'sms' ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
         >
           <MessageSquare className="w-3.5 h-3.5" />
           SMS
@@ -163,7 +163,7 @@ export const MessagesDashboard: React.FC = () => {
             setActiveTab('email');
             setTypeFilter('all');
           }}
-          className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${activeTab === 'email' ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+          className={`px-4 py-2 rounded-none text-xs font-bold transition-all flex items-center gap-2 ${activeTab === 'email' ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
         >
           <Mail className="w-3.5 h-3.5" />
           Email
@@ -181,13 +181,13 @@ export const MessagesDashboard: React.FC = () => {
               ? 'Search by phone, name, receipt code...'
               : 'Search by email, subject...'
           }
-          className="rounded-lg py-1.5 text-xs"
+          className="rounded-none py-1.5 text-xs"
           icon={<Search className="w-3.5 h-3.5" />}
         />
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="w-full bg-input border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary"
+          className="w-full bg-input border border-border rounded-none px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary"
         >
           <option value="all">All Statuses</option>
           <option value="sent">Sent</option>
@@ -197,7 +197,7 @@ export const MessagesDashboard: React.FC = () => {
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
-          className="w-full bg-input border border-border rounded-lg px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary"
+          className="w-full bg-input border border-border rounded-none px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary"
         >
           <option value="all">All Types</option>
           {activeTab === 'sms' ? (
@@ -288,7 +288,7 @@ export const MessagesDashboard: React.FC = () => {
                     </span>
                   </div>
 
-                  <p className="text-xs text-muted-foreground leading-relaxed bg-muted/30 border border-border/60 rounded-lg p-2.5 whitespace-pre-line">
+                  <p className="text-xs text-muted-foreground leading-relaxed bg-muted/30 border border-border/60 rounded-none p-2.5 whitespace-pre-line">
                     {msg.message_body}
                   </p>
 
@@ -356,7 +356,7 @@ export const MessagesDashboard: React.FC = () => {
 
                   {/* Email Content Preview (Raw HTML stripped or handled) */}
                   <div
-                    className="text-xs text-muted-foreground leading-relaxed bg-muted/30 border border-border/60 rounded-lg p-2.5 max-h-32 overflow-y-auto"
+                    className="text-xs text-muted-foreground leading-relaxed bg-muted/30 border border-border/60 rounded-none p-2.5 max-h-32 overflow-y-auto"
                     dangerouslySetInnerHTML={{ __html: email.body_html }}
                   />
 

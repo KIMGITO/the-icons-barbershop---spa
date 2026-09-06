@@ -96,7 +96,7 @@ export const CustomTimePicker: React.FC<CustomTimePickerProps> = ({
         id={id}
         disabled={disabled}
         onClick={() => !disabled && setIsOpen(prev => !prev)}
-        className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border text-sm text-left transition-all ${
+        className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-none border text-sm text-left transition-all ${
           disabled 
             ? 'opacity-50 cursor-not-allowed bg-muted/40 border-border text-muted-foreground' 
             : 'cursor-pointer bg-input text-foreground hover:border-primary/50'
@@ -118,7 +118,7 @@ export const CustomTimePicker: React.FC<CustomTimePickerProps> = ({
 
       {/* Popover Time List */}
       {isOpen && (
-        <div className="absolute left-0 z-50 mt-1 w-64 rounded-2xl border border-border bg-card shadow-2xl p-2 flex flex-col max-h-72 animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute left-0 z-50 mt-1 w-64 rounded-none border border-border bg-card shadow-2xl p-2 flex flex-col max-h-72 animate-in fade-in zoom-in-95 duration-150">
           {/* Search/Filter header */}
           <div className="p-1.5 border-b border-border mb-1 flex items-center gap-2">
             <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
@@ -149,7 +149,7 @@ export const CustomTimePicker: React.FC<CustomTimePickerProps> = ({
                     ref={isSelected ? selectedItemRef : undefined}
                     type="button"
                     onClick={() => handleSelect(slot)}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-mono transition-colors ${
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-none text-xs font-mono transition-colors ${
                       isSelected
                         ? 'bg-primary/20 text-primary font-bold border border-primary/40'
                         : 'text-foreground hover:bg-muted/60'

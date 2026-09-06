@@ -25,7 +25,7 @@ export const MonthPlannerView: React.FC<MonthPlannerViewProps> = ({
   const prevMonthTotalDays = new Date(year, month, 0).getDate();
 
   return (
-    <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+    <div className="bg-card border border-border rounded-none overflow-hidden shadow-sm">
       {/* Weekday Header */}
       <div className="grid grid-cols-7 border-b border-border bg-muted/40 text-center py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-wider">
         {daysOfWeek.map((d) => (

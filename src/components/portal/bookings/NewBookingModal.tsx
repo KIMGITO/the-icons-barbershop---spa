@@ -132,7 +132,7 @@ export const NewBookingModal: React.FC<NewBookingModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl bg-card border border-border rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4 max-h-[92vh] overflow-y-auto">
+      <div className="relative w-full max-w-xl bg-card border border-border rounded-none shadow-2xl p-5 sm:p-6 space-y-4 max-h-[92vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border pb-3">
           <div>
@@ -146,14 +146,14 @@ export const NewBookingModal: React.FC<NewBookingModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
+            className="p-1.5 rounded-none text-muted-foreground hover:text-foreground hover:bg-muted"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {error && (
-          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-xl text-xs text-destructive">
+          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-none text-xs text-destructive">
             {error}
           </div>
         )}
@@ -170,7 +170,7 @@ export const NewBookingModal: React.FC<NewBookingModalProps> = ({
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
                 placeholder="e.g. Eric Kimani"
-                className="rounded-xl py-2 text-xs"
+                className="rounded-none py-2 text-xs"
                 required
               />
             </div>
@@ -184,7 +184,7 @@ export const NewBookingModal: React.FC<NewBookingModalProps> = ({
                 value={customerPhone}
                 onChange={(e) => setCustomerPhone(e.target.value)}
                 placeholder="07XX XXX XXX"
-                className="rounded-xl py-2 text-xs"
+                className="rounded-none py-2 text-xs"
                 required
               />
             </div>
@@ -199,7 +199,7 @@ export const NewBookingModal: React.FC<NewBookingModalProps> = ({
               value={customerEmail}
               onChange={(e) => setCustomerEmail(e.target.value)}
               placeholder="client@gmail.com"
-              className="rounded-xl py-2 text-xs"
+              className="rounded-none py-2 text-xs"
             />
           </div>
 
@@ -254,7 +254,7 @@ export const NewBookingModal: React.FC<NewBookingModalProps> = ({
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="rounded-xl py-2 text-xs"
+                className="rounded-none py-2 text-xs"
                 required
               />
             </div>
@@ -294,7 +294,7 @@ export const NewBookingModal: React.FC<NewBookingModalProps> = ({
               <button
                 type="button"
                 onClick={() => setDepositChoice('deposit')}
-                className={`p-2 rounded-xl border transition-all ${
+                className={`p-2 rounded-none border transition-all ${
                   depositChoice === 'deposit'
                     ? 'border-primary bg-primary/10 text-foreground font-bold'
                     : 'border-border bg-muted/40 text-muted-foreground'
@@ -305,7 +305,7 @@ export const NewBookingModal: React.FC<NewBookingModalProps> = ({
               <button
                 type="button"
                 onClick={() => setDepositChoice('full')}
-                className={`p-2 rounded-xl border transition-all ${
+                className={`p-2 rounded-none border transition-all ${
                   depositChoice === 'full'
                     ? 'border-primary bg-primary/10 text-foreground font-bold'
                     : 'border-border bg-muted/40 text-muted-foreground'
@@ -316,7 +316,7 @@ export const NewBookingModal: React.FC<NewBookingModalProps> = ({
               <button
                 type="button"
                 onClick={() => setDepositChoice('none')}
-                className={`p-2 rounded-xl border transition-all ${
+                className={`p-2 rounded-none border transition-all ${
                   depositChoice === 'none'
                     ? 'border-primary bg-primary/10 text-foreground font-bold'
                     : 'border-border bg-muted/40 text-muted-foreground'
@@ -337,7 +337,7 @@ export const NewBookingModal: React.FC<NewBookingModalProps> = ({
               value={specialRequests}
               onChange={(e) => setSpecialRequests(e.target.value)}
               placeholder="e.g. Skin sensitive to hot water, espresso requested"
-              className="rounded-xl py-2 text-xs"
+              className="rounded-none py-2 text-xs"
             />
           </div>
 

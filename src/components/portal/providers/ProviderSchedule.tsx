@@ -19,6 +19,10 @@ interface ProviderScheduleProps {
 }
 
 const TIME_OPTIONS = [
+  '05:00',
+  '05:30',
+  '06:00',
+  '06:30',
   '07:00',
   '07:30',
   '08:00',
@@ -48,6 +52,11 @@ const TIME_OPTIONS = [
   '20:00',
   '20:30',
   '21:00',
+  '21:30',
+  '22:00',
+  '22:30',
+  '23:00',
+  '23:30',
 ];
 
 export const ProviderSchedule: React.FC<ProviderScheduleProps> = ({
@@ -203,7 +212,7 @@ export const ProviderSchedule: React.FC<ProviderScheduleProps> = ({
   return (
     <div className="space-y-4">
       {editable && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-muted/40 rounded-xl border border-border/65 shadow-2xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-muted/40 rounded-none border border-border/65 shadow-2xs">
           <Button
             type="button"
             variant="outline"
@@ -228,7 +237,7 @@ export const ProviderSchedule: React.FC<ProviderScheduleProps> = ({
           return (
             <div
               key={dayItem.day}
-              className={`rounded-xl border overflow-hidden transition-colors ${
+              className={`rounded-none border overflow-hidden transition-colors ${
                 isWorking
                   ? 'bg-card border-border'
                   : 'bg-muted/30 border-border/40'
@@ -328,7 +337,10 @@ export const ProviderSchedule: React.FC<ProviderScheduleProps> = ({
                     <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-1.5">
                       Working Hours
                     </span>
-                    <div className="flex items-center gap-1.5 bg-input px-2.5 py-1.5 rounded-lg border border-border w-full sm:w-fit">
+                    <div className="relative flex items-center gap-1.5 bg-input px-2.5 py-1.5 rounded-none border border-border w-full sm:w-fit overflow-hidden">
+                      {/* Scroll Simulation for Selects */}
+                      <div className="absolute inset-0 z-10 pointer-events-none opacity-20 bg-gradient-to-r from-transparent via-primary/10 to-transparent animate-pulse" />
+                      
                       <Clock className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                       {editable ? (
                         <ThemeSelect
@@ -398,7 +410,7 @@ export const ProviderSchedule: React.FC<ProviderScheduleProps> = ({
                         <button
                           type="button"
                           onClick={() => handleAddBreak(dayItem.day)}
-                          className="inline-flex items-center gap-1 text-[11px] text-primary hover:text-primary-hover font-semibold px-2 py-1 rounded-lg border border-border/60 hover:border-primary/50 hover:bg-primary/5 transition-colors cursor-pointer shrink-0"
+                          className="inline-flex items-center gap-1 text-[11px] text-primary hover:text-primary-hover font-semibold px-2 py-1 rounded-none border border-border/60 hover:border-primary/50 hover:bg-primary/5 transition-colors cursor-pointer shrink-0"
                         >
                           <Plus className="w-3 h-3" />
                           <span>Add Break</span>
@@ -411,7 +423,7 @@ export const ProviderSchedule: React.FC<ProviderScheduleProps> = ({
                         {dayItem.breaks!.map((b, bIdx) => (
                           <div
                             key={bIdx}
-                            className="flex items-center gap-1.5 text-xs bg-muted/60 px-2.5 py-1.5 rounded-lg border border-border text-foreground w-full sm:w-fit"
+                            className="flex items-center gap-1.5 text-xs bg-muted/60 px-2.5 py-1.5 rounded-none border border-border text-foreground w-full sm:w-fit"
                           >
                             {editable ? (
                               <>

@@ -81,7 +81,7 @@ export const CustomerSelector: React.FC<CustomerSelectorProps> = ({
 
       {/* Existing Client Search Popover */}
       {isOpen && (
-        <div className="rounded-xl  p-2.5 shadow-xl space-y-2 animate-in fade-in-50 duration-150">
+        <div className="rounded-none  p-2.5 shadow-xl space-y-2 animate-in fade-in-50 duration-150">
           <div className="flex items-center gap-2 bg-input px-2.5 py-1.5 ">
             {/* <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" /> */}
             <Input
@@ -107,7 +107,7 @@ export const CustomerSelector: React.FC<CustomerSelectorProps> = ({
                     key={c.id}
                     type="button"
                     onClick={() => handlePickCustomer(c)}
-                    className={`w-full flex items-center justify-between p-2 rounded-lg text-xs text-left transition-colors cursor-pointer ${
+                    className={`w-full flex items-center justify-between p-2 rounded-none text-xs text-left transition-colors cursor-pointer ${
                       isSelected
                         ? 'bg-primary/20 text-primary border border-primary/40'
                         : 'hover:bg-muted/60 text-foreground'
@@ -147,7 +147,7 @@ export const CustomerSelector: React.FC<CustomerSelectorProps> = ({
             value={customerName}
             onChange={e => onNameChange(e.target.value)}
             placeholder="Full Name (e.g. John Kamau)"
-            className="text-xs rounded-xl py-2.5"
+            className="text-xs rounded-none py-2.5"
           />
         </div>
         <div className="relative">
@@ -157,7 +157,7 @@ export const CustomerSelector: React.FC<CustomerSelectorProps> = ({
             value={customerPhone}
             onChange={e => onPhoneChange(e.target.value)}
             placeholder="Phone Number (e.g. 0722 000 000)"
-            className="text-xs rounded-xl py-2.5 font-mono"
+            className="text-xs rounded-none py-2.5 font-mono"
           />
         </div>
       </div>
@@ -169,7 +169,7 @@ export const CustomerSelector: React.FC<CustomerSelectorProps> = ({
             value={customerEmail}
             onChange={e => onEmailChange(e.target.value)}
             placeholder="Client Email (optional for receipt notification)"
-            className="text-xs rounded-xl py-2"
+            className="text-xs rounded-none py-2"
           />
         </div>
       )}

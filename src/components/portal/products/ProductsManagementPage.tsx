@@ -403,7 +403,7 @@ export const ProductsManagementPage: React.FC = () => {
 
       {/* Error banner */}
       {error && (
-        <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-xl text-xs text-destructive flex items-center gap-2">
+        <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-none text-xs text-destructive flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span>{error}</span>
         </div>
@@ -411,25 +411,25 @@ export const ProductsManagementPage: React.FC = () => {
 
       {/* Quick Metrics */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-3.5 rounded-xl bg-card border border-border space-y-0.5">
+        <div className="p-3.5 rounded-none bg-card border border-border space-y-0.5">
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
             <Package className="w-3 h-3 text-primary" /> Total Products
           </span>
           <div className="text-xl font-mono font-extrabold text-foreground">{products.length}</div>
         </div>
-        <div className="p-3.5 rounded-xl bg-card border border-border space-y-0.5">
+        <div className="p-3.5 rounded-none bg-card border border-border space-y-0.5">
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
             <CheckCircle2 className="w-3 h-3 text-success" /> Active
           </span>
           <div className="text-xl font-mono font-extrabold text-success">{activeCount}</div>
         </div>
-        <div className="p-3.5 rounded-xl bg-card border border-border space-y-0.5">
+        <div className="p-3.5 rounded-none bg-card border border-border space-y-0.5">
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
             <AlertTriangle className="w-3 h-3 text-warning" /> Low / Out of Stock
           </span>
           <div className="text-xl font-mono font-extrabold text-warning">{lowStockCount}</div>
         </div>
-        <div className="p-3.5 rounded-xl bg-card border border-border space-y-0.5">
+        <div className="p-3.5 rounded-none bg-card border border-border space-y-0.5">
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
             <MessageSquare className="w-3 h-3 text-primary" /> Pending Reviews
           </span>
@@ -486,7 +486,7 @@ export const ProductsManagementPage: React.FC = () => {
       {/* ============ CATEGORIES TAB ============ */}
       {activeTab === 'categories' && (
         <div className="space-y-4">
-          <div className="bg-card p-5 rounded-2xl border border-border">
+          <div className="bg-card p-5 rounded-none border border-border">
             <ProductCategoryManagement />
           </div>
         </div>
@@ -499,12 +499,12 @@ export const ProductsManagementPage: React.FC = () => {
 
           {/* Loading state */}
           {loading && products.length === 0 ? (
-            <div className="p-10 text-center bg-card rounded-xl border border-border flex flex-col items-center gap-2">
+            <div className="p-10 text-center bg-card rounded-none border border-border flex flex-col items-center gap-2">
               <Loader2 className="w-6 h-6 animate-spin text-primary" />
               <p className="text-xs text-muted-foreground">Loading products from database...</p>
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div className="p-10 text-center bg-card rounded-xl border border-border">
+            <div className="p-10 text-center bg-card rounded-none border border-border">
               <p className="text-xs text-muted-foreground mb-3">No products found matching your filters.</p>
               {/* <Button
                 type="button"
@@ -529,12 +529,12 @@ export const ProductsManagementPage: React.FC = () => {
                 return (
                   <div
                     key={product.id}
-                    className="bg-card border border-border hover:border-primary/30 rounded-2xl overflow-hidden transition-all"
+                    className="bg-card border border-border hover:border-primary/30 rounded-none overflow-hidden transition-all"
                   >
                     {/* Product Row */}
                     <div className="p-4 flex flex-col sm:flex-row sm:items-center gap-3">
                       {/* Image */}
-                      <div className="w-14 h-14 rounded-xl bg-product-surface border border-border p-1.5 flex items-center justify-center shrink-0">
+                      <div className="w-14 h-14 rounded-none bg-product-surface border border-border p-1.5 flex items-center justify-center shrink-0">
                         {product.imageUrl ? (
                           <img
                             src={product.imageUrl}
@@ -625,7 +625,7 @@ export const ProductsManagementPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setExpandedProductId(isExpanded ? null : product.id)}
-                          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                          className="p-1.5 rounded-none text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                           title={isExpanded ? 'Collapse details' : 'Expand details'}
                         >
                           {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -643,7 +643,7 @@ export const ProductsManagementPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleToggleStatus(product)}
-                          className="p-1.5 rounded-lg text-muted-foreground hover:text-primary transition-colors"
+                          className="p-1.5 rounded-none text-muted-foreground hover:text-primary transition-colors"
                           title={product.status === 'active' ? 'Archive product' : 'Activate product'}
                         >
                           {product.status === 'active' ? <Archive className="w-3.5 h-3.5" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
@@ -651,7 +651,7 @@ export const ProductsManagementPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleDeleteProduct(product)}
-                          className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive transition-colors"
+                          className="p-1.5 rounded-none text-muted-foreground hover:text-destructive transition-colors"
                           title="Delete product permanently"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -694,7 +694,7 @@ export const ProductsManagementPage: React.FC = () => {
                         </p>
 
                         {isLowStock && (
-                          <div className="p-2.5 bg-warning/10 border border-warning/30 rounded-lg text-[11px] text-warning flex items-center gap-1.5">
+                          <div className="p-2.5 bg-warning/10 border border-warning/30 rounded-none text-[11px] text-warning flex items-center gap-1.5">
                             <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                             <span>
                               {product.availability === 'out-of-stock'
@@ -717,12 +717,12 @@ export const ProductsManagementPage: React.FC = () => {
       {activeTab === 'reviews' && (
         <div className="space-y-4">
           {/* Review Type + Filter */}
-          <div className="bg-card p-3.5 rounded-xl border border-border flex flex-col sm:flex-row items-start sm:items-center gap-2.5">
+          <div className="bg-card p-3.5 rounded-none border border-border flex flex-col sm:flex-row items-start sm:items-center gap-2.5">
             <div className="flex items-center justify-between lg:justify-start w-full   gap-1.5 shrink-0">
               <button
                 type="button"
                 onClick={() => setReviewType('product')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`px-3 py-1.5 rounded-none text-xs font-bold transition-all ${
                   reviewType === 'product'
                     ? 'bg-primary text-black'
                     : 'bg-muted/50 text-muted-foreground hover:text-foreground'
@@ -733,7 +733,7 @@ export const ProductsManagementPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setReviewType('service')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`px-3 py-1.5 rounded-none text-xs font-bold transition-all ${
                   reviewType === 'service'
                     ? 'bg-primary text-black'
                     : 'bg-muted/50 text-muted-foreground hover:text-foreground'
@@ -746,13 +746,13 @@ export const ProductsManagementPage: React.FC = () => {
           </div>
 
           {loading && reviews.length === 0 && serviceReviews.length === 0 ? (
-            <div className="p-10 text-center bg-card rounded-xl border border-border flex flex-col items-center gap-2">
+            <div className="p-10 text-center bg-card rounded-none border border-border flex flex-col items-center gap-2">
               <Loader2 className="w-6 h-6 animate-spin text-primary" />
               <p className="text-xs text-muted-foreground">Loading reviews...</p>
             </div>
           ) : reviewType === 'product' ? (
             filteredReviews.length === 0 ? (
-              <div className="p-10 text-center bg-card rounded-xl border border-border">
+              <div className="p-10 text-center bg-card rounded-none border border-border">
                 <p className="text-xs text-muted-foreground">No product reviews found in this category.</p>
               </div>
             ) : (
@@ -760,7 +760,7 @@ export const ProductsManagementPage: React.FC = () => {
                 {filteredReviews.map(review => (
                   <div
                     key={review.id}
-                    className="bg-card border border-border rounded-2xl p-4 space-y-3"
+                    className="bg-card border border-border rounded-none p-4 space-y-3"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                       <div className="space-y-1.5 flex-1 min-w-0">
@@ -824,7 +824,7 @@ export const ProductsManagementPage: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleReviewAction(review, 'archived')}
-                            className="p-1.5 rounded-lg text-muted-foreground hover:text-warning transition-colors"
+                            className="p-1.5 rounded-none text-muted-foreground hover:text-warning transition-colors"
                             title="Archive review"
                           >
                             <Archive className="w-3.5 h-3.5" />
@@ -833,7 +833,7 @@ export const ProductsManagementPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleDeleteReview(review)}
-                          className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive transition-colors"
+                          className="p-1.5 rounded-none text-muted-foreground hover:text-destructive transition-colors"
                           title="Delete review permanently"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -846,7 +846,7 @@ export const ProductsManagementPage: React.FC = () => {
             )
           ) : (
             serviceReviews.filter(r => reviewFilter === 'all' || r.reviewStatus === reviewFilter).length === 0 ? (
-              <div className="p-10 text-center bg-card rounded-xl border border-border">
+              <div className="p-10 text-center bg-card rounded-none border border-border">
                 <p className="text-xs text-muted-foreground">No service reviews found in this category.</p>
               </div>
             ) : (
@@ -854,7 +854,7 @@ export const ProductsManagementPage: React.FC = () => {
                 {serviceReviews.filter(r => reviewFilter === 'all' || r.reviewStatus === reviewFilter).map(review => (
                   <div
                     key={review.id}
-                    className="bg-card border border-border rounded-2xl p-4 space-y-3"
+                    className="bg-card border border-border rounded-none p-4 space-y-3"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                       <div className="space-y-1.5 flex-1 min-w-0">
@@ -918,7 +918,7 @@ export const ProductsManagementPage: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleServiceReviewAction(review, 'archived')}
-                            className="p-1.5 rounded-lg text-muted-foreground hover:text-warning transition-colors"
+                            className="p-1.5 rounded-none text-muted-foreground hover:text-warning transition-colors"
                             title="Archive review"
                           >
                             <Archive className="w-3.5 h-3.5" />
@@ -927,7 +927,7 @@ export const ProductsManagementPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleDeleteServiceReview(review)}
-                          className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive transition-colors"
+                          className="p-1.5 rounded-none text-muted-foreground hover:text-destructive transition-colors"
                           title="Delete review permanently"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -945,7 +945,7 @@ export const ProductsManagementPage: React.FC = () => {
       {/* ============ ADD / EDIT PRODUCT MODAL ============ */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="relative w-full max-w-3xl bg-card border border-border rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4 max-h-[92vh] overflow-y-auto">
+          <div className="relative w-full max-w-3xl bg-card border border-border rounded-none shadow-2xl p-5 sm:p-6 space-y-4 max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="text-base font-bold text-foreground">
                 {editingProduct ? `Edit Product: ${editingProduct.name}` : 'Add New Product'}
@@ -953,14 +953,14 @@ export const ProductsManagementPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 rounded-lg text-muted-foreground hover:text-foreground"
+                className="p-1 rounded-none text-muted-foreground hover:text-foreground"
               >
                 ✕
               </button>
             </div>
 
             {formError && (
-              <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-xl text-xs text-destructive">
+              <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-none text-xs text-destructive">
                 {formError}
               </div>
             )}
@@ -977,7 +977,7 @@ export const ProductsManagementPage: React.FC = () => {
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     placeholder="e.g. Organic Moroccan Argan Beard Oil"
-                    className="rounded-xl py-2 text-xs"
+                    className="rounded-none py-2 text-xs"
                     required
                   />
                 </div>
@@ -991,7 +991,7 @@ export const ProductsManagementPage: React.FC = () => {
                     value={form.slug}
                     onChange={(e) => setForm({ ...form, slug: e.target.value })}
                     placeholder="auto-generated from name"
-                    className="rounded-xl py-2 text-xs font-mono"
+                    className="rounded-none py-2 text-xs font-mono"
                   />
                 </div>
               </div>
@@ -1004,7 +1004,7 @@ export const ProductsManagementPage: React.FC = () => {
                     <ThemeSelect
                       value={form.category}
                       onChange={(e) => setForm({ ...form, category: e.target.value })}
-                      className="w-full bg-input border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary capitalize"
+                      className="w-full bg-input border border-border rounded-none px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary capitalize"
                     >
                       {productCategories && productCategories.length > 0 ? (
                         productCategories.map(cat => (
@@ -1028,7 +1028,7 @@ export const ProductsManagementPage: React.FC = () => {
                     onChange={(e) => setForm({ ...form, priceKsh: Number(e.target.value) })}
                     min={0}
                     step={50}
-                    className="rounded-xl py-2 text-xs font-mono"
+                    className="rounded-none py-2 text-xs font-mono"
                     required
                   />
                 </div>
@@ -1044,7 +1044,7 @@ export const ProductsManagementPage: React.FC = () => {
                     min={0}
                     step={50}
                     placeholder="Optional (for sale display)"
-                    className="rounded-xl py-2 text-xs font-mono"
+                    className="rounded-none py-2 text-xs font-mono"
                   />
                 </div>
               </div>
@@ -1057,7 +1057,7 @@ export const ProductsManagementPage: React.FC = () => {
                   <ThemeSelect
                     value={form.availability}
                     onChange={(e) => setForm({ ...form, availability: e.target.value as any })}
-                    className="w-full bg-input border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary"
+                    className="w-full bg-input border border-border rounded-none px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary"
                   >
                     <option value="in-stock">In Stock</option>
                     <option value="low-stock">Low Stock</option>
@@ -1074,7 +1074,7 @@ export const ProductsManagementPage: React.FC = () => {
                     value={form.stockQuantity}
                     onChange={(e) => setForm({ ...form, stockQuantity: Number(e.target.value) })}
                     min={0}
-                    className="rounded-xl py-2 text-xs font-mono"
+                    className="rounded-none py-2 text-xs font-mono"
                   />
                 </div>
 
@@ -1087,7 +1087,7 @@ export const ProductsManagementPage: React.FC = () => {
                     value={form.lowStockThreshold}
                     onChange={(e) => setForm({ ...form, lowStockThreshold: Number(e.target.value) })}
                     min={0}
-                    className="rounded-xl py-2 text-xs font-mono"
+                    className="rounded-none py-2 text-xs font-mono"
                   />
                 </div>
               </div>
@@ -1102,7 +1102,7 @@ export const ProductsManagementPage: React.FC = () => {
                     value={form.sku}
                     onChange={(e) => setForm({ ...form, sku: e.target.value })}
                     placeholder="e.g. ICN-PRD-009"
-                    className="rounded-xl py-2 text-xs font-mono"
+                    className="rounded-none py-2 text-xs font-mono"
                   />
                 </div>
 
@@ -1115,7 +1115,7 @@ export const ProductsManagementPage: React.FC = () => {
                     value={form.badge}
                     onChange={(e) => setForm({ ...form, badge: e.target.value })}
                     placeholder="e.g. BESTSELLER, ORGANIC"
-                    className="rounded-xl py-2 text-xs"
+                    className="rounded-none py-2 text-xs"
                   />
                 </div>
 
@@ -1130,7 +1130,7 @@ export const ProductsManagementPage: React.FC = () => {
                     min={1}
                     max={5}
                     step={0.1}
-                    className="rounded-xl py-2 text-xs font-mono"
+                    className="rounded-none py-2 text-xs font-mono"
                   />
                 </div>
               </div>
@@ -1146,7 +1146,7 @@ export const ProductsManagementPage: React.FC = () => {
                   onChange={(e) => setForm({ ...form, shortDescription: e.target.value })}
                   rows={2}
                   placeholder="Concise product summary shown on cards..."
-                  className="rounded-xl p-2.5 text-xs"
+                  className="rounded-none p-2.5 text-xs"
                 />
               </div>
 
@@ -1160,7 +1160,7 @@ export const ProductsManagementPage: React.FC = () => {
                   onChange={(e) => setForm({ ...form, detailedDescription: e.target.value })}
                   rows={3}
                   placeholder="Full clinical / formulation description..."
-                  className="rounded-xl p-2.5 text-xs"
+                  className="rounded-none p-2.5 text-xs"
                 />
               </div>
 
@@ -1175,7 +1175,7 @@ export const ProductsManagementPage: React.FC = () => {
                     value={form.specifications.volume}
                     onChange={(e) => setForm({ ...form, specifications: { ...form.specifications, volume: e.target.value } })}
                     placeholder="e.g. 50 ml / 1.7 fl oz"
-                    className="rounded-xl py-2 text-xs"
+                    className="rounded-none py-2 text-xs"
                   />
                 </div>
 
@@ -1188,7 +1188,7 @@ export const ProductsManagementPage: React.FC = () => {
                     value={form.specifications.origin}
                     onChange={(e) => setForm({ ...form, specifications: { ...form.specifications, origin: e.target.value } })}
                     placeholder="e.g. Formulated in London"
-                    className="rounded-xl py-2 text-xs"
+                    className="rounded-none py-2 text-xs"
                   />
                 </div>
 
@@ -1201,7 +1201,7 @@ export const ProductsManagementPage: React.FC = () => {
                     value={form.specifications.scentProfile}
                     onChange={(e) => setForm({ ...form, specifications: { ...form.specifications, scentProfile: e.target.value } })}
                     placeholder="e.g. Sandalwood, Amber & Cedar"
-                    className="rounded-xl py-2 text-xs"
+                    className="rounded-none py-2 text-xs"
                   />
                 </div>
 
@@ -1214,7 +1214,7 @@ export const ProductsManagementPage: React.FC = () => {
                     value={form.specifications.usageFrequency}
                     onChange={(e) => setForm({ ...form, specifications: { ...form.specifications, usageFrequency: e.target.value } })}
                     placeholder="e.g. Daily every morning"
-                    className="rounded-xl py-2 text-xs"
+                    className="rounded-none py-2 text-xs"
                   />
                 </div>
               </div>
@@ -1228,7 +1228,7 @@ export const ProductsManagementPage: React.FC = () => {
                   value={form.specifications.keyIngredients}
                   onChange={(e) => setForm({ ...form, specifications: { ...form.specifications, keyIngredients: e.target.value } })}
                   placeholder="e.g. Argan Oil, Jojoba, Vitamin E"
-                  className="rounded-xl py-2 text-xs"
+                  className="rounded-none py-2 text-xs"
                 />
               </div>
 
@@ -1242,7 +1242,7 @@ export const ProductsManagementPage: React.FC = () => {
                   onChange={(e) => setForm({ ...form, howToUse: e.target.value })}
                   rows={3}
                   placeholder={'Step 1: Dispense 4-6 drops...\nStep 2: Rub between palms...'}
-                  className="rounded-xl p-2.5 text-xs"
+                  className="rounded-none p-2.5 text-xs"
                 />
               </div>
 
@@ -1255,7 +1255,7 @@ export const ProductsManagementPage: React.FC = () => {
                   value={form.suitableFor}
                   onChange={(e) => setForm({ ...form, suitableFor: e.target.value })}
                   placeholder="e.g. All beard lengths, coarse textures"
-                  className="rounded-xl py-2 text-xs"
+                  className="rounded-none py-2 text-xs"
                 />
               </div>
 
@@ -1269,7 +1269,7 @@ export const ProductsManagementPage: React.FC = () => {
                     value={form.relatedServiceSlugs}
                     onChange={(e) => setForm({ ...form, relatedServiceSlugs: e.target.value })}
                     placeholder="e.g. beard-grooming, the-ceo-experience"
-                    className="rounded-xl py-2 text-xs font-mono"
+                    className="rounded-none py-2 text-xs font-mono"
                   />
                 </div>
 
@@ -1282,7 +1282,7 @@ export const ProductsManagementPage: React.FC = () => {
                     value={form.relatedProductSlugs}
                     onChange={(e) => setForm({ ...form, relatedProductSlugs: e.target.value })}
                     placeholder="e.g. botanical-beard-balm, antibacterial-shampoo"
-                    className="rounded-xl py-2 text-xs font-mono"
+                    className="rounded-none py-2 text-xs font-mono"
                   />
                 </div>
               </div>
@@ -1307,7 +1307,7 @@ export const ProductsManagementPage: React.FC = () => {
                   <ThemeSelect
                     value={form.status}
                     onChange={(e) => setForm({ ...form, status: e.target.value as any })}
-                    className="w-full bg-input border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary"
+                    className="w-full bg-input border border-border rounded-none px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary"
                   >
                     <option value="active">Active (Visible on website)</option>
                     <option value="draft">Draft (Hidden)</option>

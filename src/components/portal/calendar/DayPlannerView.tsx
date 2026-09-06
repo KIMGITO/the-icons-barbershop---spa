@@ -59,7 +59,7 @@ export const DayPlannerView: React.FC<DayPlannerViewProps> = ({
   return (
     <>
       {/* ============ MOBILE: vertical agenda (all active providers merged) ============ */}
-      <div className="sm:hidden bg-card border border-border rounded-2xl p-3">
+      <div className="sm:hidden bg-card border border-border rounded-none p-3">
         <MobileAgendaDay
           bookings={dayBookings}
           onBookingClick={onBookingClick}
@@ -69,7 +69,7 @@ export const DayPlannerView: React.FC<DayPlannerViewProps> = ({
       </div>
 
       {/* ============ DESKTOP/TABLET: time grid, columns per provider ============ */}
-      <div className="hidden sm:block bg-card border border-border rounded-2xl overflow-x-auto shadow-sm">
+      <div className="hidden sm:block bg-card border border-border rounded-none overflow-x-auto shadow-sm">
       <div className={isMultiProvider ? 'min-w-[760px] sm:min-w-[880px]' : 'min-w-[400px]'}>
         {/* Header with Provider Columns */}
         <div 

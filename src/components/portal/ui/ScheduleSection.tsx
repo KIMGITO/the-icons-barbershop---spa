@@ -17,7 +17,7 @@ export const ScheduleSection: React.FC<ScheduleSectionProps> = ({
   scrollable = false,
   children,
 }) => (
-  <div className="bg-card border border-border rounded-2xl overflow-hidden">
+  <div className="bg-card border border-border rounded-none overflow-hidden">
     <div className="p-3 sm:p-4 border-b border-border flex items-center gap-2">
       {icon}
       <h3 className="text-xs sm:text-sm font-bold text-foreground">

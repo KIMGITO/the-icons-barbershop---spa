@@ -169,7 +169,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
           </div>
 
           {/* Compact Services Page Hero (Section 12 requirement) */}
-          <div className="relative rounded-2xl bg-gradient-to-b from-card-elevated via-card to-background border border-border p-6 sm:p-10 lg:p-12 mb-10 overflow-hidden shadow-2xl">
+          <div className="relative rounded-none bg-gradient-to-b from-card-elevated via-card to-background border border-border p-6 sm:p-10 lg:p-12 mb-10 overflow-hidden shadow-2xl">
             <div className="absolute top-0 right-0 w-96 h-96 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent pointer-events-none" />
             
             <div className="relative z-10 max-w-3xl space-y-3">
@@ -237,7 +237,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
                       </Badge>
                     )}
 
-                    <div className="absolute bottom-3 left-3 bg-background/95 border border-primary/40 px-3 py-1.5 rounded-lg">
+                    <div className="absolute bottom-3 left-3 bg-background/95 border border-primary/40 px-3 py-1.5 rounded-none">
                       <span className="text-[10px] text-muted-foreground-light block uppercase tracking-wider">Investment</span>
                       <span className="text-white font-bold text-base tracking-tight font-mono">
                         KSh {service.priceKsh.toLocaleString()}
@@ -358,14 +358,14 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
               >
                 {/* Clean Card matching the reference design layout */}
                 <article 
-                  className={`h-full flex flex-col justify-between transition-all duration-300 group rounded-2xl bg-card p-4 sm:p-5 border ${
+                  className={`h-full flex flex-col justify-between transition-all duration-300 group rounded-none bg-card p-4 sm:p-5 border ${
                     isCenter 
                       ? 'border-primary/60 shadow-xl shadow-primary/5 scale-100' 
                       : 'border-border hover:border-border-strong scale-[0.98]'
                   }`}
                 >
                   {/* High Quality Rounded Image (matching reference 16:10 / 4:3 rounded look) */}
-                  <div className="relative aspect-[16/10] sm:aspect-[4/3] w-full rounded-xl overflow-hidden bg-secondary mb-4">
+                  <div className="relative aspect-[16/10] sm:aspect-[4/3] w-full rounded-none overflow-hidden bg-secondary mb-4">
                     <SafeImage
                       src={service.imageUrl}
                       alt={service.name}

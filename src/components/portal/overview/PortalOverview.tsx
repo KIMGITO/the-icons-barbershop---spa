@@ -138,7 +138,7 @@ export const PortalOverview: React.FC<PortalOverviewProps> = ({
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
-      <div className=" p-4 sm:p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className=" p-4 sm:p-6 rounded-none flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">
@@ -200,7 +200,7 @@ export const PortalOverview: React.FC<PortalOverviewProps> = ({
       </div>
       {/* Immediate "Next Client" Feature */}
       {nextClient && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-card via-card to-primary/5 border border-primary/30 space-y-3">
+        <div className="p-4 sm:p-5 rounded-none bg-gradient-to-r from-card via-card to-primary/5 border border-primary/30 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5" /> Next Client Up
@@ -284,7 +284,7 @@ export const PortalOverview: React.FC<PortalOverviewProps> = ({
               </Button>
             </div>
           ) : (
-            <div className="bg-card border border-border rounded-xl divide-y divide-border/60 overflow-hidden">
+            <div className="bg-card border border-border rounded-none divide-y divide-border/60 overflow-hidden">
               {upcomingBookings.map((b) => (
                 <div
                   key={b.id}
@@ -392,7 +392,7 @@ export const PortalOverview: React.FC<PortalOverviewProps> = ({
               </Button>
             </div>
 
-            <div className=" border-0 rounded-xl divide-y divide-border/60 overflow-hidden">
+            <div className=" border-0 rounded-none divide-y divide-border/60 overflow-hidden">
               {messagesLoading && recentMessages.length === 0 ? (
                 <div className="p-8 text-center text-xs text-muted-foreground">
                   <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2" />

@@ -103,7 +103,7 @@ export const ProductPurchaseModal: React.FC = () => {
         if (e.target === e.currentTarget) closePurchaseModal();
       }}
     >
-      <div className="relative w-full max-w-xl bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-2xl my-8 text-left text-white">
+      <div className="relative w-full max-w-xl bg-card border border-border rounded-none p-6 sm:p-8 shadow-2xl my-8 text-left text-white">
         
         {/* Close Button */}
         <button
@@ -126,7 +126,7 @@ export const ProductPurchaseModal: React.FC = () => {
               Thank you, <strong className="text-white">{customerName}</strong>. Your product reservation has been received.
             </p>
 
-            <div className="bg-secondary border border-border rounded-xl p-5 mb-6 text-left space-y-3">
+            <div className="bg-secondary border border-border rounded-none p-5 mb-6 text-left space-y-3">
               <div className="flex justify-between items-center text-xs text-muted-foreground pb-2 border-b border-white/5">
                 <span>Order Reference</span>
                 <span className="font-mono text-primary font-bold text-sm">{confirmedOrderCode}</span>
@@ -171,7 +171,7 @@ export const ProductPurchaseModal: React.FC = () => {
           /* Order Form */
           <div>
             <div className="flex items-center gap-3 pb-5 border-b border-white/10 mb-6">
-              <div className="w-10 h-10 rounded-lg bg-secondary border border-primary/40 flex items-center justify-center text-primary">
+              <div className="w-10 h-10 rounded-none bg-secondary border border-primary/40 flex items-center justify-center text-primary">
                 <ShoppingBag className="w-5 h-5" />
               </div>
               <div>
@@ -185,8 +185,8 @@ export const ProductPurchaseModal: React.FC = () => {
             </div>
 
             {/* Selected Product Summary Card */}
-            <div className="flex items-center gap-4 bg-secondary border border-white/10 rounded-xl p-3.5 mb-6">
-              <div className="w-16 h-16 rounded-lg bg-product-surface p-1.5 flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-4 bg-secondary border border-white/10 rounded-none p-3.5 mb-6">
+              <div className="w-16 h-16 rounded-none bg-product-surface p-1.5 flex items-center justify-center shrink-0">
                 <SafeImage 
                   src={activeProduct.imageUrl} 
                   alt={activeProduct.name} 
@@ -201,7 +201,7 @@ export const ProductPurchaseModal: React.FC = () => {
                 </div>
               </div>
               {/* Quantity Controls */}
-              <div className="flex items-center border border-white/20 rounded-lg bg-black/40 overflow-hidden shrink-0">
+              <div className="flex items-center border border-white/20 rounded-none bg-black/40 overflow-hidden shrink-0">
                 <button
                   type="button"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -231,7 +231,7 @@ export const ProductPurchaseModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setDeliveryMethod('studio-pickup')}
-                    className={`p-3 rounded-lg border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                    className={`p-3 rounded-none border text-left transition-all cursor-pointer flex flex-col justify-between ${
                       deliveryMethod === 'studio-pickup'
                         ? 'border-primary bg-primary/10 text-white'
                         : 'border-white/10 bg-secondary text-muted-foreground hover:border-white/20'
@@ -247,7 +247,7 @@ export const ProductPurchaseModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setDeliveryMethod('nairobi-delivery')}
-                    className={`p-3 rounded-lg border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                    className={`p-3 rounded-none border text-left transition-all cursor-pointer flex flex-col justify-between ${
                       deliveryMethod === 'nairobi-delivery'
                         ? 'border-primary bg-primary/10 text-white'
                         : 'border-white/10 bg-secondary text-muted-foreground hover:border-white/20'

@@ -177,12 +177,12 @@ export const BookingList: React.FC = () => {
       {/* Top Controls Bar */}
       <div className="space-y-3 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center   gap-3">
-          <div className="flex gap-2 w-full justify-between items-center bg-input p-1 rounded-xl border border-border text-xs overflow-x-auto">
-            <div className="flex items-center bg-input p-1 rounded-xl border border-border text-xs overflow-x-auto justify-between">
+          <div className="flex gap-2 w-full justify-between items-center bg-input p-1 rounded-none border border-border text-xs overflow-x-auto">
+            <div className="flex items-center bg-input p-1 rounded-none border border-border text-xs overflow-x-auto justify-between">
               <button
                 type="button"
                 onClick={() => setActiveTab('today')}
-                className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-none font-bold transition-all cursor-pointer ${
                   activeTab === 'today'
                     ? 'bg-primary text-black'
                     : 'text-muted-foreground hover:text-foreground'
@@ -193,7 +193,7 @@ export const BookingList: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setActiveTab('upcoming')}
-                className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-none font-bold transition-all cursor-pointer ${
                   activeTab === 'upcoming'
                     ? 'bg-primary text-black'
                     : 'text-muted-foreground hover:text-foreground'
@@ -204,7 +204,7 @@ export const BookingList: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setActiveTab('past')}
-                className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-none font-bold transition-all cursor-pointer ${
                   activeTab === 'past'
                     ? 'bg-primary text-black'
                     : 'text-muted-foreground hover:text-foreground'
@@ -215,7 +215,7 @@ export const BookingList: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setActiveTab('all')}
-                className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-none font-bold transition-all cursor-pointer ${
                   activeTab === 'all'
                     ? 'bg-primary text-black'
                     : 'text-muted-foreground hover:text-foreground'
@@ -246,7 +246,7 @@ export const BookingList: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by client, phone, or ref..."
-            className="rounded-xl py-2.5 text-xs"
+            className="rounded-none py-2.5 text-xs"
             icon={<Search className="w-3.5 h-3.5" />}
           />
           
@@ -255,7 +255,7 @@ export const BookingList: React.FC = () => {
 
       {/* Bookings Display */}
       {filteredBookings.length === 0 ? (
-        <div className="p-12 text-center bg-card rounded-2xl border border-border space-y-3">
+        <div className="p-12 text-center bg-card rounded-none border border-border space-y-3">
           <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto text-muted-foreground">
             <Calendar className="w-6 h-6" />
           </div>
@@ -283,7 +283,7 @@ export const BookingList: React.FC = () => {
       ) : (
         <>
           {/* Desktop Table */}
-          <div className="hidden md:block bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+          <div className="hidden md:block bg-card border border-border rounded-none overflow-hidden shadow-sm">
             <table className="w-full text-left text-xs">
               <thead className="bg-muted/50 border-b border-border text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
                 <tr>
@@ -401,7 +401,7 @@ export const BookingList: React.FC = () => {
               <div
                 key={b.id}
                 onClick={() => openViewDrawer(b)}
-                className="bg-card border border-border p-4 rounded-2xl space-y-3 cursor-pointer hover:border-primary/50 transition-all shadow-xs"
+                className="bg-card border border-border p-4 rounded-none space-y-3 cursor-pointer hover:border-primary/50 transition-all shadow-xs"
               >
                 <div className="flex items-start justify-between">
                   <div>

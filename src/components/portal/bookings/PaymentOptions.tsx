@@ -37,7 +37,7 @@ export function PaymentChoiceSelector<T extends string = string>({
               key={option.value}
               type="button"
               onClick={() => onChange(option.value)}
-              className={`p-2.5 text-left rounded-xl border text-xs transition-all cursor-pointer min-w-0 ${
+              className={`p-2.5 text-left rounded-none border text-xs transition-all cursor-pointer min-w-0 ${
                 isSelected
                   ? 'bg-primary/15 border-primary text-foreground ring-1 ring-primary/40'
                   : 'bg-input border-border text-muted-foreground hover:text-foreground'

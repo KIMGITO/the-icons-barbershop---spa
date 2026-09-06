@@ -151,7 +151,7 @@ export const FAQManagementPage: React.FC = () => {
       {/* FAQ List */}
       <div className="space-y-3">
         {filteredFaqs.length === 0 ? (
-          <div className="p-10 text-center bg-card rounded-xl border border-border">
+          <div className="p-10 text-center bg-card rounded-none border border-border">
             <HelpCircle className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-20" />
             <p className="text-xs text-muted-foreground">No FAQs found matching your filters.</p>
           </div>
@@ -159,7 +159,7 @@ export const FAQManagementPage: React.FC = () => {
           filteredFaqs.map(faq => (
             <div
               key={faq.id}
-              className="bg-card border border-border hover:border-primary/40 rounded-xl p-4 transition-all"
+              className="bg-card border border-border hover:border-primary/40 rounded-none p-4 transition-all"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1 flex-1">
@@ -182,14 +182,14 @@ export const FAQManagementPage: React.FC = () => {
                 <div className="flex items-center gap-1 shrink-0">
                   <button
                     onClick={() => handleOpenEdit(faq)}
-                    className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
+                    className="p-1.5 rounded-none text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
                     title="Edit FAQ"
                   >
                     <Edit className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(faq.id)}
-                    className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
+                    className="p-1.5 rounded-none text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
                     title="Delete FAQ"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -204,7 +204,7 @@ export const FAQManagementPage: React.FC = () => {
       {/* Add / Edit Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="relative w-full max-w-xl bg-card border border-border rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4 max-h-[92vh] overflow-y-auto">
+          <div className="relative w-full max-w-xl bg-card border border-border rounded-none shadow-2xl p-5 sm:p-6 space-y-4 max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="text-base font-bold text-foreground">
                 {editingFaq ? 'Edit FAQ' : 'Add New FAQ'}
@@ -212,14 +212,14 @@ export const FAQManagementPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 rounded-lg text-muted-foreground hover:text-foreground"
+                className="p-1 rounded-none text-muted-foreground hover:text-foreground"
               >
                 ✕
               </button>
             </div>
 
             {error && (
-              <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-xl text-xs text-destructive">
+              <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-none text-xs text-destructive">
                 {error}
               </div>
             )}
@@ -234,7 +234,7 @@ export const FAQManagementPage: React.FC = () => {
                   value={question}
                   onChange={(e) => setQuestion(e.target.value)}
                   placeholder="e.g. What are your opening hours?"
-                  className="rounded-xl py-2 text-xs"
+                  className="rounded-none py-2 text-xs"
                   required
                 />
               </div>
@@ -249,7 +249,7 @@ export const FAQManagementPage: React.FC = () => {
                   onChange={(e) => setAnswer(e.target.value)}
                   rows={4}
                   placeholder="Provide a clear, detailed answer..."
-                  className="rounded-xl p-2.5 text-xs"
+                  className="rounded-none p-2.5 text-xs"
                   required
                 />
               </div>
@@ -262,7 +262,7 @@ export const FAQManagementPage: React.FC = () => {
                   <ThemeSelect
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full bg-input border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary capitalize"
+                    className="w-full bg-input border border-border rounded-none px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary capitalize"
                   >
                     {categories.map(c => (
                       <option key={c} value={c}>{c}</option>
@@ -278,7 +278,7 @@ export const FAQManagementPage: React.FC = () => {
                     type="number"
                     value={order}
                     onChange={(e) => setOrder(Number(e.target.value))}
-                    className="rounded-xl py-2 text-xs"
+                    className="rounded-none py-2 text-xs"
                   />
                 </div>
               </div>

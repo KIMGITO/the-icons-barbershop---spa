@@ -113,7 +113,7 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
       {/* Main card */}
-      <div className="relative w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6">
+      <div className="relative w-full max-w-md bg-card border border-border rounded-none shadow-2xl p-6 sm:p-8 space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
           
@@ -122,7 +122,7 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({
 
         {/* Global Error Notice */}
         {error && (
-          <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/30 rounded-xl text-xs text-destructive">
+          <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/30 rounded-none text-xs text-destructive">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
@@ -130,7 +130,7 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({
 
         {/* Feedback Message */}
         {feedbackMessage && (
-          <div className="flex items-start gap-2 p-3 bg-primary/10 border border-primary/30 rounded-xl text-xs text-foreground">
+          <div className="flex items-start gap-2 p-3 bg-primary/10 border border-primary/30 rounded-none text-xs text-foreground">
             <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-primary" />
             <span>{feedbackMessage}</span>
           </div>
@@ -140,7 +140,7 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({
         {forcedChange && (
           <form onSubmit={handleForcedPasswordChange} className="space-y-4">
             <div className="space-y-1 text-center">
-              <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10 border border-primary/30 text-primary mx-auto mb-2 shadow-inner">
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-none bg-primary/10 border border-primary/30 text-primary mx-auto mb-2 shadow-inner">
                 <KeyRound className="w-5 h-5" />
               </div>
               <h3 className="text-sm font-bold text-foreground">
@@ -161,7 +161,7 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 placeholder="The password you just used"
-                className="rounded-xl py-2.5 text-xs"
+                className="rounded-none py-2.5 text-xs"
                 icon={<Lock className="w-4 h-4" />}
                 required
               />
@@ -176,7 +176,7 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="At least 8 characters"
-                className="rounded-xl py-2.5 text-xs"
+                className="rounded-none py-2.5 text-xs"
                 icon={<Lock className="w-4 h-4" />}
                 showPasswordToggle
                 required
@@ -192,7 +192,7 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Re-enter new password"
-                className="rounded-xl py-2.5 text-xs"
+                className="rounded-none py-2.5 text-xs"
                 icon={<Lock className="w-4 h-4" />}
                 showPasswordToggle
                 required
@@ -244,7 +244,7 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@theicons.co.ke"
-                className="rounded-xl py-2.5 text-xs"
+                className="rounded-none py-2.5 text-xs"
                 icon={<Mail className="w-4 h-4" />}
                 required
               />
@@ -272,7 +272,7 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="rounded-xl py-2.5 text-xs"
+                className="rounded-none py-2.5 text-xs"
                 icon={<Lock className="w-4 h-4" />}
                 showPasswordToggle
                 required
@@ -323,7 +323,7 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@theicons.co.ke"
-                className="rounded-xl py-2.5 text-xs"
+                className="rounded-none py-2.5 text-xs"
                 icon={<Mail className="w-4 h-4" />}
                 required
               />
@@ -379,7 +379,7 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({
                 value={resetToken}
                 onChange={(e) => setResetToken(e.target.value)}
                 placeholder="Token from email"
-                className="rounded-xl py-2 text-xs font-mono"
+                className="rounded-none py-2 text-xs font-mono"
                 required
               />
             </div>
@@ -393,7 +393,7 @@ export const PortalAuth: React.FC<PortalAuthProps> = ({
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="At least 6 characters"
-                className="rounded-xl py-2 text-xs"
+                className="rounded-none py-2 text-xs"
                 icon={<Lock className="w-4 h-4" />}
                 showPasswordToggle
                 required

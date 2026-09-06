@@ -225,6 +225,14 @@ export const bookingService = {
     });
   },
 
+  async deleteBooking(id: string): Promise<void> {
+    if (!isSupabaseConfigured) {
+      throw new Error('Supabase not configured.');
+    }
+    const { error } = await supabase.from('bookings').delete().eq('id', id);
+    if (error) throw error;
+  },
+
   async cancelBooking(id: string, reason?: string): Promise<StaffBooking> {
     const booking = await this.getBookingById(id);
     if (!booking) throw new Error('Booking not found');

@@ -155,11 +155,11 @@ export const MpesaPaymentModal: React.FC<MpesaPaymentModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4 max-h-[92vh] overflow-y-auto">
+      <div className="relative w-full max-w-md bg-card border border-border rounded-none shadow-2xl p-5 sm:p-6 space-y-4 max-h-[92vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border pb-3">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+            <div className="w-8 h-8 rounded-none bg-primary/10 flex items-center justify-center text-primary">
               <Smartphone className="w-4 h-4" />
             </div>
             <div>
@@ -174,7 +174,7 @@ export const MpesaPaymentModal: React.FC<MpesaPaymentModalProps> = ({
           <button
             type="button"
             onClick={handleClose}
-            className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            className="p-1 rounded-none text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -185,7 +185,7 @@ export const MpesaPaymentModal: React.FC<MpesaPaymentModalProps> = ({
 
         {/* Success State */}
         {status === 'success' ? (
-          <div className="py-6 text-center space-y-3 bg-muted/30 rounded-xl p-4 border border-success/30">
+          <div className="py-6 text-center space-y-3 bg-muted/30 rounded-none p-4 border border-success/30">
             <div className="w-12 h-12 rounded-full bg-success/20 text-success flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-6 h-6" />
             </div>
@@ -222,7 +222,7 @@ export const MpesaPaymentModal: React.FC<MpesaPaymentModalProps> = ({
                   <button
                     type="button"
                     onClick={() => setPaymentOption('deposit')}
-                    className={`p-2.5 rounded-xl border text-left transition-all ${
+                    className={`p-2.5 rounded-none border text-left transition-all ${
                       paymentOption === 'deposit'
                         ? 'border-primary bg-primary/10 text-foreground'
                         : 'border-border bg-muted/40 text-muted-foreground hover:border-border-strong'
@@ -240,7 +240,7 @@ export const MpesaPaymentModal: React.FC<MpesaPaymentModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setPaymentOption('full')}
-                  className={`p-2.5 rounded-xl border text-left transition-all ${
+                  className={`p-2.5 rounded-none border text-left transition-all ${
                     paymentOption === 'full'
                       ? 'border-primary bg-primary/10 text-foreground'
                       : 'border-border bg-muted/40 text-muted-foreground hover:border-border-strong'
@@ -267,7 +267,7 @@ export const MpesaPaymentModal: React.FC<MpesaPaymentModalProps> = ({
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   placeholder="0712 345 678"
-                  className="rounded-xl py-2.5 text-xs font-mono pr-20"
+                  className="rounded-none py-2.5 text-xs font-mono pr-20"
                   required
                   disabled={status === 'pushing' || status === 'waiting_pin'}
                 />
@@ -282,7 +282,7 @@ export const MpesaPaymentModal: React.FC<MpesaPaymentModalProps> = ({
 
             {/* Error state display */}
             {errorMessage && (
-              <div className="flex items-center gap-2 p-2.5 bg-destructive/10 border border-destructive/30 rounded-xl text-xs text-destructive">
+              <div className="flex items-center gap-2 p-2.5 bg-destructive/10 border border-destructive/30 rounded-none text-xs text-destructive">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{errorMessage}</span>
               </div>
@@ -290,7 +290,7 @@ export const MpesaPaymentModal: React.FC<MpesaPaymentModalProps> = ({
 
             {/* Live Progress feedback */}
             {status === 'waiting_pin' && (
-              <div className="p-3 bg-primary/10 border border-primary/30 rounded-xl text-xs text-foreground space-y-1 animate-pulse">
+              <div className="p-3 bg-primary/10 border border-primary/30 rounded-none text-xs text-foreground space-y-1 animate-pulse">
                 <div className="font-bold flex items-center gap-1.5 text-primary">
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   STK Push Prompt Dispatched

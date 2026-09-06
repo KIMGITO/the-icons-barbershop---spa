@@ -108,7 +108,7 @@ export const TransactionsPage: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="rounded-xl flex gap-2">
+      <div className="rounded-none flex gap-2">
         <Input
           placeholder="Search code, name, or ref..."
           value={searchQuery}
@@ -120,7 +120,7 @@ export const TransactionsPage: React.FC = () => {
       </div>
 
       {/* ============ MOBILE: compact card list ============ */}
-      <div className="sm:hidden bg-card border border-border rounded-xl overflow-hidden">
+      <div className="sm:hidden bg-card border border-border rounded-none overflow-hidden">
         {loading ? (
           <div className="p-6 text-center text-muted-foreground text-xs">
             <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2" />
@@ -160,7 +160,7 @@ export const TransactionsPage: React.FC = () => {
       </div>
 
       {/* ============ DESKTOP/TABLET: full table ============ */}
-      <div className="hidden sm:block bg-card border border-border rounded-xl overflow-hidden">
+      <div className="hidden sm:block bg-card border border-border rounded-none overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>

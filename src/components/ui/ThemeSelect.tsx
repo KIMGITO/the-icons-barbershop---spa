@@ -90,7 +90,7 @@ export const ThemeSelect: React.FC<Props> = ({
     else if (e.key === 'Tab') { setOpen(false); setQ(''); }
   };
 
-  const triggerPad = compact ? 'px-2 py-1 text-xs rounded-lg' : 'px-3 py-2.5 text-sm rounded-xl';
+  const triggerPad = compact ? 'px-2 py-1 text-xs rounded-none' : 'px-3 py-2.5 text-sm rounded-none';
 
   return (
     <div className={`relative `} ref={ref}>
@@ -120,7 +120,7 @@ export const ThemeSelect: React.FC<Props> = ({
       </select>
 
       {open && (
-        <div className={`absolute left-0 right-0 z-50 mt-1 rounded-xl border border-border bg-card shadow-2xl overflow-hidden flex flex-col animate-in fade-in-50 zoom-in-95 duration-150 ${popoverClassName}`}>
+        <div className={`absolute left-0 right-0 z-50 mt-1 rounded-none border border-border bg-card shadow-2xl overflow-hidden flex flex-col animate-in fade-in-50 zoom-in-95 duration-150 ${popoverClassName}`}>
           {searchable && (
             <div className="p-2 border-b border-border bg-input/40 flex items-center gap-2">
               <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
@@ -144,7 +144,7 @@ export const ThemeSelect: React.FC<Props> = ({
               return (
                 <button key={`${o.value}-${i}`} type="button" disabled={o.disabled}
                   onClick={() => pick(o)} onMouseEnter={() => setHi(i)}
-                  className={`w-full flex items-center justify-between gap-2 rounded-lg text-xs text-left transition-all ${compact ? 'px-2 py-1.5' : 'px-3 py-2'} ${
+                  className={`w-full flex items-center justify-between gap-2 rounded-none text-xs text-left transition-all ${compact ? 'px-2 py-1.5' : 'px-3 py-2'} ${
                     o.disabled ? 'opacity-40 cursor-not-allowed text-muted-foreground' : 'cursor-pointer'} ${
                     isSel ? 'bg-primary/15 text-primary font-bold border border-primary/30'
                     : i === hi ? 'bg-muted/70 text-foreground' : 'text-foreground hover:bg-muted/40'}`}>

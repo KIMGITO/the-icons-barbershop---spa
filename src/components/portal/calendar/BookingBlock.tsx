@@ -61,7 +61,7 @@ export const BookingBlock: React.FC<BookingBlockProps> = ({
           e.stopPropagation();
           onClick(booking);
         }}
-        className={`w-full h-full text-left p-1.5 sm:p-2 rounded-xl border transition-all flex flex-col justify-between overflow-hidden shadow-xs cursor-pointer ${getStatusBorder()}`}
+        className={`w-full h-full text-left p-1.5 sm:p-2 rounded-none border transition-all flex flex-col justify-between overflow-hidden shadow-xs cursor-pointer ${getStatusBorder()}`}
       >
         {/* Top row: Client name & Status dot */}
         <div className="flex items-start justify-between gap-1 w-full">

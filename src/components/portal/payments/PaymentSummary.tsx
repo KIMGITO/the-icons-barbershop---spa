@@ -17,7 +17,7 @@ export const PaymentSummary: React.FC<PaymentSummaryProps> = ({
   const isFullyPaid = breakdown.remainingKsh === 0;
 
   return (
-    <div className={`p-3.5 rounded-xl bg-card border border-border space-y-3 ${className}`}>
+    <div className={`p-3.5 rounded-none bg-card border border-border space-y-3 ${className}`}>
       <div className="flex items-center justify-between border-b border-border pb-2">
         <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           Payment Breakdown
@@ -55,7 +55,7 @@ export const PaymentSummary: React.FC<PaymentSummaryProps> = ({
       </div>
 
       {!isFullyPaid && (
-        <div className="flex items-start gap-1.5 text-[11px] text-muted-foreground bg-muted/50 p-2 rounded-lg border border-border/50">
+        <div className="flex items-start gap-1.5 text-[11px] text-muted-foreground bg-muted/50 p-2 rounded-none border border-border/50">
           <Info className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
           <span>
             The client pays a minimum 50% deposit to secure their artisan chair. Remaining balance is settled at checkout.

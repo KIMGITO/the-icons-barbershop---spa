@@ -83,7 +83,7 @@ export const ProviderSelector: React.FC<ProviderSelectorProps> = ({
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setIsOpen(prev => !prev)}
-        className={`w-full flex items-center justify-between gap-3 p-3 rounded-xl border text-left transition-all ${
+        className={`w-full flex items-center justify-between gap-3 p-3 rounded-none border text-left transition-all ${
           disabled 
             ? 'opacity-50 cursor-not-allowed bg-muted/40 border-border' 
             : 'cursor-pointer bg-input text-foreground hover:border-primary/50'
@@ -121,7 +121,7 @@ export const ProviderSelector: React.FC<ProviderSelectorProps> = ({
 
       {/* Dropdown list */}
       {isOpen && (
-        <div className="absolute left-0 right-0 z-50 mt-1 max-h-72 rounded-2xl border border-border bg-card shadow-2xl p-2 flex flex-col animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute left-0 right-0 z-50 mt-1 max-h-72 rounded-none border border-border bg-card shadow-2xl p-2 flex flex-col animate-in fade-in zoom-in-95 duration-150">
          
 
           <div className="overflow-y-auto max-h-56 p-1 space-y-1">
@@ -143,7 +143,7 @@ export const ProviderSelector: React.FC<ProviderSelectorProps> = ({
                     key={p.id}
                     type="button"
                     onClick={() => handlePick(p)}
-                    className={`w-full flex items-center justify-between gap-3 p-2.5 rounded-xl text-left transition-colors cursor-pointer ${
+                    className={`w-full flex items-center justify-between gap-3 p-2.5 rounded-none text-left transition-colors cursor-pointer ${
                       isSelected
                         ? 'bg-primary/20 text-primary border border-primary/40'
                         : 'hover:bg-muted/60 text-foreground'

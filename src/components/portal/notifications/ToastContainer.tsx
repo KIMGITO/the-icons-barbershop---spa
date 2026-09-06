@@ -17,7 +17,7 @@ export const ToastContainer: React.FC = () => {
         return (
           <div
             key={toast.id}
-            className={`pointer-events-auto p-3 rounded-xl border shadow-xl flex items-start gap-2.5 backdrop-blur-md transition-all animate-in slide-in-from-bottom-3 duration-200 ${
+            className={`pointer-events-auto p-3 rounded-none border shadow-xl flex items-start gap-2.5 backdrop-blur-md transition-all animate-in slide-in-from-bottom-3 duration-200 ${
               isSuccess 
                 ? 'bg-card/95 border-success/40 text-foreground' 
                 : isError 

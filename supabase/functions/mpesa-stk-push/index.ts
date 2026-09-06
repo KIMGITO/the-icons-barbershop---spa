@@ -51,28 +51,33 @@ Deno.serve(async (req) => {
       );
     }
 
+    const roundedAmount = Math.round(amountKsh);
+    const formattedPhone = formatPhoneForDaraja(phoneNumber);
+
+    // Validate phone number is Safaricom (07, 01, 2547, 2541)
+    if (!/^254(7|1)\d{8}$/.test(formattedPhone)) {
+      return Response.json({ error: 'M-Pesa STK Push requires a Safaricom number (07XX, 01XX, 2547XX, or 2541XX)' }, { status: 400, headers: corsHeaders });
+    }
+
     const accessToken = await getAccessToken(config);
     const timestamp = getTimestamp();
     const password = generatePassword(config.shortcode, config.passkey, timestamp);
-    const formattedPhone = formatPhoneForDaraja(phoneNumber);
 
-    // Validate phone number is Safaricom (07 or 2547)
-    if (!/^2547\d{8}$/.test(formattedPhone)) {
-      return Response.json({ error: 'M-Pesa STK Push requires a Safaricom number (07XX or 2547XX)' }, { status: 400, headers: corsHeaders });
-    }
+    const mpesaUrl = `${config.env === 'sandbox' ? 'https://sandbox.safaricom.co.ke' : 'https://api.safaricom.co.ke'}/mpesa/stkpush/v1/processrequest`;
+    
+    console.log(`Initiating STK Push to ${formattedPhone} (Amount: ${roundedAmount}) via ${config.env} environment`);
 
-    const roundedAmount = Math.round(amountKsh);
-    const res = await fetch(`${config.env === 'sandbox' ? 'https://sandbox.safaricom.co.ke' : 'https://api.safaricom.co.ke'}/mpesa/stkpush/v1/processrequest`, {
+    const res = await fetch(mpesaUrl, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json'0
       },
       body: JSON.stringify({
         BusinessShortCode: config.shortcode,
         Password: password,
         Timestamp: timestamp,
-        TransactionType: 'CustomerPayBillOnline',
+        TransactionType: config.shortcode.length > 6 ? 'CustomerBuyGoodsOnline' : 'CustomerPayBillOnline',
         Amount: String(roundedAmount),
         PartyA: formattedPhone,
         PartyB: config.shortcode,
@@ -84,6 +89,8 @@ Deno.serve(async (req) => {
     });
 
     const data = await res.json();
+    console.log('M-Pesa API Response Status:', res.status);
+    console.log('M-Pesa API Response Data:', data);
 
     if (!res.ok || (data.ResponseCode && data.ResponseCode !== '0')) {
       // Log the failed attempt

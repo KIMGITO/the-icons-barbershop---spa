@@ -25,7 +25,7 @@ export function StatCard({
 
   return (
     <div
-      className={`p-3.5 rounded-xl border space-y-1 min-w-0 ${variants[variant]} ${className}`}
+      className={`p-3.5 rounded-none border space-y-1 min-w-0 ${variants[variant]} ${className}`}
     >
       <span className="block text-[10px] sm:text-[11px] text-center font-bold uppercase tracking-wider text-muted-foreground truncate">
         {label}

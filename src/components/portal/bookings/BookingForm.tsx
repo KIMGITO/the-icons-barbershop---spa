@@ -252,14 +252,14 @@ export const BookingForm: React.FC<BookingFormProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {errorMessage && (
-        <div className="p-3 bg-destructive/15 border border-destructive/40 text-destructive text-xs rounded-xl flex items-center gap-2">
+        <div className="p-3 bg-destructive/15 border border-destructive/40 text-destructive text-xs rounded-none flex items-center gap-2">
           <ShieldAlert className="w-4 h-4 shrink-0" />
           <span>{errorMessage}</span>
         </div>
       )}
 
       {/* 1. Client Details with Auto-Lookup */}
-      <div className=" p-2 rounded-2xl space-y-3">
+      <div className=" p-2 rounded-none space-y-3">
         <CustomerSelector
           customerName={customerName}
           customerPhone={customerPhone}
@@ -277,7 +277,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
       </div>
 
       {/* 2. Service Selection */}
-      <div className=" rounded-2xl space-y-3">
+      <div className=" rounded-none space-y-3">
         <ServiceSelector
           services={services}
           selectedServiceId={selectedServiceId}
@@ -286,7 +286,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
       </div>
 
       {/* 3. Provider Selection (Including Admin) */}
-      <div className="  rounded-2xl space-y-3">
+      <div className="  rounded-none space-y-3">
         <ProviderSelector
           providers={providers}
           selectedProviderId={selectedProviderId}
@@ -296,7 +296,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
       </div>
 
       {/* 4. Scheduling: Date, Start Time & Duration */}
-      <div className="  rounded-2xl space-y-3.5">
+      <div className="  rounded-none space-y-3.5">
         <div className="text-xs font-bold  tracking-wider text-muted-foreground">
           Appointment Schedule & Duration
         </div>
@@ -340,7 +340,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
                   key={mins}
                   type="button"
                   onClick={() => setDurationMinutes(mins)}
-                  className={`py-1.5 text-xs font-mono rounded-lg border transition-all cursor-pointer ${
+                  className={`py-1.5 text-xs font-mono rounded-none border transition-all cursor-pointer ${
                     durationMinutes === mins
                       ? 'bg-primary text-black font-extrabold border-primary shadow-xs'
                       : 'bg-input text-foreground border-border hover:border-primary/40'
@@ -355,7 +355,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
 
         {/* Real-time Conflict Alert Box */}
         {conflict.hasConflict && (
-          <div className="p-3 bg-warning/10 border border-warning/40 text-foreground rounded-xl space-y-2 text-xs animate-in fade-in duration-150">
+          <div className="p-3 bg-warning/10 border border-warning/40 text-foreground rounded-none space-y-2 text-xs animate-in fade-in duration-150">
             <div className="flex items-start gap-2 text-warning font-bold">
               <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>Schedule Conflict Detected</span>
@@ -370,7 +370,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
               <button
                 type="button"
                 onClick={handleFindNextAvailable}
-                className="px-2.5 py-1 text-xs font-bold bg-primary text-black rounded-lg hover:bg-primary/90 transition-colors"
+                className="px-2.5 py-1 text-xs font-bold bg-primary text-black rounded-none hover:bg-primary/90 transition-colors"
               >
                 Jump to Next Available ({conflict.conflictingBooking?.endTime || 'Open'})
               </button>
@@ -389,7 +389,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
         )}
       </div>
 
-      <div className=" pt-4 rounded-2xl space-y-3">
+      <div className=" pt-4 rounded-none space-y-3">
         {mode === 'edit' && (
           <div>
             <label className="block text-xs font-semibold  tracking-wider text-muted-foreground mb-1.5">
@@ -401,7 +401,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
                   key={st}
                   type="button"
                   onClick={() => setStatus(st)}
-                  className={`py-1.5 text-[11px] capitalize rounded-lg border font-semibold transition-all cursor-pointer ${
+                  className={`py-1.5 text-[11px] capitalize rounded-none border font-semibold transition-all cursor-pointer ${
                     status === st
                       ? 'bg-primary text-black font-extrabold border-primary'
                       : 'bg-input text-muted-foreground border-border hover:text-foreground'
@@ -450,7 +450,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
       </div>
 
       {/* 6. Special Requests & Notes */}
-      <div className="bg-muted/20 border border-border p-3.5 sm:p-4 rounded-2xl space-y-2.5">
+      <div className="bg-muted/20 border border-border p-3.5 sm:p-4 rounded-none space-y-2.5">
         <label className="block text-xs font-semibold  tracking-wider text-muted-foreground">
           Client Requests & Staff Notes
         </label>
@@ -461,7 +461,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
             value={specialRequests}
             onChange={e => setSpecialRequests(e.target.value)}
             placeholder="Client preferences, skin sensitivity, beverage request..."
-            className="w-full text-foreground text-xs rounded-xl p-2.5 placeholder:text-muted-foreground"
+            className="w-full text-foreground text-xs rounded-none p-2.5 placeholder:text-muted-foreground"
           />
           <Input
             multiline
@@ -469,7 +469,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
             value={staffNotes}
             onChange={e => setStaffNotes(e.target.value)}
             placeholder="Staff notes (internal only)..."
-            className="w-full text-foreground text-xs rounded-xl p-2.5 placeholder:text-muted-foreground"
+            className="w-full text-foreground text-xs rounded-none p-2.5 placeholder:text-muted-foreground"
           />
         </div>
       </div>

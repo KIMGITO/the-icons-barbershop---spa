@@ -84,13 +84,13 @@ export const WeekPlannerView: React.FC<WeekPlannerViewProps> = ({
     <>
       {/* ============ MOBILE: day-picker strip + vertical agenda ============ */}
       <div className="sm:hidden space-y-3">
-        <div className="bg-card border border-border rounded-2xl p-2 flex gap-1.5 overflow-x-auto">
+        <div className="bg-card border border-border rounded-none p-2 flex gap-1.5 overflow-x-auto">
           {weekDays.map(day => (
             <button
               key={day.dateString}
               type="button"
               onClick={() => setMobileSelectedDate(day.dateString)}
-              className={`shrink-0 flex flex-col items-center justify-center w-12 py-2 rounded-xl transition-colors cursor-pointer ${
+              className={`shrink-0 flex flex-col items-center justify-center w-12 py-2 rounded-none transition-colors cursor-pointer ${
                 mobileSelectedDate === day.dateString
                   ? 'bg-primary text-black font-extrabold shadow-xs'
                   : day.isToday
@@ -104,7 +104,7 @@ export const WeekPlannerView: React.FC<WeekPlannerViewProps> = ({
           ))}
         </div>
 
-        <div className="bg-card border border-border rounded-2xl p-3">
+        <div className="bg-card border border-border rounded-none p-3">
           <MobileAgendaDay
             bookings={mobileDayBookings}
             onBookingClick={onBookingClick}
@@ -115,7 +115,7 @@ export const WeekPlannerView: React.FC<WeekPlannerViewProps> = ({
       </div>
 
       {/* ============ DESKTOP/TABLET: full 7-day time grid ============ */}
-      <div className="hidden sm:block bg-card border border-border rounded-2xl overflow-x-auto shadow-sm">
+      <div className="hidden sm:block bg-card border border-border rounded-none overflow-x-auto shadow-sm">
       <div className="min-w-[760px] sm:min-w-[860px]">
         {/* Days Header */}
         <div className="grid grid-cols-[70px_repeat(7,1fr)] border-b border-border bg-muted/40 text-center sticky top-0 z-20">

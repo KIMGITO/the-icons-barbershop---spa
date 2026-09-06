@@ -152,7 +152,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         id={id}
         disabled={disabled}
         onClick={() => !disabled && setIsOpen(prev => !prev)}
-        className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border text-sm text-left transition-all ${
+        className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-none border text-sm text-left transition-all ${
           disabled 
             ? 'opacity-50 cursor-not-allowed bg-muted/40 border-border text-muted-foreground' 
             : 'cursor-pointer bg-input text-foreground hover:border-primary/50'
@@ -174,13 +174,13 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
 
       {/* Popover Calendar */}
       {isOpen && (
-        <div className="absolute left-0 z-50 mt-1 w-72 rounded-2xl border border-border bg-card shadow-2xl p-3 animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute left-0 z-50 mt-1 w-72 rounded-none border border-border bg-card shadow-2xl p-3 animate-in fade-in zoom-in-95 duration-150">
           {/* Header Navigation */}
           <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-border">
             <button
               type="button"
               onClick={handlePrevMonth}
-              className="p-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+              className="p-1 rounded-none hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -200,7 +200,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
               <button
                 type="button"
                 onClick={handleNextMonth}
-                className="p-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                className="p-1 rounded-none hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -248,7 +248,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                   type="button"
                   disabled={isDisabled}
                   onClick={() => handleDayClick(day)}
-                  className={`p-1.5 rounded-lg text-center font-semibold text-xs transition-all ${
+                  className={`p-1.5 rounded-none text-center font-semibold text-xs transition-all ${
                     isDisabled 
                       ? 'opacity-30 cursor-not-allowed text-muted-foreground' 
                       : 'cursor-pointer hover:bg-primary/20'
