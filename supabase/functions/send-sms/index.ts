@@ -105,12 +105,15 @@ Deno.serve(async (req) => {
       );
     }
 
-    const baseUrl = AT_ENV === 'production'
+    const isProd = AT_ENV === 'production';
+    const baseUrl = isProd
       ? 'https://api.africastalking.com'
       : 'https://api.sandbox.africastalking.com';
 
-    const smsBody: any = { username: AT_USERNAME, to: formattedPhone, message: msg };
-    if (AT_SENDER_ID) smsBody.from = AT_SENDER_ID;
+    // In sandbox, the username MUST be 'sandbox' and custom from/sender IDs are not supported.
+    const username = isProd ? AT_USERNAME : 'sandbox';
+    const smsBody: any = { username, to: formattedPhone, message: msg };
+    if (isProd && AT_SENDER_ID) smsBody.from = AT_SENDER_ID;
 
     const atRes = await fetch(`${baseUrl}/version1/messaging`, {
       method: 'POST',
