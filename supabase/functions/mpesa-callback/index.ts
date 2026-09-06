@@ -88,6 +88,7 @@ Deno.serve(async (req) => {
           payment_status: 'deposit-paid',
           payment_method: 'mpesa',
           mpesa_receipt_number: receiptNumber,
+          receipt_code: receiptNumber || undefined, // Use M-Pesa receipt as the official receipt code
           deposit_paid_ksh: Number(amount || 0),
           updated_at: new Date().toISOString()
         })

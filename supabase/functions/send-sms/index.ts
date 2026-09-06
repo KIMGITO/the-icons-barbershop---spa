@@ -29,7 +29,7 @@ function buildReceiptMessage(booking: any): string {
     `THE ICONS Barber & Spa`,
     `Hi ${booking.customer_name}, your appointment is confirmed!`,
     ``,
-    `Receipt Code: ${booking.receipt_code}`,
+    `Receipt Code: ${booking.mpesa_receipt_number || booking.receipt_code}`,
     `Services: ${services}`,
     `Barber: ${booking.provider_name}`,
     `Date: ${booking.date} @ ${booking.time_slot}`,
@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
       const { data: booking } = await admin.from('bookings').select('*').eq('id', bookingId).maybeSingle();
       if (!booking) return Response.json({ error: 'Booking not found' }, { status: 404, headers: corsHeaders });
       toPhone = booking.customer_phone;
-      rc = booking.receipt_code;
+      rc = booking.mpesa_receipt_number || booking.receipt_code;
       customer = booking.customer_name;
       msg = buildReceiptMessage(booking);
     }
