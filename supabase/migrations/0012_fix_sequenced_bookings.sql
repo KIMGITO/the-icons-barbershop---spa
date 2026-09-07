@@ -35,7 +35,6 @@ declare
   v_business_count int;
   v_status booking_status := 'confirmed';
   v_payment_status payment_status := 'unpaid';
-  v_leg_results jsonb[] := '{}';
   v_i int;
   v_sorted_legs public.booking_leg_input[];
   v_customer_id uuid := p_customer_id;
@@ -73,7 +72,6 @@ begin
     end if;
 
     v_leg_start := v_current_ts;
-    -- Standardized buffer logic: Always include buffer unless 0
     v_leg_end := v_leg_start + ((v_service.duration_minutes + coalesce(v_service.buffer_minutes, 0)) || ' minutes')::interval;
 
     if not public.fn_is_staff_available(v_leg.provider_id, v_leg_start, v_leg_end) then
@@ -138,7 +136,6 @@ begin
     insert into public.booking_services (booking_id, service_id) 
     values (v_booking_id, v_leg.service_id);
     
-    -- Safe role lookup
     select id into v_role_id from public.staff_roles 
     where code = (select provider_type::text from public.service_providers where id = v_leg.provider_id);
 
