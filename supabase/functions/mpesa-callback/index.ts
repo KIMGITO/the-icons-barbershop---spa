@@ -85,43 +85,69 @@ Deno.serve(async (req) => {
 
     if (status === 'completed') {
       console.log(`Payment successful for booking ${bookingId}. Updating status and triggering notifications...`);
-      // 1. Confirm the booking
-      const { data: bookingRow, error: confirmErr } = await admin.from('bookings')
-        .update({
-          status: 'confirmed',
-          payment_status: 'deposit-paid',
-          payment_method: 'mpesa',
-          mpesa_receipt_number: receiptNumber,
-          receipt_code: receiptNumber || undefined, // Use M-Pesa receipt as the official receipt code
-          deposit_paid_ksh: Number(amount || 0),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', bookingId)
-        .select('id')
-        .maybeSingle();
+      
+      try {
+        // 1. Fetch current booking state for accurate balance math
+        const { data: booking, error: fetchErr } = await admin.from('bookings')
+          .select('total_price_ksh, deposit_paid_ksh')
+          .eq('id', bookingId)
+          .single();
 
-      if (confirmErr) {
-        console.error('Failed to confirm booking:', confirmErr.message);
-      } else if (bookingRow) {
-        // 2. Trigger notifications via another Edge Function
-        // We use the service role key to authenticate the internal call
-        const notificationUrl = `${supabaseUrl}/functions/v1/confirm-booking-notification`;
-        try {
-          await fetch(notificationUrl, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${serviceRoleKey}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              bookingId: bookingRow.id,
-              amountPaid: amount
-            })
-          });
-          console.log(`Notification trigger sent for booking ${bookingRow.id}`);
-        } catch (err) {
-          console.error('Failed to trigger notifications:', err.message);
+        if (fetchErr || !booking) {
+          throw new Error(`Could not fetch booking ${bookingId}: ${fetchErr?.message}`);
         }
+
+        const totalPaid = (booking.deposit_paid_ksh || 0) + Number(amount || 0);
+        const remaining = Math.max(0, booking.total_price_ksh - totalPaid);
+        const paymentStatus = remaining === 0 ? 'paid' : 'deposit-paid';
+
+        // 2. Confirm the booking and update balance
+        const { data: bookingRow, error: confirmErr } = await admin.from('bookings')
+          .update({
+            status: 'confirmed',
+            payment_status: paymentStatus,
+            payment_method: 'mpesa',
+            mpesa_receipt_number: receiptNumber,
+            receipt_code: receiptNumber || undefined, // Use M-Pesa receipt as the official receipt code
+            deposit_paid_ksh: totalPaid,
+            remaining_balance_ksh: remaining,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', bookingId)
+          .select('id')
+          .maybeSingle();
+
+        if (confirmErr) {
+          throw confirmErr;
+        }
+
+        if (bookingRow) {
+          // 3. Trigger notifications via another Edge Function
+          const notificationUrl = `${supabaseUrl}/functions/v1/confirm-booking-notification`;
+          try {
+            await fetch(notificationUrl, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${serviceRoleKey}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                bookingId: bookingRow.id,
+                amountPaid: amount
+              })
+            });
+            console.log(`Notification trigger sent for booking ${bookingRow.id}`);
+          } catch (err) {
+            console.error('Failed to trigger notifications:', err.message);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to process successful payment:', err.message);
+        // If we failed to update the booking (e.g. constraint violation), 
+        // we remove it to free the slot as requested by the user, 
+        // even though this is a successful payment (manual intervention might be needed).
+        await admin.from('bookings').delete().eq('id', bookingId);
+        return darajaError;
       }
     } else {
       // Payment failed — remove the pending booking record to free up the slot

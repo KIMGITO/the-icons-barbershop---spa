@@ -89,7 +89,17 @@ export const useBookingStore = create<BookingState>((set, get) => ({
               }));
             } else {
               const fresh = await bookingService.getBookings();
-              set({ bookings: fresh });
+              set(state => {
+                // If the currently selected booking was updated, refresh its reference too
+                const updatedSelected = state.selectedBooking 
+                  ? fresh.find(b => b.id === state.selectedBooking?.id) || state.selectedBooking
+                  : state.selectedBooking;
+                  
+                return { 
+                  bookings: fresh,
+                  selectedBooking: updatedSelected
+                };
+              });
             }
           })
           .subscribe();
