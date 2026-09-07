@@ -85,14 +85,20 @@ begin
   end if;
 
   -- All services in one booking must belong to the same business.
-  select count(distinct business_id), min(business_id)
-  into v_business_count, v_business_id
+  -- (uuid has no built-in min()/max() aggregate, so count distinct
+  -- separately and just take any one business_id once confirmed unique.)
+  select count(distinct business_id)
+  into v_business_count
   from public.services
   where id = any(select (l).service_id from unnest(v_sorted_legs) l);
 
   if v_business_count > 1 then
     return jsonb_build_object('success', false, 'error', 'MULTIPLE_BUSINESSES');
   end if;
+
+  select business_id into v_business_id
+  from public.services
+  where id = (v_sorted_legs[1]).service_id;
 
   v_i := 0;
   foreach v_leg in array v_sorted_legs loop
@@ -147,10 +153,25 @@ begin
   end loop;
 
   if v_customer_id is null then
-    insert into public.customers (name, phone, email, business_id, total_visits)
-    values (p_customer_name, p_customer_phone, p_customer_email, v_business_id, 1)
-    on conflict (phone, business_id) do update set total_visits = customers.total_visits + 1, last_visit_date = now(), email = coalesce(p_customer_email, customers.email), updated_at = now()
-    returning id into v_customer_id;
+    -- No unique/exclusion constraint exists on (phone, business_id) in this
+    -- schema, so ON CONFLICT can't be used here -- do an explicit
+    -- find-then-insert-or-update instead.
+    if p_customer_phone is not null then
+      select id into v_customer_id from public.customers
+      where phone = p_customer_phone and business_id = v_business_id
+      limit 1;
+    end if;
+
+    if v_customer_id is not null then
+      update public.customers
+      set total_visits = total_visits + 1, last_visit_date = now(),
+          email = coalesce(p_customer_email, email), updated_at = now()
+      where id = v_customer_id;
+    else
+      insert into public.customers (name, phone, email, business_id, total_visits, last_visit_date)
+      values (p_customer_name, p_customer_phone, p_customer_email, v_business_id, 1, now())
+      returning id into v_customer_id;
+    end if;
   else
     update public.customers set total_visits = total_visits + 1, last_visit_date = now(), email = coalesce(p_customer_email, email), updated_at = now() where id = v_customer_id;
   end if;
@@ -220,8 +241,6 @@ begin
     'payment_status', v_payment_status,
     'deposit_paid_ksh', 0,
     'remaining_balance_ksh', v_total_price
-  );
-exception when others then
-  return jsonb_build_object('success', false, 'error', SQLERRM);
+    return jsonb_build_object('success', false, 'error', SQLERRM);
 end;
 $$;
