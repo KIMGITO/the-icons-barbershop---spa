@@ -15,6 +15,7 @@ export interface ServiceItem {
   description?: string;
   durationMinutes: number;
   priceKsh: number;
+  sequenceRank?: number;
   features: string[];
   imageUrl: string;
   isPopular?: boolean;

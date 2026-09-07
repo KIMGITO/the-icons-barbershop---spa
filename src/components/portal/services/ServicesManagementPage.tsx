@@ -42,6 +42,8 @@ export const ServicesManagementPage: React.FC = () => {
   const [imageUrl, setImageUrl] = useState('');
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
   const [selectedProviderIds, setSelectedProviderIds] = useState<string[]>([]);
+  const [sequenceRank, setSequenceRank] = useState<number>(100);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,7 +69,7 @@ export const ServicesManagementPage: React.FC = () => {
         return s.name.toLowerCase().includes(q) || s.description.toLowerCase().includes(q);
       }
       return true;
-    });
+    }).sort((a, b) => (a.sequenceRank || 100) - (b.sequenceRank || 100) || a.name.localeCompare(b.name));
   }, [services, categoryFilter, searchQuery]);
 
   const handleOpenAdd = () => {
@@ -80,6 +82,8 @@ export const ServicesManagementPage: React.FC = () => {
     setDurationMinutes(45);
     setDescription('');
     setImageUrl('');
+    setSequenceRank(100);
+
     setStatus('active');
     setSelectedProviderIds(providers.map(p => p.id));
     setIsModalOpen(true);
@@ -93,6 +97,8 @@ export const ServicesManagementPage: React.FC = () => {
     setPriceKsh(s.priceKsh);
     setDurationMinutes(s.durationMinutes);
     setDescription(s.description || s.shortDescription || s.fullDescription || '');
+    setSequenceRank(s.sequenceRank || 100);
+
     setImageUrl(s.imageUrl || '');
     setStatus(s.status === 'inactive' ? 'inactive' : 'active');
     setSelectedProviderIds(serviceProvidersMap[s.id] || []);
@@ -127,6 +133,7 @@ export const ServicesManagementPage: React.FC = () => {
             category,
             priceKsh: Number(priceKsh),
             durationMinutes: Number(durationMinutes),
+            sequenceRank: Number(sequenceRank),
             shortDescription: description.trim() || editingService.shortDescription,
             fullDescription: description.trim() || editingService.fullDescription,
             description: description.trim(),
@@ -143,6 +150,7 @@ export const ServicesManagementPage: React.FC = () => {
             category,
             priceKsh: Number(priceKsh),
             durationMinutes: Number(durationMinutes),
+            sequenceRank: Number(sequenceRank),
             shortDescription: description.trim() || name.trim(),
             fullDescription: description.trim() || name.trim(),
             description: description.trim(),
@@ -255,9 +263,14 @@ export const ServicesManagementPage: React.FC = () => {
                   <div className="space-y-2">
                     <div className="flex items-start justify-between gap-2">
                       <div className="space-y-0.5">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
-                          {service.category}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                            {service.category}
+                          </span>
+                          <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-sm font-mono font-bold" title="Multi-service sequence rank">
+                            #{service.sequenceRank || 100}
+                          </span>
+                        </div>
                         <h3 className="text-sm font-bold text-foreground">
                           {service.name}
                         </h3>
@@ -397,7 +410,7 @@ export const ServicesManagementPage: React.FC = () => {
                 <p className="text-[9px] text-muted-foreground">Leave blank to auto-generate from name</p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="space-y-1">
                   <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                     Category *
@@ -441,7 +454,7 @@ export const ServicesManagementPage: React.FC = () => {
 
                 <div className="space-y-1">
                   <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Duration (Minutes) *
+                    Duration (Min) *
                   </label>
                   <Input
                     type="number"
@@ -449,6 +462,21 @@ export const ServicesManagementPage: React.FC = () => {
                     onChange={(e) => setDurationMinutes(Number(e.target.value))}
                     min={10}
                     step={5}
+                    className="rounded-none py-2 text-xs font-mono"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground" title="Order in multi-service bookings">
+                    Sequence *
+                  </label>
+                  <Input
+                    type="number"
+                    value={sequenceRank}
+                    onChange={(e) => setSequenceRank(Number(e.target.value))}
+                    min={1}
+                    step={1}
                     className="rounded-none py-2 text-xs font-mono"
                     required
                   />

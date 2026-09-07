@@ -61,6 +61,15 @@ export interface BookingResource {
   roleId?: string;
 }
 
+export interface BookingLeg {
+  serviceId: string;
+  providerId: string;
+  startTs: string;
+  endTs: string;
+  sequenceOrder: number;
+}
+
+
 export interface AvailableSlot {
   startTs: string; // ISO timestamp
   endTs: string; // ISO timestamp
@@ -83,4 +92,6 @@ export interface CheckAndReserveResult {
   remainingBalanceKsh?: number;
   status?: string;
   paymentStatus?: string;
+  legs?: BookingLeg[];
+
 }

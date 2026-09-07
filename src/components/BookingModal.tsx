@@ -23,6 +23,7 @@ import {
   Loader2,
   AlertCircle,
   Lock,
+  Sparkles,
 } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
 import { format, startOfDay, addDays } from 'date-fns';
@@ -71,6 +72,8 @@ export const BookingModal: React.FC = () => {
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
   const [selectedBarberId, setSelectedBarberId] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [perServiceProviders, setPerServiceProviders] = useState<Record<string, string>>({});
+
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('');
 
   // Customer Details Form
@@ -85,7 +88,7 @@ export const BookingModal: React.FC = () => {
   const [scheduleError, setScheduleError] = useState<string | null>(null);
 
   // Availability + Payment state
-  const [bookedSlots, setBookedSlots] = useState<BookedSlotInfo[]>([]);
+  const [bookedSlotsMap, setBookedSlotsMap] = useState<Record<string, BookedSlotInfo[]>>({});
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [qualifiedStaff, setQualifiedStaff] = useState<
     { staffId: string; staffName: string; providerType: string }[]
@@ -109,12 +112,12 @@ export const BookingModal: React.FC = () => {
   const [dbBusinessHours, setDbBusinessHours] = useState<BusinessHoursResult | null>(null);
   const [businessHoursLoading, setBusinessHoursLoading] = useState(false);
 
-  const selectedServices = services.filter((s) =>
-    selectedServiceIds.includes(s.id),
-  );
+  const selectedServices = services
+    .filter((s) => selectedServiceIds.includes(s.id))
+    .sort((a, b) => (a.sequenceRank || 100) - (b.sequenceRank || 100) || a.name.localeCompare(b.name));
   const totalPrice = selectedServices.reduce((sum, s) => sum + s.priceKsh, 0);
   const totalDuration = selectedServices.reduce(
-    (sum, s) => sum + s.durationMinutes,
+    (sum, s) => sum + (s.durationMinutes === 30 ? 30 : s.durationMinutes + (s.bufferMinutes || 0)),
     0,
   );
   const depositBreakdown = paymentService.calculateDeposit(totalPrice, 0);
@@ -130,12 +133,12 @@ export const BookingModal: React.FC = () => {
     [],
   );
 
-  const resolvedProvider = useMemo(
-    () => barbers.find((b) => b.id === selectedBarberId) || null,
-    [barbers, selectedBarberId],
-  );
-
-  const barberDisplayName = resolvedProvider?.name || 'Master Barber';
+  const barberDisplayName = useMemo(() => {
+    const uniqueNames = Array.from(new Set(Object.values(perServiceProviders).map(pid => barbers.find(b => b.id === pid)?.name))).filter(Boolean);
+    if (uniqueNames.length === 0) return 'Master Barber';
+    if (uniqueNames.length === 1) return uniqueNames[0] || 'Master Barber';
+    return `${uniqueNames[0]} & ${uniqueNames.length - 1} more`;
+  }, [perServiceProviders, barbers]);
 
   // Load business hours from database (same source as check_and_reserve RPC)
   useEffect(() => {
@@ -163,6 +166,10 @@ export const BookingModal: React.FC = () => {
 
       if (selectedPreBarberId) {
         setSelectedBarberId(selectedPreBarberId);
+        // Pre-fill per-service providers if a specific barber was selected
+        if (selectedPreServiceId) {
+          setPerServiceProviders({ [selectedPreServiceId]: selectedPreBarberId });
+        }
       } else {
         setSelectedBarberId('');
       }
@@ -192,31 +199,36 @@ export const BookingModal: React.FC = () => {
 
   // Load available slots using the new booking engine
   useEffect(() => {
-    if (!isBookingModalOpen || step !== 3 || !resolvedProvider || !selectedDate)
+    if (!isBookingModalOpen || step !== 3 || !selectedDate || Object.keys(perServiceProviders).length === 0)
       return;
 
-    const providerId = resolvedProvider.id;
     const dateStr = format(selectedDate, 'yyyy-MM-dd');
     setSlotsLoading(true);
-    setBookedSlots([]);
-
-    Promise.all([
-      bookingService.getBookedSlots(providerId, dateStr),
-      // Qualified staff for suggestions when the day is fully booked
-      bookingEngineService.getQualifiedStaff(selectedServiceIds[0]),
-    ])
-      .then(([booked, qualified]) => {
-        setBookedSlots(booked);
-        setQualifiedStaff(qualified);
+    
+    const uniqueProviderIds = Array.from(new Set(Object.values(perServiceProviders)));
+    
+    Promise.all(uniqueProviderIds.map(pid => 
+      bookingService.getBookedSlots(pid, dateStr).then(slots => ({ pid, slots }))
+    ))
+      .then((results) => {
+        const newMap: Record<string, BookedSlotInfo[]> = {};
+        results.forEach(({ pid, slots }) => {
+          newMap[pid] = slots;
+        });
+        setBookedSlotsMap(newMap);
       })
       .catch((err) => console.error('Failed to load slots:', err))
       .finally(() => setSlotsLoading(false));
+
+    // Also fetch qualified staff for the first service as a fallback
+    bookingEngineService.getQualifiedStaff(selectedServiceIds[0])
+      .then(setQualifiedStaff)
+      .catch(console.error);
   }, [
     isBookingModalOpen,
     step,
-    resolvedProvider,
+    perServiceProviders,
     selectedDate,
-    totalDuration,
     selectedServiceIds,
   ]);
 
@@ -225,9 +237,69 @@ export const BookingModal: React.FC = () => {
     if (selectedServiceIds.includes(id)) {
       if (selectedServiceIds.length > 1) {
         setSelectedServiceIds(selectedServiceIds.filter((sId) => sId !== id));
+      } else {
+        setServiceError('At least one service must be selected.');
       }
     } else {
       setSelectedServiceIds([...selectedServiceIds, id]);
+    }
+  };
+
+  const legs = useMemo(() => {
+    if (!selectedTimeSlot || !selectedDate) return [];
+    let currentMin = parseTimeToMinutes(selectedTimeSlot);
+    return selectedServices.map((service) => {
+      const providerId = perServiceProviders[service.id];
+      const startMin = currentMin;
+      const duration = service.durationMinutes === 30 ? 30 : (service.durationMinutes + (service.bufferMinutes || 0));
+      const endMin = startMin + duration;
+      currentMin = endMin;
+      return {
+        service,
+        providerId,
+        startMin,
+        endMin,
+        provider: barbers.find(b => b.id === providerId)
+      };
+    });
+  }, [selectedTimeSlot, selectedDate, selectedServices, perServiceProviders, barbers]);
+
+  const hasLegConflict = useCallback((leg: any) => {
+    if (!leg.providerId) return false;
+    const providerSlots = bookedSlotsMap[leg.providerId] || [];
+    const legStartStr = minutesToHHMM(leg.startMin);
+    const legEndStr = minutesToHHMM(leg.endMin);
+    
+    return providerSlots.some(slot => {
+      const slotStart = slot.time_slot;
+      const slotEnd = slot.end_time;
+      return (legStartStr < slotEnd && legEndStr > slotStart);
+    });
+  }, [bookedSlotsMap]);
+
+  const handleNextAvailable = async () => {
+    if (!selectedDate || Object.keys(perServiceProviders).length === 0) return;
+    
+    setSlotsLoading(true);
+    try {
+      const startAfter = createNairobiTimestamp(format(selectedDate, 'yyyy-MM-dd'), minutesToHHMM(getNairobiMinutesNow()));
+      const nextSlot = await bookingEngineService.getNextAvailableCombinedSlot(
+        selectedServices.map(s => ({ serviceId: s.id, providerId: perServiceProviders[s.id] })),
+        startAfter
+      );
+      
+      if (nextSlot) {
+        const dateStr = nextSlot.split('T')[0];
+        const timeStr = format(new Date(nextSlot), 'HH:mm');
+        setSelectedDate(new Date(dateStr));
+        setSelectedTimeSlot(timeStr);
+      } else {
+        setScheduleError('No available combined slot found in the next 30 days.');
+      }
+    } catch (err) {
+      console.error('Failed to find next available slot:', err);
+    } finally {
+      setSlotsLoading(false);
     }
   };
 
@@ -280,9 +352,10 @@ export const BookingModal: React.FC = () => {
   const latestBookableMin = Math.max(openMin, closeMin - CLOSING_BUFFER_MINUTES);
 
   // Occupied ranges for the read-only busy timeline
-  const busyRanges = useMemo(
-    () =>
-      bookedSlots
+  const busyRangesMap = useMemo(() => {
+    const map: Record<string, { start: number; end: number; label: string }[]> = {};
+    Object.keys(bookedSlotsMap).forEach(pid => {
+      map[pid] = bookedSlotsMap[pid]
         .map((b) => {
           const start = parseTimeToMinutes(b.time_slot);
           const rawEnd = parseTimeToMinutes(b.end_time || b.time_slot);
@@ -294,31 +367,18 @@ export const BookingModal: React.FC = () => {
           };
         })
         .filter((r) => r.start >= 0 && r.end > r.start)
-        .sort((a, b) => a.start - b.start),
-    [bookedSlots],
-  );
+        .sort((a, b) => a.start - b.start);
+    });
+    return map;
+  }, [bookedSlotsMap]);
 
   // Current selection window in minutes
   const selectedStartMin = parseTimeToMinutes(selectedTimeSlot);
-  const selectedEndMin =
-    selectedStartMin >= 0 ? selectedStartMin + totalDuration : -1;
 
-  const selectedConflict = useMemo(() => {
-    if (selectedStartMin < 0) return null;
-    return (
-      busyRanges.find(
-        (r) => selectedStartMin < r.end && selectedEndMin > r.start,
-      ) || null
-    );
-  }, [busyRanges, selectedStartMin, selectedEndMin]);
-
-  /** First minute >= fromMin where a full-duration window fits with no overlap.
-   * Uses 15-minute slot intervals from the unified time system. */
-  const suggestNextFreeStartLocal = (fromMin: number): number => {
-    return suggestNextFreeStart(fromMin, busyRanges, totalDuration, closeMin, SLOT_INTERVAL_MINUTES);
-  };
-
-  const hasAnyFreeWindow = suggestNextFreeStartLocal(openMin) >= 0;
+  const anyLegConflict = useMemo(() => {
+    if (selectedStartMin < 0) return false;
+    return legs.some(leg => hasLegConflict(leg));
+  }, [legs, hasLegConflict, selectedStartMin]);
 
   // Live validation on every change of the typed/picked time
   const timeValidation = useMemo(() => {
@@ -349,23 +409,15 @@ export const BookingModal: React.FC = () => {
     }
     // The service is allowed to run past closing time — only the start time
     // must fall within business hours (strictly before closing, matching database validation).
-    if (selectedConflict) {
-      const nextFree = suggestNextFreeStartLocal(selectedConflict.end + SLOT_INTERVAL_MINUTES);
-      const suggestion =
-        nextFree >= 0
-          ? `try ${formatTimeDisplay(minutesToHHMM(nextFree))} or later.`
-          : 'try another date or provider.';
+    if (anyLegConflict) {
       return {
         status: 'error' as const,
-        message: `Conflicts with a booking until ${formatTimeDisplay(minutesToHHMM(selectedConflict.end))} — ${suggestion}`,
+        message: 'One or more selected masters have a conflict at this time. Try "Find Next Available" or pick another time.',
       };
     }
-    const runsPastClose = selectedEndMin > closeMin;
     return {
       status: 'success' as const,
-      message: runsPastClose
-        ? `Available — starts before closing at ${closeDisplay} and ends at ${formatTimeDisplay(minutesToHHMM(selectedEndMin))} (running past closing is allowed).`
-        : `Available — ends at ${formatTimeDisplay(minutesToHHMM(selectedEndMin))}.`,
+      message: `All selected masters are available! Ends at ${formatTimeDisplay(minutesToHHMM(legs[legs.length-1]?.endMin || 0))}.`,
     };
   }, [
     selectedTimeSlot,
@@ -374,9 +426,8 @@ export const BookingModal: React.FC = () => {
     closeMin,
     openDisplay,
     closeDisplay,
-    selectedEndMin,
-    totalDuration,
-    selectedConflict,
+    anyLegConflict,
+    legs,
   ]);
 
   const timelineSpan = Math.max(1, closeMin - openMin);
@@ -418,10 +469,11 @@ export const BookingModal: React.FC = () => {
       return { ok: true, message: '' };
     }
     if (s === 2) {
-      if (!selectedBarberId)
+      const allSelected = selectedServiceIds.every(id => perServiceProviders[id]);
+      if (!allSelected)
         return {
           ok: false,
-          message: 'Please select a master barber to continue.',
+          message: 'Please select a master barber for each service to continue.',
         };
       return { ok: true, message: '' };
     }
@@ -431,10 +483,10 @@ export const BookingModal: React.FC = () => {
           ok: false,
           message: 'Availability is still loading — please wait a moment.',
         };
-      if (!resolvedProvider)
+      if (selectedServiceIds.some(id => !perServiceProviders[id]))
         return {
           ok: false,
-          message: 'Please go back and select a master barber.',
+          message: 'Please go back and ensure a master is selected for each service.',
         };
       if (!selectedDate)
         return {
@@ -448,9 +500,9 @@ export const BookingModal: React.FC = () => {
         };
       if (isSameDay && selectedStartMin < earliestBookableMin)
         return { ok: false, message: timeValidation.message };
-    if (selectedStartMin < openMin || selectedStartMin > latestBookableMin)
-      return { ok: false, message: timeValidation.message };
-      if (selectedConflict)
+      if (selectedStartMin < openMin || selectedStartMin > latestBookableMin)
+        return { ok: false, message: timeValidation.message };
+      if (anyLegConflict)
         return { ok: false, message: timeValidation.message };
       return { ok: true, message: '' };
     }
@@ -571,9 +623,10 @@ export const BookingModal: React.FC = () => {
       setPaymentError(phoneErr);
       return;
     }
-    if (!resolvedProvider) {
+    const allProvidersSelected = selectedServiceIds.every(id => perServiceProviders[id]);
+    if (!allProvidersSelected) {
       setPaymentError(
-        'No provider available for the selected services. Please choose another barber.',
+        'Please go back and ensure a master is selected for each service.',
       );
       return;
     }
@@ -586,22 +639,19 @@ export const BookingModal: React.FC = () => {
 
     let createdBookingId: string | null = null;
     try {
-      // 1. Create the booking atomically via check_and_reserve (race-condition-safe).
-      // Use a strict 24-hour HH:mm:ss timestamp — "10:00 AM" is not parseable by Date.
       const startMinForSubmit =
         selectedStartMin >= 0 ? selectedStartMin : parseTimeToMinutes(selectedTimeSlot);
       const desiredStartTs = new Date(
         `${format(selectedDate, 'yyyy-MM-dd')}T${minutesToHHMM(startMinForSubmit)}:00+03:00`,
       ).toISOString();
 
-
-      const result = await bookingEngineService.createBooking({
-        customerId: null,
-        // Submit ALL selected services — one atomic booking covering
-        // the full list (priced and sized by the database RPC).
-        serviceIds: selectedServiceIds,
+      const result = await bookingEngineService.reserveSequenced({
+        customerId: undefined,
+        legs: selectedServices.map(s => ({
+          serviceId: s.id,
+          providerId: perServiceProviders[s.id]
+        })),
         desiredStartTs,
-        preferredStaffIds: [resolvedProvider.id],
         customerName: customerName.trim(),
         customerPhone:
           paymentService.formatKenyanPhone(customerPhone).formatted,
@@ -958,71 +1008,72 @@ export const BookingModal: React.FC = () => {
 
           {/* STEP 2: Select Barber */}
           {step === 2 && (
-            <div className="space-y-4">
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-                Select Your Master Barber
+            <div className="space-y-6">
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-2">
+                Assign a Master for Each Service
               </h3>
-              <p className="text-[11px] text-muted-foreground">
-                Please choose a specific master barber. If your preferred master
-                is fully booked, go back here and pick another.
-              </p>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1">
-                {barbers.map((barber) => {
-                  const isSelected = selectedBarberId === barber.id;
-                  const cannotHandle =
-                    selectedServiceIds.length > 0 &&
-                    !canProviderHandle(barber, selectedServiceIds);
-                  return (
-                    <div
-                      key={barber.id}
-                      onClick={() => {
-                        if (!cannotHandle) {
-                          setSelectedBarberId(barber.id);
-                          setBarberError(null);
-                        }
-                      }}
-                      className={`p-3.5 rounded-sm border transition-all flex items-center gap-3.5 ${
-                        cannotHandle
-                          ? 'opacity-40 cursor-not-allowed bg-background border-border'
-                          : isSelected
-                            ? 'cursor-pointer bg-secondary border-primary'
-                            : 'cursor-pointer bg-background border-border hover:border-border-strong'
-                      }`}
-                    >
-                      <SafeImage
-                        src={barber.avatarUrl}
-                        alt={barber.name}
-                        className="w-12 h-12 rounded-sm object-cover border border-border-strong flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-xs sm:text-sm font-bold text-white truncate">
-                          {barber.name}
-                        </h4>
-                        <p className="text-[10px] text-primary uppercase tracking-wider font-semibold truncate">
-                          {barber.title}
-                        </p>
-                        <p className="text-[11px] text-muted-foreground truncate">
-                          {barber.specialty}
-                        </p>
-                        {cannotHandle && (
-                          <p className="text-[10px] text-destructive mt-0.5">
-                            Cannot perform all selected services
-                          </p>
-                        )}
+              
+              <div className="space-y-6 max-h-[50vh] overflow-y-auto pr-1">
+                {selectedServices.map((service) => (
+                  <div key={service.id} className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <div className="bg-primary/20 p-1.5 rounded-sm">
+                        <Scissors className="w-4 h-4 text-primary" />
                       </div>
-                      <div
-                        className={`w-5 h-5 rounded-sm border flex items-center justify-center flex-shrink-0 ${
-                          isSelected
-                            ? 'bg-primary border-primary text-primary-foreground'
-                            : 'border-border-strong'
-                        }`}
-                      >
-                        {isSelected && <Check className="w-3.5 h-3.5" />}
-                      </div>
+                      <span className="text-sm font-bold text-white uppercase tracking-wider">
+                        {service.name}
+                      </span>
                     </div>
-                  );
-                })}
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {barbers.filter(b => b.servicesOfferedIds.includes(service.id)).map((barber) => {
+                        const isSelected = perServiceProviders[service.id] === barber.id;
+                        return (
+                          <div
+                            key={`${service.id}-${barber.id}`}
+                            onClick={() => {
+                              setBarberError(null);
+                              setPerServiceProviders(prev => ({
+                                ...prev,
+                                [service.id]: barber.id
+                              }));
+                            }}
+                            className={`flex items-center justify-between p-3 cursor-pointer transition-all border ${
+                              isSelected
+                                ? 'bg-secondary border-primary'
+                                : 'bg-background border-border-strong hover:border-muted-foreground'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3 overflow-hidden">
+                              <SafeImage
+                                src={barber.avatarUrl}
+                                alt={barber.name}
+                                className="w-10 h-10 object-cover rounded-sm flex-shrink-0"
+                              />
+                              <div className="overflow-hidden">
+                                <p className="text-sm font-bold text-white truncate">
+                                  {barber.name}
+                                </p>
+                                <p className="text-[10px] text-primary uppercase tracking-tight truncate">
+                                  {barber.title}
+                                </p>
+                              </div>
+                            </div>
+                            <div
+                              className={`w-5 h-5 rounded-sm border flex items-center justify-center flex-shrink-0 ${
+                                isSelected
+                                  ? 'bg-primary border-primary text-primary-foreground'
+                                  : 'border-border-strong'
+                              }`}
+                            >
+                              {isSelected && <Check className="w-3.5 h-3.5" />}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
 
               {barberError && (
@@ -1072,7 +1123,7 @@ export const BookingModal: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-                    2. {barberDisplayName}'s Day
+                    2. Provider Schedules & Legs
                   </h3>
                   {slotsLoading && (
                     <span className="text-[10px] text-muted-foreground flex items-center gap-1">
@@ -1082,126 +1133,80 @@ export const BookingModal: React.FC = () => {
                   )}
                 </div>
 
-                {!resolvedProvider ? (
-                  <p className="text-xs text-destructive p-3 bg-destructive/10 border border-destructive/30 rounded-sm">
-                    No provider is available for the selected services. Go back
-                    and pick another barber.
-                  </p>
-                ) : (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-[10px] font-mono text-muted-foreground">
-                      <span>{openDisplay}</span>
-                      <span className="text-primary font-semibold">
-                        {totalDuration} min
-                      </span>
-                      <span>{closeDisplay}</span>
-                    </div>
+                <div className="space-y-4">
+                  {legs.map((leg, index) => {
+                    const busyRanges = busyRangesMap[leg.providerId] || [];
+                    const isConflicted = hasLegConflict(leg);
+                    return (
+                      <div key={`${leg.service.id}-${leg.providerId}-${index}`} className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                           <div className="flex items-center gap-1.5 overflow-hidden">
+                              <span className="text-[10px] font-bold text-white uppercase truncate">
+                                {leg.service.name}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground">with</span>
+                              <span className="text-[10px] text-primary font-bold truncate">
+                                {leg.provider?.name}
+                              </span>
+                           </div>
+                           {isConflicted && (
+                             <div className="flex items-center gap-1 text-[9px] text-destructive font-bold uppercase">
+                               <AlertCircle className="w-3 h-3" /> Conflict
+                             </div>
+                           )}
+                        </div>
+                        
+                        <div className="relative h-8 bg-background border border-border rounded-none overflow-hidden">
+                          {/* Hour markers */}
+                          {Array.from({ length: Math.floor(timelineSpan / 60) + 1 }, (_, i) => openMin + i * 60)
+                            .filter(m => m <= closeMin)
+                            .map(m => (
+                              <div key={m} className="absolute top-0 bottom-0 w-px bg-border-subtle" style={{ left: `${((m - openMin) / timelineSpan) * 100}%` }} />
+                            ))}
 
-                    {/* Horizontal timeline spanning opening hours */}
-                    <div 
-                      className="relative h-10 bg-background border border-border rounded-none overflow-hidden cursor-pointer touch-none"
-                      onMouseDown={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const x = e.clientX - rect.left;
-                        const percentage = Math.max(0, Math.min(1, x / rect.width));
-                        const minutes = openMin + percentage * timelineSpan;
-                        const stepped = Math.round(minutes / SLOT_INTERVAL_MINUTES) * SLOT_INTERVAL_MINUTES;
-                        const final = Math.max(earliestBookableMin, Math.min(latestBookableMin, stepped));
-                        setSelectedTimeSlot(minutesToHHMM(final));
-                      }}
-                      onMouseMove={(e) => {
-                        if (e.buttons !== 1) return;
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const x = e.clientX - rect.left;
-                        const percentage = Math.max(0, Math.min(1, x / rect.width));
-                        const minutes = openMin + percentage * timelineSpan;
-                        const stepped = Math.round(minutes / SLOT_INTERVAL_MINUTES) * SLOT_INTERVAL_MINUTES;
-                        const final = Math.max(earliestBookableMin, Math.min(latestBookableMin, stepped));
-                        setSelectedTimeSlot(minutesToHHMM(final));
-                      }}
-                      onTouchMove={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const x = e.touches[0].clientX - rect.left;
-                        const percentage = Math.max(0, Math.min(1, x / rect.width));
-                        const minutes = openMin + percentage * timelineSpan;
-                        const stepped = Math.round(minutes / SLOT_INTERVAL_MINUTES) * SLOT_INTERVAL_MINUTES;
-                        const final = Math.max(earliestBookableMin, Math.min(latestBookableMin, stepped));
-                        setSelectedTimeSlot(minutesToHHMM(final));
-                      }}
+                          {/* Busy ranges for this provider */}
+                          {busyRanges.map((r, i) => (
+                            <div key={`${r.start}-${r.end}-${i}`} className="absolute top-0 bottom-0 bg-destructive/40 border-x border-destructive" style={{ left: `${((r.start - openMin) / timelineSpan) * 100}%`, width: `${((r.end - r.start) / timelineSpan) * 100}%` }} />
+                          ))}
+
+                          {/* This leg's window */}
+                          {selectedStartMin >= 0 && (
+                            <div 
+                              className={`absolute top-0 bottom-0 ${isConflicted ? 'bg-destructive/60 border-y-2 border-destructive animate-pulse' : 'bg-primary/30 border-y-2 border-primary'} flex items-center justify-center`}
+                              style={{
+                                left: `${((leg.startMin - openMin) / timelineSpan) * 100}%`,
+                                width: `${((leg.endMin - leg.startMin) / timelineSpan) * 100}%`
+                              }}
+                            >
+                               <span className="text-[8px] font-bold text-white px-1 truncate">
+                                 {formatTimeDisplay(minutesToHHMM(leg.startMin))} – {formatTimeDisplay(minutesToHHMM(leg.endMin))}
+                               </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-2 text-[10px] text-muted-foreground border-t border-border/50">
+                    <span className="flex items-center gap-1">
+                      <span className="inline-block w-2.5 h-2.5 bg-destructive/40 border border-destructive rounded-sm" />
+                      Booked
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="inline-block w-2.5 h-2.5 bg-primary/30 border border-primary rounded-sm" />
+                      Your selection
+                    </span>
+                    <button 
+                      type="button"
+                      onClick={handleNextAvailable}
+                      disabled={slotsLoading}
+                      className="ml-auto text-primary hover:text-primary-hover font-bold uppercase tracking-wider flex items-center gap-1 transition-colors disabled:opacity-50"
                     >
-                      {/* Busy Ranges & Selection Rendering... */}
-                      {Array.from(
-                        {
-                          length: Math.max(
-                            1,
-                            Math.floor(timelineSpan / 60) + 1,
-                          ),
-                        },
-                        (_, i) => openMin + i * 60,
-                      )
-                        .filter((m) => m <= closeMin)
-                        .map((m) => (
-                          <div
-                            key={m}
-                            className="absolute top-0 bottom-0 w-px bg-border-subtle"
-                            style={{
-                              left: `${((m - openMin) / timelineSpan) * 100}%`,
-                            }}
-                          />
-                        ))}
-
-                      {busyRanges.map((r, i) => (
-                        <div
-                          key={`${r.start}-${r.end}-${i}`}
-                          title={`Booked: ${r.label}`}
-                          className="absolute top-0 bottom-0 bg-destructive/70 border-x border-destructive"
-                          style={{
-                            left: `${((r.start - openMin) / timelineSpan) * 100}%`,
-                            width: `${((r.end - r.start) / timelineSpan) * 100}%`,
-                          }}
-                        >
-                          <span className="absolute inset-x-0 top-0 text-[8px] leading-tight text-white px-1 py-0.5 truncate">
-                            {r.label}
-                          </span>
-                        </div>
-                      ))}
-
-                      {selectedInRange && selectedStartMin >= 0 && (
-                        <div
-                          className="absolute top-0 bottom-0 bg-primary/30 border-y-2 border-primary flex items-center justify-center rounded-none"
-                          style={{
-                            left: `${((selectedStartMin - openMin) / timelineSpan) * 100}%`,
-                            width: `${((Math.min(selectedEndMin, closeMin) - selectedStartMin) / timelineSpan) * 100}%`,
-                          }}
-                        >
-                          <span className="text-[8px] font-bold text-white px-1 truncate">
-                            You —{' '}
-                            {formatTimeDisplay(
-                              minutesToHHMM(selectedStartMin),
-                            )}
-                            –{formatTimeDisplay(minutesToHHMM(selectedEndMin))}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <span className="inline-block w-2.5 h-2.5 bg-destructive/70 rounded-sm" />
-                        Booked
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <span className="inline-block w-2.5 h-2.5 bg-primary/30 border border-primary rounded-sm" />
-                        Your selection
-                      </span>
-                      {busyRanges.length === 0 && !slotsLoading && (
-                        <span className="text-success">
-                          No bookings yet — the whole day is open.
-                        </span>
-                      )}
-                    </div>
+                      <Sparkles className="w-3 h-3" /> Find Next Available
+                    </button>
                   </div>
-                )}
+                </div>
               </div>
 
               {/* Time Selection — Interactive Slider */}
@@ -1295,45 +1300,11 @@ export const BookingModal: React.FC = () => {
                     </div>
                   )}
 
-                  {!slotsLoading &&
-                    hasAnyFreeWindow &&
-                    timeValidation.status === 'error' &&
-                    selectedConflict && (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setSelectedTimeSlot(
-                            minutesToHHMM(
-                              suggestNextFreeStartLocal(selectedConflict.end + SLOT_INTERVAL_MINUTES),
-                            ),
-                          )
-                        }
-                        className="text-[11px] text-primary underline cursor-pointer"
-                      >
-                        Snap to suggested free time
-                      </button>
-                    )}
-
-                  {!slotsLoading && !hasAnyFreeWindow && (
+                  {timeValidation.status === 'error' && (
                     <div className="p-3 bg-secondary/50 border border-border rounded-sm space-y-2">
                       <p className="text-xs text-muted-foreground">
-                        No {totalDuration}-minute window is free for{' '}
-                        {barberDisplayName} on{' '}
-                        {selectedDate
-                          ? format(selectedDate, 'yyyy-MM-dd')
-                          : 'this date'}
-                        . Please try another date or provider.
+                        If no slots are available, try picking another date, or use the <strong>Find Next Available</strong> tool above.
                       </p>
-                      {qualifiedStaff.length > 0 && (
-                        <p className="text-[11px] text-muted-foreground">
-                          <span className="text-primary font-semibold">
-                            Masters qualified for this service:
-                          </span>{' '}
-                          {qualifiedStaff.map((q) => q.staffName).join(', ')}
-                          {' — '}try another date or select one of them
-                          specifically.
-                        </p>
-                      )}
                     </div>
                   )}
                 </div>

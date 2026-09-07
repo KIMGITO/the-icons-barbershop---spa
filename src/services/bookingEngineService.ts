@@ -173,6 +173,115 @@ export const bookingEngineService = {
   },
 
   /**
+   * Check availability for a sequenced multi-provider booking.
+   */
+  async checkAvailabilitySequenced(
+    customerId: string | null,
+    legs: { serviceId: string; providerId: string }[],
+    desiredStartTs: string
+  ): Promise<CheckAndReserveResult> {
+    if (!isSupabaseConfigured) {
+      return { success: false, error: 'Supabase not configured' };
+    }
+    const { data, error } = await supabase.rpc('check_and_reserve_sequenced', {
+      p_customer_id: customerId,
+      p_legs: legs.map(l => ({ service_id: l.serviceId, provider_id: l.providerId })),
+      p_desired_start_ts: desiredStartTs,
+      p_check_only: true
+    });
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    const row = data as any;
+    return {
+      success: !!row.success,
+      error: row.error,
+      bookingId: row.booking_id,
+      referenceNumber: row.reference_number,
+      receiptCode: row.receipt_code,
+      startTs: row.start_ts,
+      endTs: row.end_ts,
+      totalPriceKsh: Number(row.total_price_ksh || 0),
+      legs: row.legs?.map((l: any) => ({
+        serviceId: l.service_id,
+        providerId: l.provider_id,
+        startTs: l.start_ts,
+        endTs: l.end_ts,
+        sequenceOrder: l.sequence_order
+      }))
+    };
+  },
+
+  /**
+   * Create a sequenced multi-provider booking.
+   */
+  async reserveSequenced(payload: {
+    customerId?: string;
+    legs: { serviceId: string; providerId: string }[];
+    desiredStartTs: string;
+    customerName?: string;
+    customerPhone?: string;
+    customerEmail?: string;
+    specialRequests?: string;
+    requirePayment?: boolean;
+    paymentMethod?: string;
+    paymentRef?: string;
+  }): Promise<CheckAndReserveResult> {
+    if (!isSupabaseConfigured) {
+      return { success: false, error: 'Supabase not configured' };
+    }
+    const { data, error } = await supabase.rpc('check_and_reserve_sequenced', {
+      p_customer_id: payload.customerId || null,
+      p_legs: payload.legs.map(l => ({ service_id: l.serviceId, provider_id: l.providerId })),
+      p_desired_start_ts: payload.desiredStartTs,
+      p_check_only: false,
+      p_customer_name: payload.customerName || null,
+      p_customer_phone: payload.customerPhone || null,
+      p_customer_email: payload.customerEmail || null,
+      p_special_requests: payload.specialRequests || null,
+      p_require_payment: payload.requirePayment || false,
+      p_payment_method: payload.paymentMethod || 'unpaid',
+      p_payment_ref: payload.paymentRef || null
+    });
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    const row = data as any;
+    return {
+      success: !!row.success,
+      error: row.error,
+      bookingId: row.booking_id,
+      referenceNumber: row.reference_number,
+      receiptCode: row.receipt_code,
+      startTs: row.start_ts,
+      endTs: row.end_ts,
+      totalPriceKsh: Number(row.total_price_ksh || 0),
+      status: row.status,
+      paymentStatus: row.payment_status
+    };
+  },
+
+  /**
+   * Find the next available combined slot for a multi-service booking.
+   */
+  async getNextAvailableCombinedSlot(
+    legs: { serviceId: string; providerId: string }[],
+    startAfter: string
+  ): Promise<string | null> {
+    if (!isSupabaseConfigured) return null;
+    const { data, error } = await supabase.rpc('get_next_available_combined_slot', {
+      p_legs: legs.map(l => ({ service_id: l.serviceId, provider_id: l.providerId })),
+      p_start_after: startAfter
+    });
+    if (error) {
+      console.error('Failed to get next available combined slot:', error.message);
+      return null;
+    }
+    return data;
+  },
+
+
+  /**
    * Get all staff qualified to perform a service (regardless of availability).
    * Used to suggest alternatives when no one is available at the chosen time.
    */

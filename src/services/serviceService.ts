@@ -32,6 +32,7 @@ const mapDbService = (row: any): ServiceItem => ({
   imageUrl: row.image_url || '',
   isPopular: row.is_popular || false,
   recommendedFor: row.recommended_for || '',
+  sequenceRank: row.sequence_rank || 100,
   status: row.status,
   bufferMinutes: row.buffer_minutes || 0
 });
@@ -140,7 +141,8 @@ export const serviceService = {
           imageUrl: serviceData.imageUrl || '',
           status: serviceData.status || 'active',
           isPopular: serviceData.isPopular || false,
-          recommendedFor: serviceData.recommendedFor || ''
+          recommendedFor: serviceData.recommendedFor || '',
+          sequenceRank: serviceData.sequenceRank || 100
         },
         providerIds
       })
@@ -179,6 +181,8 @@ export const serviceService = {
     if (updates.priceKsh !== undefined) formattedUpdates.priceKsh = updates.priceKsh;
     if (updates.features !== undefined) formattedUpdates.features = updates.features;
     if (updates.imageUrl !== undefined) formattedUpdates.imageUrl = updates.imageUrl;
+    if (updates.sequenceRank !== undefined) formattedUpdates.sequenceRank = updates.sequenceRank;
+
     if (updates.status !== undefined) formattedUpdates.status = updates.status;
     if (updates.isPopular !== undefined) formattedUpdates.isPopular = updates.isPopular;
     if (updates.recommendedFor !== undefined) formattedUpdates.recommendedFor = updates.recommendedFor;

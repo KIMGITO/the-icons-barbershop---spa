@@ -55,6 +55,7 @@ Deno.serve(async (req) => {
           status: payload.status || 'active',
           is_popular: payload.isPopular || false,
           recommended_for: payload.recommendedFor || '',
+          sequence_rank: payload.sequenceRank || 100,
           business_id: '00000000-0000-0000-0000-000000000001' // default business
         })
         .select()
@@ -100,6 +101,8 @@ Deno.serve(async (req) => {
       if (updates.imageUrl !== undefined) dbUpdates.image_url = updates.imageUrl;
       if (updates.status !== undefined) dbUpdates.status = updates.status;
       if (updates.isPopular !== undefined) dbUpdates.is_popular = updates.isPopular;
+      if (updates.sequenceRank !== undefined) dbUpdates.sequence_rank = updates.sequenceRank;
+
       if (updates.recommendedFor !== undefined) dbUpdates.recommended_for = updates.recommendedFor;
 
       const { data: updatedService, error: updateErr } = await admin
