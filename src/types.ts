@@ -22,6 +22,8 @@ export interface ServiceItem {
   recommendedFor?: string;
   relatedProductSlugs?: string[];
   status?: 'active' | 'archived' | 'draft' | 'inactive';
+  rating?: number;
+  reviewCount?: number;
   bufferMinutes?: number;
 }
 

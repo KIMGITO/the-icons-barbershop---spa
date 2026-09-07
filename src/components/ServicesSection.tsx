@@ -2,7 +2,7 @@ import { SafeImage } from './ui/SafeImage';
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { ServiceCategory, ServiceItem } from '../types';
-import { Clock, Scissors, Sparkles, Check, ArrowRight, ArrowLeft, Shield, ChevronLeft, ChevronRight, User } from 'lucide-react';
+import { Clock, Scissors, Sparkles, Check, ArrowRight, ArrowLeft, Shield, ChevronLeft, ChevronRight, User, Star } from 'lucide-react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { Button, Badge, Price } from './ui';
 
@@ -392,6 +392,39 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
                       <h3 className="font-display text-lg sm:text-xl font-bold text-white group-hover:text-primary transition-colors leading-snug">
                         {service.name}
                       </h3>
+                      {/* Service Rating Display */}
+                      {(service.rating || service.reviewCount) ? (
+                        <div className="flex items-center gap-2 mt-1 mb-2">
+                          <div className="flex items-center">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-3 h-3 ${i < Math.round(service.rating || 5) ? 'text-primary fill-primary' : 'text-muted-foreground opacity-30'}`}
+                              />
+                            ))}
+                          </div>
+                          {service.reviewCount > 0 && (
+                            <span className="text-[10px] text-muted-foreground font-medium">
+                              ({service.reviewCount} reviews)
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 mt-1 mb-2">
+                          <div className="flex items-center">
+                             {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className="w-3 h-3 text-primary fill-primary"
+                              />
+                            ))}
+                          </div>
+                          <span className="text-[10px] text-muted-foreground font-medium">
+                            (New)
+                          </span>
+                        </div>
+                      )}
+
                       
                       {/* Short concise description matching reference */}
                       <p className="mt-2 text-xs sm:text-sm text-muted-foreground-light leading-relaxed line-clamp-2 font-light">

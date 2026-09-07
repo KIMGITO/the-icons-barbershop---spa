@@ -24,6 +24,7 @@ import { NewBookingModal } from '../bookings/NewBookingModal';
 import { BookingDetailsDrawer } from '../bookings/BookingDetailsDrawer';
 import { MpesaPaymentModal } from '../payments/MpesaPaymentModal';
 import { smsService, SmsMessageRecord } from '../../../services/smsService';
+import { ReceiptLookup } from '../receipts/ReceiptLookup';
 
 interface PortalOverviewProps {
   onNavigateTab: (tab: string) => void;
@@ -370,67 +371,70 @@ export const PortalOverview: React.FC<PortalOverviewProps> = ({
           )}
         </div>
 
-        {/* Recent Communications */}
-        {role === 'admin' && (
-          <div className="space-y-3 border-0  border-t lg:border-t-0 lg:border-l  lg:col-span-1 rounded-0 p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-base font-bold text-foreground">
-                  Recent <span className="text-primary">Messages</span>
-                </h2>
-                
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => onNavigateTab('messages')}
-                className="text-xs text-primary"
-              >
-                <span>See All</span>
-                <ArrowRight className="w-3.5 h-3.5 ml-1" />
-              </Button>
-            </div>
+        {/* Right Column: Lookup & Communications */}
+        <div className="space-y-8 border-0 border-t lg:border-t-0 lg:border-l lg:col-span-1 rounded-0 p-4">
+          <ReceiptLookup />
 
-            <div className=" border-0 rounded-none divide-y divide-border/60 overflow-hidden">
-              {messagesLoading && recentMessages.length === 0 ? (
-                <div className="p-8 text-center text-xs text-muted-foreground">
-                  <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2" />
-                  Loading messages...
+          {role === 'admin' && (
+            <div className="space-y-3 pt-8 border-t border-border/60">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-base font-bold text-foreground">
+                    Recent <span className="text-primary">Messages</span>
+                  </h2>
                 </div>
-              ) : recentMessages.length === 0 ? (
-                <div className="p-8 text-center text-xs text-muted-foreground">
-                  No recent messages.
-                </div>
-              ) : (
-                recentMessages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className="p-3.5 space-y-1 hover:bg-muted/30 transition-colors"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-primary uppercase">
-                        {msg.sms_type || 'SMS'}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground">
-                        {new Date(msg.created_at || '').toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </span>
-                    </div>
-                    <p className="text-xs font-semibold text-foreground truncate">
-                      {msg.customer_name || 'Guest'}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground line-clamp-2">
-                      {msg.message_body}
-                    </p>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onNavigateTab('messages')}
+                  className="text-xs text-primary"
+                >
+                  <span>See All</span>
+                  <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                </Button>
+              </div>
+
+              <div className=" border-0 rounded-none divide-y divide-border/60 overflow-hidden">
+                {messagesLoading && recentMessages.length === 0 ? (
+                  <div className="p-8 text-center text-xs text-muted-foreground">
+                    <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2" />
+                    Loading messages...
                   </div>
-                ))
-              )}
+                ) : recentMessages.length === 0 ? (
+                  <div className="p-8 text-center text-xs text-muted-foreground">
+                    No recent messages.
+                  </div>
+                ) : (
+                  recentMessages.map((msg) => (
+                    <div
+                      key={msg.id}
+                      className="p-3.5 space-y-1 hover:bg-muted/30 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-primary uppercase">
+                          {msg.sms_type || 'SMS'}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">
+                          {new Date(msg.created_at || '').toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                      </div>
+                      <p className="text-xs font-semibold text-foreground truncate">
+                        {msg.customer_name || 'Guest'}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground line-clamp-2">
+                        {msg.message_body}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <BookingDrawer />

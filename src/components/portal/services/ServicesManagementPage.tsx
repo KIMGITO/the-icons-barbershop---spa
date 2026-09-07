@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Scissors, Search, Plus, Clock, Edit, Trash2, CheckCircle2, 
-  User, Image as ImageIcon, Sparkles, Layers
+  User, Image as ImageIcon, Sparkles, Layers, Star
 } from 'lucide-react';
 import { ServiceItem } from '../../../types';
 import { useServiceStore } from '../../../stores/serviceStore';
@@ -43,9 +43,22 @@ export const ServicesManagementPage: React.FC = () => {
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
   const [selectedProviderIds, setSelectedProviderIds] = useState<string[]>([]);
   const [sequenceRank, setSequenceRank] = useState<number>(100);
+  const [rating, setRating] = useState<number>(5);
+  const [reviewCount, setReviewCount] = useState<number>(0);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const renderStars = (val: number) => (
+    <div className="flex items-center gap-0.5">
+      {[...Array(5)].map((_, i) => (
+        <Star
+          key={i}
+          className={`w-3 h-3 ${i < Math.round(val) ? 'text-primary fill-primary' : 'text-muted-foreground'}`}
+        />
+      ))}
+    </div>
+  );
 
   React.useEffect(() => {
     loadServices();
@@ -83,6 +96,8 @@ export const ServicesManagementPage: React.FC = () => {
     setDescription('');
     setImageUrl('');
     setSequenceRank(100);
+    setRating(5);
+    setReviewCount(0);
 
     setStatus('active');
     setSelectedProviderIds(providers.map(p => p.id));
@@ -98,6 +113,8 @@ export const ServicesManagementPage: React.FC = () => {
     setDurationMinutes(s.durationMinutes);
     setDescription(s.description || s.shortDescription || s.fullDescription || '');
     setSequenceRank(s.sequenceRank || 100);
+    setRating(s.rating || 5);
+    setReviewCount(s.reviewCount || 0);
 
     setImageUrl(s.imageUrl || '');
     setStatus(s.status === 'inactive' ? 'inactive' : 'active');
@@ -134,6 +151,8 @@ export const ServicesManagementPage: React.FC = () => {
             priceKsh: Number(priceKsh),
             durationMinutes: Number(durationMinutes),
             sequenceRank: Number(sequenceRank),
+            rating: Number(rating),
+            reviewCount: Number(reviewCount),
             shortDescription: description.trim() || editingService.shortDescription,
             fullDescription: description.trim() || editingService.fullDescription,
             description: description.trim(),
@@ -151,6 +170,8 @@ export const ServicesManagementPage: React.FC = () => {
             priceKsh: Number(priceKsh),
             durationMinutes: Number(durationMinutes),
             sequenceRank: Number(sequenceRank),
+            rating: Number(rating),
+            reviewCount: Number(reviewCount),
             shortDescription: description.trim() || name.trim(),
             fullDescription: description.trim() || name.trim(),
             description: description.trim(),
@@ -274,6 +295,12 @@ export const ServicesManagementPage: React.FC = () => {
                         <h3 className="text-sm font-bold text-foreground">
                           {service.name}
                         </h3>
+                        <div className="flex items-center gap-2">
+                          {renderStars(service.rating || 5)}
+                          <span className="text-[10px] text-muted-foreground">
+                            ({service.reviewCount || 0})
+                          </span>
+                        </div>
                       </div>
 
                       <div className="text-right shrink-0">
@@ -479,6 +506,35 @@ export const ServicesManagementPage: React.FC = () => {
                     step={1}
                     className="rounded-none py-2 text-xs font-mono"
                     required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Rating (1-5)
+                  </label>
+                  <Input
+                    type="number"
+                    value={rating}
+                    onChange={(e) => setRating(Number(e.target.value))}
+                    min={1}
+                    max={5}
+                    step={0.1}
+                    className="rounded-none py-2 text-xs font-mono"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Review Count
+                  </label>
+                  <Input
+                    type="number"
+                    value={reviewCount}
+                    onChange={(e) => setReviewCount(Number(e.target.value))}
+                    min={0}
+                    step={1}
+                    className="rounded-none py-2 text-xs font-mono"
                   />
                 </div>
               </div>

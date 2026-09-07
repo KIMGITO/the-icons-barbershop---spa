@@ -142,6 +142,8 @@ export const useServiceStore = create<ServiceState>((set, get) => ({
             imageUrl: row.image_url,
             status: row.status,
             sequenceRank: row.sequence_rank,
+            rating: row.rating,
+            reviewCount: row.review_count,
             features: row.features || []
           };
           set(state => ({ 
@@ -164,6 +166,8 @@ export const useServiceStore = create<ServiceState>((set, get) => ({
             imageUrl: row.image_url,
             status: row.status,
             sequenceRank: row.sequence_rank,
+            rating: row.rating,
+            reviewCount: row.review_count,
             features: row.features || []
           };
           set(state => ({

@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { Users, User, Calendar as CalendarIcon, ReceiptText } from 'lucide-react';
+import { Users, User, Calendar as CalendarIcon } from 'lucide-react';
 import { ProvidersPage } from '../providers/ProvidersPage';
 import { StaffProfileView } from '../staff/StaffProfileView';
 import { StaffScheduleView } from '../staff/StaffScheduleView';
-import { ReceiptLookup } from '../receipts/ReceiptLookup';
 
 export const TeamHub: React.FC = () => {
-  const [activeSubTab, setActiveSubTab] = useState<'providers' | 'profile' | 'schedule' | 'receipts'>('providers');
+  const [activeSubTab, setActiveSubTab] = useState<'providers' | 'profile' | 'schedule'>('providers');
 
   return (
     <div className="space-y-6">
@@ -45,24 +44,12 @@ export const TeamHub: React.FC = () => {
           <CalendarIcon className="w-4 h-4" />
           <span> Schedule</span>
         </button>
-        <button
-          onClick={() => setActiveSubTab('receipts')}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold transition-all border-b-2 ${
-            activeSubTab === 'receipts'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <ReceiptText className="w-4 h-4" />
-          <span> Lookup</span>
-        </button>
       </div>
 
       <div className="mt-4">
         {activeSubTab === 'providers' && <ProvidersPage />}
         {activeSubTab === 'profile' && <StaffProfileView />}
         {activeSubTab === 'schedule' && <StaffScheduleView />}
-        {activeSubTab === 'receipts' && <ReceiptLookup />}
       </div>
     </div>
   );

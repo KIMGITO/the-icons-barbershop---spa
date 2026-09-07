@@ -657,7 +657,7 @@ export const BookingModal: React.FC = () => {
           paymentService.formatKenyanPhone(customerPhone).formatted,
         customerEmail: customerEmail.trim() || null,
         specialRequests: specialRequests.trim() || null,
-        requirePayment: true,
+        requirePayment: false,
         paymentMethod: 'mpesa',
       });
 
@@ -769,7 +769,7 @@ export const BookingModal: React.FC = () => {
             return;
           }
           const fresh = payload.new as any;
-          if (fresh.status === 'confirmed' && fresh.payment_status === 'deposit-paid') {
+          if (fresh.status === 'confirmed' && (fresh.payment_status === 'deposit-paid' || fresh.payment_status === 'paid')) {
             handleSuccess(fresh);
           }
         }

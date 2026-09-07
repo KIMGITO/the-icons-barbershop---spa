@@ -56,6 +56,8 @@ Deno.serve(async (req) => {
           is_popular: payload.isPopular || false,
           recommended_for: payload.recommendedFor || '',
           sequence_rank: payload.sequenceRank || 100,
+          rating: payload.rating || 5,
+          review_count: payload.reviewCount || 0,
           business_id: '00000000-0000-0000-0000-000000000001' // default business
         })
         .select()
@@ -102,6 +104,8 @@ Deno.serve(async (req) => {
       if (updates.status !== undefined) dbUpdates.status = updates.status;
       if (updates.isPopular !== undefined) dbUpdates.is_popular = updates.isPopular;
       if (updates.sequenceRank !== undefined) dbUpdates.sequence_rank = updates.sequenceRank;
+      if (updates.rating !== undefined) dbUpdates.rating = updates.rating;
+      if (updates.reviewCount !== undefined) dbUpdates.review_count = updates.reviewCount;
 
       if (updates.recommendedFor !== undefined) dbUpdates.recommended_for = updates.recommendedFor;
 

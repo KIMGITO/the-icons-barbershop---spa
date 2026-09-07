@@ -240,7 +240,8 @@ begin
     'status', v_status,
     'payment_status', v_payment_status,
     'deposit_paid_ksh', 0,
-    'remaining_balance_ksh', v_total_price
+    'remaining_balance_ksh', v_total_price);
+
     return jsonb_build_object('success', false, 'error', SQLERRM);
 end;
 $$;

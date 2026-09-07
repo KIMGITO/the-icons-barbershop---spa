@@ -146,6 +146,27 @@ export const ServiceDetailPage: React.FC<ServiceDetailPageProps> = ({ slug }) =>
                 {service.name}
               </h1>
 
+              {/* Rating Section for Detail Page Header */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`w-4 h-4 ${i < Math.round(service.rating || 5) ? 'text-primary fill-primary' : 'text-muted-foreground opacity-30'}`}
+                    />
+                  ))}
+                </div>
+                <span className="text-xs font-semibold text-white">
+                  {service.rating?.toFixed(1) || '5.0'}
+                </span>
+                {service.reviewCount > 0 && (
+                  <span className="text-xs text-muted-foreground">
+                    ({service.reviewCount} customer reviews)
+                  </span>
+                )}
+              </div>
+
+
               <div className="flex items-baseline gap-3 pt-2">
                 <span className="text-3xl sm:text-4xl font-mono font-bold text-primary">
                   KSh {service.priceKsh.toLocaleString()}
@@ -300,6 +321,39 @@ export const ServiceDetailPage: React.FC<ServiceDetailPageProps> = ({ slug }) =>
                   <h4 className="font-display font-bold text-white text-sm group-hover:text-primary transition-colors line-clamp-1">
                     {rel.name}
                   </h4>
+                  {/* Related Service Rating Display */}
+                  {(rel.rating || rel.reviewCount) ? (
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                      <div className="flex items-center">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-2.5 h-2.5 ${i < Math.round(rel.rating || 5) ? 'text-primary fill-primary' : 'text-muted-foreground opacity-30'}`}
+                          />
+                        ))}
+                      </div>
+                      {rel.reviewCount > 0 && (
+                        <span className="text-[9px] text-muted-foreground font-medium">
+                          ({rel.reviewCount})
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                      <div className="flex items-center">
+                         {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className="w-2.5 h-2.5 text-primary fill-primary"
+                          />
+                        ))}
+                      </div>
+                      <span className="text-[9px] text-muted-foreground font-medium">
+                        (New)
+                      </span>
+                    </div>
+                  )}
+
                   <p className="text-xs text-muted-foreground line-clamp-2 mt-1 font-light">
                     {rel.shortDescription}
                   </p>

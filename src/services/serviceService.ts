@@ -33,6 +33,8 @@ const mapDbService = (row: any): ServiceItem => ({
   isPopular: row.is_popular || false,
   recommendedFor: row.recommended_for || '',
   sequenceRank: row.sequence_rank || 100,
+  rating: row.rating || 5,
+  reviewCount: row.review_count || 0,
   status: row.status,
   bufferMinutes: row.buffer_minutes || 0
 });
@@ -142,7 +144,9 @@ export const serviceService = {
           status: serviceData.status || 'active',
           isPopular: serviceData.isPopular || false,
           recommendedFor: serviceData.recommendedFor || '',
-          sequenceRank: serviceData.sequenceRank || 100
+          sequenceRank: serviceData.sequenceRank || 100,
+          rating: serviceData.rating || 5,
+          reviewCount: serviceData.reviewCount || 0
         },
         providerIds
       })
@@ -186,6 +190,8 @@ export const serviceService = {
     if (updates.status !== undefined) formattedUpdates.status = updates.status;
     if (updates.isPopular !== undefined) formattedUpdates.isPopular = updates.isPopular;
     if (updates.recommendedFor !== undefined) formattedUpdates.recommendedFor = updates.recommendedFor;
+    if (updates.rating !== undefined) formattedUpdates.rating = updates.rating;
+    if (updates.reviewCount !== undefined) formattedUpdates.reviewCount = updates.reviewCount;
 
     const session = await supabase.auth.getSession();
     const url = String(import.meta.env.VITE_SUPABASE_URL) + '/functions/v1/manage-services';
