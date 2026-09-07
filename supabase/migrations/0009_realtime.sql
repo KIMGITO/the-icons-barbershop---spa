@@ -18,8 +18,9 @@ DECLARE
 BEGIN
     FOREACH t IN ARRAY ARRAY[
         'services',
-        'providers',
-        'provider_services',
+        'service_providers',
+        'service_categories',
+        'product_categories',
         'products',
         'gallery_items',
         'faqs',
@@ -27,7 +28,7 @@ BEGIN
         'customers',
         'product_reviews',
         'service_reviews',
-        'business_profile'
+        'businesses'
     ]
     LOOP
         IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = t)
@@ -53,15 +54,17 @@ DECLARE
 BEGIN
     FOREACH t IN ARRAY ARRAY[
         'services',
-        'providers',
-        'provider_services',
+        'service_providers',
+        'service_categories',
+        'product_categories',
         'products',
         'gallery_items',
         'faqs',
         'bookings',
         'customers',
         'product_reviews',
-        'service_reviews'
+        'service_reviews',
+        'businesses'
     ]
     LOOP
         IF EXISTS (

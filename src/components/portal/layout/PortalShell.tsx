@@ -31,6 +31,7 @@ export const PortalShell: React.FC<PortalShellProps> = ({
     { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'operations', label: 'Operations', icon: Clock },
     { id: 'catalog', label: 'Catalog', icon: Briefcase },
+    { id: 'reviews', label: 'Reviews', icon: MessageSquare },
     { id: 'team', label: 'Team', icon: Users },
     { id: 'messages', label: 'SMS Messages', icon: MessageSquare },
     { id: 'business', label: 'Settings', icon: Building2 },

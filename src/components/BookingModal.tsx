@@ -1203,7 +1203,7 @@ export const BookingModal: React.FC = () => {
                       disabled={slotsLoading}
                       className="ml-auto text-primary hover:text-primary-hover font-bold uppercase tracking-wider flex items-center gap-1 transition-colors disabled:opacity-50"
                     >
-                      <Sparkles className="w-3 h-3" /> Find Next Available
+                      Find Next Available
                     </button>
                   </div>
                 </div>

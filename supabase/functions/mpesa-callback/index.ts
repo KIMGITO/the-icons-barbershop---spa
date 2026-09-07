@@ -40,14 +40,18 @@ Deno.serve(async (req) => {
 
     console.log(`Processing callback for CheckoutRequestID: ${checkoutRequestId}, ResultCode: ${resultCode}, Desc: ${resultDesc}`);
 
-    // Extract metadata items
+    // Extract metadata items - Daraja returns an array of { Name, Value }
     const metaItems: Record<string, string> = {};
-    for (const item of callbackMetadata.Item || []) {
-      metaItems[item.Name] = item.Value !== undefined ? String(item.Value) : '';
+    if (callbackMetadata && Array.isArray(callbackMetadata.Item)) {
+      for (const item of callbackMetadata.Item) {
+        if (item && item.Name) {
+          metaItems[item.Name] = item.Value !== undefined ? String(item.Value) : '';
+        }
+      }
     }
 
     const amount = metaItems.Amount ? parseFloat(metaItems.Amount) : null;
-    const receiptNumber = metaItems.MpeasReceiptNumber || metaItems.MpesaReceiptNumber || null;
+    const receiptNumber = metaItems.MpesaReceiptNumber || null;
     const transactionDate = metaItems.TransactionDate || null;
     const phoneNumber = metaItems.PhoneNumber || null;
 

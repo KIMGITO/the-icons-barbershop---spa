@@ -4,6 +4,7 @@ import { PortalAuth } from '../components/portal/auth/PortalAuth';
 import { PortalShell } from '../components/portal/layout/PortalShell';
 import { PortalOverview } from '../components/portal/overview/PortalOverview';
 import { BusinessManagementPage } from '../components/portal/business/BusinessManagementPage';
+import { ReviewManagementPage } from '../components/portal/business/ReviewManagementPage';
 import { MessagesDashboard } from '../components/portal/messages/MessagesDashboard';
 import { OperationsHub } from '../components/portal/layout/OperationsHub';
 import { CatalogHub } from '../components/portal/layout/CatalogHub';
@@ -22,7 +23,7 @@ export const StaffPortalPage: React.FC<StaffPortalPageProps> = ({ onExitToPublic
   }, [init]);
 
   // Define restricted tabs for non-admin staff
-  const adminOnlyTabs = ['catalog', 'team', 'business', 'messages'];
+  const adminOnlyTabs = ['catalog', 'team', 'business', 'messages', 'reviews'];
 
   // If role changes, ensure current tab is valid for that role
   useEffect(() => {
@@ -61,6 +62,8 @@ export const StaffPortalPage: React.FC<StaffPortalPageProps> = ({ onExitToPublic
         return <MessagesDashboard />;
       case 'business':
         return <BusinessManagementPage />;
+      case 'reviews':
+        return <ReviewManagementPage />;
       default:
         return <PortalOverview onNavigateTab={(tab) => setCurrentTab(tab)} />;
     }

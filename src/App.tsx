@@ -12,6 +12,8 @@ import { LocationContactSection } from './components/LocationContactSection';
 import { FAQSection } from './components/FAQSection';
 import { Footer } from './components/Footer';
 import { BookingModal } from './components/BookingModal';
+import { CookieConsent } from './components/CookieConsent';
+
 import { ProductPurchaseModal } from './components/ProductPurchaseModal';
 import { useServiceStore } from './stores/serviceStore';
 import { useProductAdminStore } from './stores/productAdminStore';
@@ -237,6 +239,8 @@ const MainContent: React.FC = () => {
         />
       )}
       <BookingModal />
+      <CookieConsent />
+
       <ProductPurchaseModal />
     </div>
   );

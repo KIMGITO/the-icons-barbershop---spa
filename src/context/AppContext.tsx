@@ -476,75 +476,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setBarbers(prev => prev.filter(b => b.id !== payload.old.id));
         }
       })
-      // Products
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
-        if (payload.eventType === 'INSERT') {
-          const row = payload.new as any;
-          const newItem: ProductItem = {
-            id: row.id,
-            slug: row.slug,
-            name: row.name,
-            category: row.category,
-            priceKsh: row.price_ksh,
-            stockQuantity: row.stock_quantity,
-            imageUrl: row.image_url,
-            status: row.status,
-            description: row.description,
-            shortDescription: row.short_description,
-            features: row.features || []
-          };
-          setProducts(prev => prev.some(p => p.id === newItem.id) ? prev : [newItem, ...prev]);
-        } else if (payload.eventType === 'UPDATE') {
-          const row = payload.new as any;
-          const updated: ProductItem = {
-            id: row.id,
-            slug: row.slug,
-            name: row.name,
-            category: row.category,
-            priceKsh: row.price_ksh,
-            stockQuantity: row.stock_quantity,
-            imageUrl: row.image_url,
-            status: row.status,
-            description: row.description,
-            shortDescription: row.short_description,
-            features: row.features || []
-          };
-          setProducts(prev => prev.map(p => p.id === updated.id ? updated : p));
-        } else if (payload.eventType === 'DELETE') {
-          setProducts(prev => prev.filter(p => p.id !== payload.old.id));
-        }
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'service_categories' }, async () => {
-        const cats = await categoryService.getCategories();
-        setServiceCategories(cats);
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'product_categories' }, async () => {
-        const { data } = await supabase.from('product_categories').select('*').order('sort_order');
-        setProductCategories(data || []);
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'businesses' }, async () => {
-        const business = await businessService.getBusinessProfile();
-        if (business) {
-          setBusinessInfo(prev => ({
-            ...prev,
-            name: business.name,
-            tagline: business.description,
-            phone: business.phone,
-            phoneDisplay: business.phone,
-            email: business.email,
-            hours: {
-              weekdays: business.openingHours?.weekdays || prev.hours.weekdays,
-              saturday: business.openingHours?.saturday || prev.hours.saturday,
-              sunday: business.openingHours?.sunday || prev.hours.sunday
-            },
-            address: {
-              ...prev.address,
-              street: business.address || prev.address.street,
-              city: business.city || prev.address.city
-            }
-          }));
-        }
-      })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'gallery_items' }, (payload) => {
         if (payload.eventType === 'INSERT') {
           const row = payload.new;
@@ -603,12 +534,115 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setFaqs(prev => prev.filter(item => item.id !== payload.old.id));
         }
       })
-      .subscribe();
+      // Providers (Barbers)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'service_providers' }, (payload) => {
+        if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+          const row = payload.new as any;
+          const updatedBarber: BarberProfile = {
+            id: row.id,
+            slug: row.slug,
+            name: row.full_name,
+            title: 'Master',
+            specialty: row.provider_type,
+            bio: row.bio,
+            yearsExperience: row.years_experience || 0,
+            avatarUrl: row.avatar_url,
+            workingDays: [],
+            quote: '',
+            servicesOfferedIds: row.services_offered_ids || [],
+            instagramHandle: row.instagram_handle,
+            email: row.email,
+            phone: row.phone,
+            status: row.status
+          };
+          if (payload.eventType === 'INSERT') {
+            setBarbers(prev => prev.some(b => b.id === updatedBarber.id) ? prev : [...prev, updatedBarber]);
+          } else {
+            setBarbers(prev => prev.map(b => b.id === updatedBarber.id ? updatedBarber : b));
+          }
+        } else if (payload.eventType === 'DELETE') {
+          setBarbers(prev => prev.filter(b => b.id !== payload.old.id));
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'businesses' }, () => refreshData())
+      // Products
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
+        if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+          const row = payload.new as any;
+          const updatedProduct: ProductItem = {
+            id: row.id,
+            slug: row.slug,
+            name: row.name,
+            category: row.category,
+            shortDescription: row.short_description || '',
+            detailedDescription: row.detailed_description || '',
+            priceKsh: Number(row.price_ksh || 0),
+            originalPriceKsh: row.original_price_ksh ? Number(row.original_price_ksh) : undefined,
+            availability: row.availability,
+            imageUrl: row.image_url || '',
+            secondaryImages: row.secondary_images || [],
+            badge: row.badge,
+            rating: Number(row.rating || 5),
+            reviewCount: row.review_count || 0,
+            specifications: row.specifications || {},
+            howToUse: row.how_to_use || [],
+            suitableFor: row.suitable_for || '',
+            relatedServiceSlugs: row.related_service_slugs || [],
+            relatedProductSlugs: row.related_product_slugs || [],
+            stockQuantity: row.stock_quantity,
+            lowStockThreshold: row.low_stock_threshold,
+            sku: row.sku,
+            isFeatured: row.is_featured,
+            status: row.status
+          };
+          if (payload.eventType === 'INSERT') {
+            setProducts(prev => prev.some(p => p.id === updatedProduct.id) ? prev : [...prev, updatedProduct]);
+          } else {
+            setProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+          }
+        } else if (payload.eventType === 'DELETE') {
+          setProducts(prev => prev.filter(p => p.id !== payload.old.id));
+        }
+      })
+      // Service Categories
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'service_categories' }, (payload) => {
+        if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+          const row = payload.new as any;
+          if (payload.eventType === 'INSERT') {
+            setServiceCategories(prev => prev.some(c => c.id === row.id) ? prev : [...prev, row].sort((a, b) => a.sort_order - b.sort_order));
+          } else {
+            setServiceCategories(prev => prev.map(c => c.id === row.id ? row : c).sort((a, b) => a.sort_order - b.sort_order));
+          }
+        } else if (payload.eventType === 'DELETE') {
+          setServiceCategories(prev => prev.filter(c => c.id !== payload.old.id));
+        }
+      })
+      // Product Categories
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'product_categories' }, (payload) => {
+        if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+          const row = payload.new as any;
+          if (payload.eventType === 'INSERT') {
+            setProductCategories(prev => prev.some(c => c.id === row.id) ? prev : [...prev, row].sort((a, b) => a.sort_order - b.sort_order));
+          } else {
+            setProductCategories(prev => prev.map(c => c.id === row.id ? row : c).sort((a, b) => a.sort_order - b.sort_order));
+          }
+        } else if (payload.eventType === 'DELETE') {
+          setProductCategories(prev => prev.filter(c => c.id !== payload.old.id));
+        }
+      })
+
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('Successfully subscribed to global real-time updates');
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('Real-time connection error');
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [isSupabaseConfigured]);
+  }, [isSupabaseConfigured, refreshData]);
 
   useEffect(() => {
     try { localStorage.setItem('theicons_orders', JSON.stringify(orders)); } catch {}
