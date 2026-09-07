@@ -1,11 +1,18 @@
 -- ============================================================
--- 0012_fix_sequenced_bookings.sql
--- Fix check_and_reserve_sequenced to correctly denormalize
+-- 0013_cleanup_duplicate_rpc.sql
+-- Drop both old and new signatures to ensure a clean state
 -- ============================================================
 
+-- Drop the old custom type version
+DROP FUNCTION IF EXISTS public.check_and_reserve_sequenced(uuid, public.booking_leg_input[], timestamptz, boolean, text, text, text, text, boolean, text, text);
+
+-- Drop the jsonb version
+DROP FUNCTION IF EXISTS public.check_and_reserve_sequenced(uuid, jsonb, timestamptz, boolean, text, text, text, text, boolean, text, text);
+
+-- Re-create the correct one
 create or replace function public.check_and_reserve_sequenced(
   p_customer_id uuid,
-  p_legs jsonb, -- Changed from public.booking_leg_input[]
+  p_legs jsonb,
   p_desired_start_ts timestamptz,
   p_check_only boolean default false,
   p_customer_name text default null,
@@ -35,7 +42,6 @@ declare
   v_business_count int;
   v_status booking_status := 'confirmed';
   v_payment_status payment_status := 'unpaid';
-  v_leg_results jsonb[] := '{}';
   v_i int;
   v_sorted_legs public.booking_leg_input[];
   v_customer_id uuid := p_customer_id;
@@ -47,49 +53,27 @@ begin
     return jsonb_build_object('success', false, 'error', 'NO_SERVICES_SELECTED');
   end if;
 
-  -- 1. Parse and sort legs
-  select array_agg(( (l->>'service_id')::uuid, (l->>'provider_id')::uuid )::public.booking_leg_input order by s.sequence_rank, s.id)
-  into v_sorted_legs
-  from jsonb_array_elements(p_legs) l
-  join public.services s on s.id = (l->>'service_id')::uuid;
-
-  -- 2. Validate all services belong to the same business
-  select count(distinct business_id), min(business_id) 
-  into v_business_count, v_business_id
-  from public.services 
-  where id = any(select service_id from unnest(v_sorted_legs));
-
-  if v_business_count > 1 then
-    return jsonb_build_object('success', false, 'error', 'MULTIPLE_BUSINESSES');
-  end if;
 
   v_i := 0;
   foreach v_leg in array v_sorted_legs loop
     v_i := v_i + 1;
     select * into v_service from public.services where id = v_leg.service_id;
-    
     if not exists (select 1 from public.service_providers where id = v_leg.provider_id) then
         return jsonb_build_object('success', false, 'error', 'STAFF_NOT_FOUND');
     end if;
-
     v_leg_start := v_current_ts;
-    -- Standardized buffer logic: Always include buffer unless 0
     v_leg_end := v_leg_start + ((v_service.duration_minutes + coalesce(v_service.buffer_minutes, 0)) || ' minutes')::interval;
-
     if not public.fn_is_staff_available(v_leg.provider_id, v_leg_start, v_leg_end) then
       return jsonb_build_object('success', false, 'error', 'SLOT_UNAVAILABLE');
     end if;
-
     v_total_duration := v_total_duration + v_service.duration_minutes;
     v_total_price := v_total_price + v_service.price_ksh;
     v_service_ids := array_append(v_service_ids, v_service.id);
     v_service_names := array_append(v_service_names, v_service.name);
-
     if v_i = 1 then
       v_primary_provider_id := v_leg.provider_id;
       select full_name into v_primary_provider_name from public.service_providers where id = v_leg.provider_id;
     end if;
-
     v_current_ts := v_leg_end;
   end loop;
 
@@ -99,7 +83,6 @@ begin
 
   v_reference := upper(substring(replace(gen_random_uuid()::text, '-', ''), 1, 8));
   v_receipt_code := v_reference;
-
   if p_require_payment then
     v_status := 'pending';
     v_payment_status := 'pending';
@@ -131,22 +114,16 @@ begin
     select * into v_service from public.services where id = v_leg.service_id;
     v_leg_start := v_current_ts;
     v_leg_end := v_leg_start + ((v_service.duration_minutes + coalesce(v_service.buffer_minutes, 0)) || ' minutes')::interval;
-    
     insert into public.booking_legs (booking_id, service_id, provider_id, start_ts, end_ts, sequence_order)
     values (v_booking_id, v_leg.service_id, v_leg.provider_id, v_leg_start, v_leg_end, v_i);
-    
     insert into public.booking_services (booking_id, service_id) 
     values (v_booking_id, v_leg.service_id);
-    
-    -- Safe role lookup
     select id into v_role_id from public.staff_roles 
     where code = (select provider_type::text from public.service_providers where id = v_leg.provider_id);
-
     if v_role_id is not null then
       insert into public.booking_resources (booking_id, provider_id, role_id)
       values (v_booking_id, v_leg.provider_id, v_role_id);
     end if;
-    
     v_current_ts := v_leg_end;
   end loop;
 
@@ -167,3 +144,17 @@ exception when others then
   return jsonb_build_object('success', false, 'error', SQLERRM);
 end;
 $$;
+
+  select array_agg(( (l->>'service_id')::uuid, (l->>'provider_id')::uuid )::public.booking_leg_input order by s.sequence_rank, s.id)
+  into v_sorted_legs
+  from jsonb_array_elements(p_legs) l
+  join public.services s on s.id = (l->>'service_id')::uuid;
+
+  select count(distinct business_id), min(business_id) 
+  into v_business_count, v_business_id
+  from public.services 
+  where id = any(select service_id from unnest(v_sorted_legs));
+
+  if v_business_count > 1 then
+    return jsonb_build_object('success', false, 'error', 'MULTIPLE_BUSINESSES');
+  end if;

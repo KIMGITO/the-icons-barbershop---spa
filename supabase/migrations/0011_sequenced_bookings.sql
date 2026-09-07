@@ -169,7 +169,7 @@ $$;
 
 -- 5. Next available combined slot query
 create or replace function public.get_next_available_combined_slot(
-  p_legs public.booking_leg_input[],
+  p_legs jsonb, -- Changed from public.booking_leg_input[]
   p_start_after timestamptz,
   p_max_days int default 30
 ) returns timestamptz
@@ -185,15 +185,24 @@ declare
   v_sorted_legs public.booking_leg_input[];
   v_step interval := '5 minutes';
 begin
+  if p_legs is null or jsonb_array_length(p_legs) = 0 then
+    return null;
+  end if;
+
   v_current_attempt_start := date_trunc('hour', v_current_attempt_start) + (ceil(extract(minute from v_current_attempt_start) / 5.0) * 5 || ' minutes')::interval;
-  select array_agg((l.service_id, l.provider_id)::public.booking_leg_input order by s.sequence_rank, s.id)
-  into v_sorted_legs from unnest(p_legs) l join public.services s on s.id = l.service_id;
+
+  -- Parse and sort legs
+  select array_agg(( (l->>'service_id')::uuid, (l->>'provider_id')::uuid )::public.booking_leg_input order by s.sequence_rank, s.id)
+  into v_sorted_legs 
+  from jsonb_array_elements(p_legs) l
+  join public.services s on s.id = (l->>'service_id')::uuid;
+
   while v_current_attempt_start < v_max_ts loop
     v_conflict_found := false; v_leg_start := v_current_attempt_start;
     foreach v_leg in array v_sorted_legs loop
       select * into v_service from public.services where id = v_leg.service_id;
-      if v_service.duration_minutes = 30 then v_leg_end := v_leg_start + (v_service.duration_minutes || ' minutes')::interval;
-      else v_leg_end := v_leg_start + ((v_service.duration_minutes + coalesce(v_service.buffer_minutes, 0)) || ' minutes')::interval; end if;
+      -- Standardized buffer logic
+      v_leg_end := v_leg_start + ((v_service.duration_minutes + coalesce(v_service.buffer_minutes, 0)) || ' minutes')::interval;
       if not public.fn_is_staff_available(v_leg.provider_id, v_leg_start, v_leg_end) then v_conflict_found := true; exit; end if;
       v_leg_start := v_leg_end;
     end loop;
